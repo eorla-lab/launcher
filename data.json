@@ -1,0 +1,115 @@
+{
+  "links": [
+    {
+      "id": 1,
+      "name": "HUB",
+      "url": "https://hub.company.com",
+      "icon": "🏢",
+      "color": "blue",
+      "isNew": true
+    },
+    {
+      "id": 2,
+      "name": "Outlook",
+      "url": "https://outlook.office.com",
+      "icon": "📧",
+      "color": "blue",
+      "isNew": false
+    },
+    {
+      "id": 3,
+      "name": "Teams",
+      "url": "https://teams.microsoft.com",
+      "icon": "💬",
+      "color": "purple",
+      "isNew": false
+    },
+    {
+      "id": 4,
+      "name": "SharePoint",
+      "url": "https://sharepoint.company.com",
+      "icon": "📱",
+      "color": "orange",
+      "isNew": false
+    },
+    {
+      "id": 5,
+      "name": "Jira",
+      "url": "https://company.atlassian.net",
+      "icon": "💼",
+      "color": "red",
+      "isNew": false
+    },
+    {
+      "id": 6,
+      "name": "GitHub",
+      "url": "https://github.com/yourcompany",
+      "icon": "🎯",
+      "color": "indigo",
+      "isNew": false
+    },
+    {
+      "id": 7,
+      "name": "Analytics",
+      "url": "https://analytics.company.com",
+      "icon": "📊",
+      "color": "pink",
+      "isNew": false
+    }
+  ],
+  "policies": [
+    {
+      "id": 1,
+      "title": "Remote Work Policy",
+      "category": "HR",
+      "url": "https://docs.company.com/remote-work"
+    },
+    {
+      "id": 2,
+      "title": "Data Security Guidelines",
+      "category": "IT",
+      "url": "https://docs.company.com/data-security"
+    },
+    {
+      "id": 3,
+      "title": "Expense Reimbursement",
+      "category": "Finance",
+      "url": "https://docs.company.com/expenses"
+    },
+    {
+      "id": 4,
+      "title": "Code of Conduct",
+      "category": "HR",
+      "url": "https://docs.company.com/conduct"
+    },
+    {
+      "id": 5,
+      "title": "Leave & Time Off",
+      "category": "HR",
+      "url": "https://docs.company.com/leave"
+    },
+    {
+      "id": 6,
+      "title": "Incident Response",
+      "category": "IT",
+      "url": "https://docs.company.com/incident"
+    },
+    {
+      "id": 7,
+      "title": "Equipment Return",
+      "category": "IT",
+      "url": "https://docs.company.com/equipment"
+    },
+    {
+      "id": 8,
+      "title": "Travel Policy",
+      "category": "Finance",
+      "url": "https://docs.company.com/travel"
+    }
+  ],
+  "_comments": {
+    "icon_options": "Use emoji ('🚀'), image URL ('https://example.com/icon.png'), or local path ('/icons/custom.png')",
+    "color_options": "Use preset names ('blue', 'green', 'purple', 'orange', 'red', 'indigo', 'pink', 'teal') or hex codes ('#3b82f6')",
+    "isNew": "Set to true to show NEW badge until first click"
+  }
+}

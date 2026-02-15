@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Workspace Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Settings Button */
+        .settings-btn, .search-btn {
+            position: absolute;
+            top: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background 0.3s;
+        }
+
+        .settings-btn {
+            right: 0;
+        }
+
+        .search-btn {
+            right: 50px;
+        }
+
+        .settings-btn:hover, .search-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tile {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            font-size: 1rem;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .tile:hover:not(.disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tile.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .tile-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .tile-icon.blue { background: #3b82f6; }
+        .tile-icon.green { background: #10b981; }
+        .tile-icon.purple { background: #8b5cf6; }
+        .tile-icon.orange { background: #f59e0b; }
+        .tile-icon.red { background: #ef4444; }
+        .tile-icon.indigo { background: #6366f1; }
+        .tile-icon.pink { background: #ec4899; }
+        .tile-icon.teal { background: #14b8a6; }
+        .tile-icon.gray { background: #9ca3af; }
+
+        .tile-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Search Box */
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Policy List */
+        .policy-list {
+            list-style: none;
+        }
+
+        .policy-item {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .policy-item:hover {
+            background: #f3f4f6;
+        }
+
+        .policy-info {
+            flex: 1;
+        }
+
+        .policy-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .policy-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .external-icon {
+            margin-left: 12px;
+            color: #6b7280;
+        }
+
+        /* Link Management */
+        .link-manager {
+            list-style: none;
+        }
+
+        .link-manager-item {
+            background: #f9fafb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .link-manager-info {
+            flex: 1;
+        }
+
+        .link-manager-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .link-manager-url {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .link-manager-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard {
+                gap: 12px;
+            }
+
+            .tile {
+                padding: 15px 10px;
+            }
+
+            .tile-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="search-btn" onclick="openSearch()" title="Search Links">🔍</button>
+        <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
+        
+        <div class="header">
+            <h1>Workspace Hub</h1>
+            <p>Quick access to tools and resources</p>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <!-- Tiles will be rendered by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Policies Modal -->
+    <div id="policiesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Policy & Procedures</h2>
+                <button class="close-btn" onclick="closeModal('policiesModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()">
+                </div>
+                <ul class="policy-list" id="policiesList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Links Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Search Links</h2>
+                <button class="close-btn" onclick="closeModal('searchModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <input type="text" id="linkSearch" placeholder="Search links..." onkeyup="filterLinks()" autofocus>
+                </div>
+                <ul class="policy-list" id="searchResults"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" onclick="closeModal('settingsModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('manage')">Manage Links</button>
+                    <button class="tab" onclick="switchTab('import-export')">Import/Export</button>
+                    <button class="tab" onclick="switchTab('changelog')">Changelog</button>
+                </div>
+
+                <!-- Manage Links Tab -->
+                <div id="manageTab" class="tab-content active">
+                    <button class="btn btn-primary" onclick="showAddLinkForm()" style="margin-bottom: 20px;">+ Add Custom Link</button>
+                    
+                    <div id="addLinkForm" style="display: none; background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 12px;">Add New Link</h3>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="newLinkName" placeholder="e.g., Teams">
+                        </div>
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input type="text" id="newLinkUrl" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label>Icon (emoji)</label>
+                            <input type="text" id="newLinkIcon" placeholder="🚀" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <select id="newLinkColor">
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="purple">Purple</option>
+                                <option value="orange">Orange</option>
+                                <option value="red">Red</option>
+                                <option value="indigo">Indigo</option>
+                                <option value="pink">Pink</option>
+                                <option value="teal">Teal</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="addCustomLink()">Add Link</button>
+                            <button class="btn btn-secondary" onclick="hideAddLinkForm()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 12px;">Your Links</h3>
+                    <ul class="link-manager" id="linkManager"></ul>
+                </div>
+
+                <!-- Import/Export Tab -->
+                <div id="importExportTab" class="tab-content">
+                    <h3 style="margin-bottom: 12px;">Export Your Customizations</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Download your custom links and click data as JSON. You can send this to the admin to update the default configuration.</p>
+                    <button class="btn btn-primary" onclick="exportData()">📥 Export as JSON</button>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                    <h3 style="margin-bottom: 12px;">Import Configuration</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Import a JSON file to restore or update your links.</p>
+                    <input type="file" id="importFile" accept=".json" style="margin-bottom: 12px;">
+                    <button class="btn btn-secondary" onclick="importData()">📤 Import JSON</button>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                    <h3 style="margin-bottom: 12px;">Reset</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Reset to default links and clear all click data.</p>
+                    <button class="btn btn-danger" onclick="resetToDefaults()">🔄 Reset to Defaults</button>
+                </div>
+
+                <!-- Changelog Tab -->
+                <div id="changelogTab" class="tab-content">
+                    <div id="changelogContent">
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.0.0</h3>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">February 2026</p>
+                            <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
+                                <li>Initial release</li>
+                                <li>3x3 grid dashboard with auto-sorting by clicks</li>
+                                <li>NEW badge for unclicked links</li>
+                                <li>Search functionality for all links</li>
+                                <li>Custom link creation</li>
+                                <li>Policy & procedures directory</li>
+                                <li>Import/export configuration</li>
+                                <li>Click tracking with localStorage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let defaultData = { links: [], policies: [] };
+        let links = [];
+        let policies = [];
+
+        // Initialize
+        async function init() {
+            await loadDefaultData();
+            loadUserData();
+            renderDashboard();
+            renderPolicies();
+        }
+
+        // Load default data from JSON file
+        async function loadDefaultData() {
+            try {
+                const response = await fetch('data.json');
+                defaultData = await response.json();
+            } catch (error) {
+                console.error('Could not load data.json, using fallback data');
+                // Fallback data if JSON file is not accessible
+                defaultData = {
+                    links: [
+                        { id: 1, name: 'HUB', url: 'https://hub.company.com', icon: '🏢', color: 'blue' },
+                        { id: 2, name: 'Outlook', url: 'https://outlook.office.com', icon: '📧', color: 'blue' }
+                    ],
+                    policies: []
+                };
+            }
+        }
+
+        // Load user customizations from localStorage
+        function loadUserData() {
+            const savedData = localStorage.getItem('workspaceData');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                links = parsed.links || [];
+                
+                // Merge with defaults for any new links
+                const userLinkIds = links.map(l => l.id);
+                defaultData.links.forEach(defaultLink => {
+                    if (!userLinkIds.includes(defaultLink.id)) {
+                        links.push({ ...defaultLink, clicks: 0, isCustom: false });
+                    }
+                });
+            } else {
+                // First time: load defaults
+                links = defaultData.links.map(link => ({ ...link, clicks: 0, isCustom: false }));
+            }
+
+            policies = defaultData.policies;
+            saveUserData();
+        }
+
+        // Save user data to localStorage
+        function saveUserData() {
+            localStorage.setItem('workspaceData', JSON.stringify({ links }));
+        }
+
+        // Render dashboard with all tiles sorted by new status first, then clicks
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            
+            // Sort links: new links first (0 clicks), then by clicks (descending)
+            const sortedLinks = [...links].sort((a, b) => {
+                const aIsNew = a.isNew && a.clicks === 0;
+                const bIsNew = b.isNew && b.clicks === 0;
+                
+                // New links go first
+                if (aIsNew && !bIsNew) return -1;
+                if (!aIsNew && bIsNew) return 1;
+                
+                // Then sort by clicks
+                return b.clicks - a.clicks;
+            });
+            
+            let html = '';
+            
+            // Render quick link tiles (max 8)
+            sortedLinks.slice(0, 8).forEach(link => {
+                const isNew = link.isNew && link.clicks === 0;
+                const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/'));
+                const isHexColor = link.color && link.color.startsWith('#');
+                
+                let iconHtml;
+                if (isImageIcon) {
+                    iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color : ''}"><img src="${link.icon}" style="width: 32px; height: 32px; object-fit: contain;"></div>`;
+                } else {
+                    iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color : ''}">${link.icon}</div>`;
+                }
+                
+                html += `
+                    <button class="tile" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                        ${isNew ? `<span class="new-badge">NEW</span>` : ''}
+                        ${iconHtml}
+                        <div class="tile-name">${link.name}</div>
+                    </button>
+                `;
+            });
+            
+            // Add Policy Search tile
+            html += `
+                <button class="tile" onclick="openFeature('policies')">
+                    <div class="tile-icon green">📄</div>
+                    <div class="tile-name">Policies</div>
+                </button>
+            `;
+            
+            dashboard.innerHTML = html;
+        }
+
+        // Render link manager
+        function renderLinkManager() {
+            const linkManager = document.getElementById('linkManager');
+            
+            if (links.length === 0) {
+                linkManager.innerHTML = '<div class="empty-state">No links yet</div>';
+                return;
+            }
+
+            linkManager.innerHTML = links.map(link => `
+                <li class="link-manager-item">
+                    <div class="link-manager-info">
+                        <div class="link-manager-name">${link.icon} ${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}</div>
+                        <div class="link-manager-url">${link.url} - ${link.clicks} clicks</div>
+                    </div>
+                    <div class="link-manager-actions">
+                        ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>` : ''}
+                        <button class="icon-btn" onclick="resetLinkClicks(${link.id})" title="Reset clicks">🔄</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Render policies
+        function renderPolicies() {
+            const policiesList = document.getElementById('policiesList');
+            
+            if (policies.length === 0) {
+                policiesList.innerHTML = '<div class="empty-state">No policies available</div>';
+                return;
+            }
+
+            policiesList.innerHTML = policies.map(policy => `
+                <li class="policy-item" onclick="window.open('${policy.url}', '_blank')">
+                    <div class="policy-info">
+                        <div class="policy-title">${policy.title}</div>
+                        <span class="policy-category">${policy.category}</span>
+                    </div>
+                    <span class="external-icon">↗</span>
+                </li>
+            `).join('');
+        }
+
+        // Filter policies
+        function filterPolicies() {
+            const searchTerm = document.getElementById('policySearch').value.toLowerCase();
+            const policiesList = document.getElementById('policiesList');
+            
+            const filtered = policies.filter(policy => 
+                policy.title.toLowerCase().includes(searchTerm) ||
+                policy.category.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                policiesList.innerHTML = '<div class="empty-state">No policies found</div>';
+            } else {
+                policiesList.innerHTML = filtered.map(policy => `
+                    <li class="policy-item" onclick="window.open('${policy.url}', '_blank')">
+                        <div class="policy-info">
+                            <div class="policy-title">${policy.title}</div>
+                            <span class="policy-category">${policy.category}</span>
+                        </div>
+                        <span class="external-icon">↗</span>
+                    </li>
+                `).join('');
+            }
+        }
+
+        // Handle link click
+        function handleLinkClick(linkId, url) {
+            const link = links.find(l => l.id === linkId);
+            if (link) {
+                link.clicks++;
+                // Remove new badge after first click
+                if (link.isNew) {
+                    link.isNew = false;
+                }
+                saveUserData();
+                renderDashboard();
+            }
+            window.open(url, '_blank');
+        }
+
+        // Open search
+        function openSearch() {
+            renderSearchResults();
+            document.getElementById('searchModal').classList.add('active');
+            // Focus the search input after a small delay
+            setTimeout(() => {
+                document.getElementById('linkSearch').focus();
+            }, 100);
+        }
+
+        // Render search results (initially show all)
+        function renderSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (links.length === 0) {
+                searchResults.innerHTML = '<div class="empty-state">No links available</div>';
+                return;
+            }
+
+            // Show all links sorted by new status first, then clicks
+            const sortedLinks = [...links].sort((a, b) => {
+                const aIsNew = a.isNew && a.clicks === 0;
+                const bIsNew = b.isNew && b.clicks === 0;
+                
+                if (aIsNew && !bIsNew) return -1;
+                if (!aIsNew && bIsNew) return 1;
+                
+                return b.clicks - a.clicks;
+            });
+
+            searchResults.innerHTML = sortedLinks.map(link => {
+                const isNew = link.isNew && link.clicks === 0;
+                return `
+                    <li class="policy-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                        <div class="policy-info">
+                            <div class="policy-title">${link.icon} ${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
+                            <span class="policy-category">${link.clicks} clicks</span>
+                        </div>
+                        <span class="external-icon">↗</span>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // Filter links in search
+        function filterLinks() {
+            const searchTerm = document.getElementById('linkSearch').value.toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            
+            const filtered = links.filter(link => 
+                link.name.toLowerCase().includes(searchTerm) ||
+                link.url.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                searchResults.innerHTML = '<div class="empty-state">No links found</div>';
+            } else {
+                const sortedFiltered = [...filtered].sort((a, b) => {
+                    const aIsNew = a.isNew && a.clicks === 0;
+                    const bIsNew = b.isNew && b.clicks === 0;
+                    
+                    if (aIsNew && !bIsNew) return -1;
+                    if (!aIsNew && bIsNew) return 1;
+                    
+                    return b.clicks - a.clicks;
+                });
+
+                searchResults.innerHTML = sortedFiltered.map(link => {
+                    const isNew = link.isNew && link.clicks === 0;
+                    return `
+                        <li class="policy-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                            <div class="policy-info">
+                                <div class="policy-title">${link.icon} ${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
+                                <span class="policy-category">${link.clicks} clicks</span>
+                            </div>
+                            <span class="external-icon">↗</span>
+                        </li>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Show add link form
+        function showAddLinkForm() {
+            document.getElementById('addLinkForm').style.display = 'block';
+        }
+
+        // Hide add link form
+        function hideAddLinkForm() {
+            document.getElementById('addLinkForm').style.display = 'none';
+            document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkUrl').value = '';
+            document.getElementById('newLinkIcon').value = '';
+        }
+
+        // Add custom link
+        function addCustomLink() {
+            const name = document.getElementById('newLinkName').value.trim();
+            const url = document.getElementById('newLinkUrl').value.trim();
+            const icon = document.getElementById('newLinkIcon').value.trim() || '🔗';
+            const color = document.getElementById('newLinkColor').value;
+
+            if (!name || !url) {
+                alert('Please fill in name and URL');
+                return;
+            }
+
+            const newLink = {
+                id: Date.now(), // Use timestamp as unique ID
+                name,
+                url,
+                icon,
+                color,
+                clicks: 0,
+                isCustom: true,
+                isNew: true // Mark as new
+            };
+
+            links.push(newLink);
+            saveUserData();
+            renderDashboard();
+            renderLinkManager();
+            hideAddLinkForm();
+        }
+
+        // Delete link
+        function deleteLink(linkId) {
+            if (!confirm('Are you sure you want to delete this link?')) return;
+            
+            links = links.filter(l => l.id !== linkId);
+            saveUserData();
+            renderDashboard();
+            renderLinkManager();
+        }
+
+        // Reset link clicks
+        function resetLinkClicks(linkId) {
+            const link = links.find(l => l.id === linkId);
+            if (link) {
+                link.clicks = 0;
+                saveUserData();
+                renderDashboard();
+                renderLinkManager();
+            }
+        }
+
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify({ links }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'workspace-hub-export.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import data
+        function importData() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.links) {
+                        links = imported.links;
+                        saveUserData();
+                        renderDashboard();
+                        renderLinkManager();
+                        alert('Import successful!');
+                    } else {
+                        alert('Invalid file format');
+                    }
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            if (!confirm('This will delete all your customizations and click data. Are you sure?')) return;
+            
+            localStorage.removeItem('workspaceData');
+            loadUserData();
+            renderDashboard();
+            renderLinkManager();
+            alert('Reset complete!');
+        }
+
+        // Open settings
+        function openSettings() {
+            renderLinkManager();
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        // Open feature modal
+        function openFeature(feature) {
+            if (feature === 'policies') {
+                document.getElementById('policiesModal').classList.add('active');
+            } else if (feature === 'search') {
+                openSearch();
+            }
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Switch tab
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            if (tabName === 'manage') {
+                document.getElementById('manageTab').classList.add('active');
+            } else if (tabName === 'import-export') {
+                document.getElementById('importExportTab').classList.add('active');
+            } else if (tabName === 'changelog') {
+                document.getElementById('changelogTab').classList.add('active');
+            }
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
