@@ -1,4 +1,4 @@
-# Workspace Hub
+# 🚀 Web Launcher
 
 A customizable web app launcher for quick access to internal tools, policies, and resources. Perfect for company intranets or personal productivity dashboards.
 
@@ -17,7 +17,7 @@ A customizable web app launcher for quick access to internal tools, policies, an
 
 ## Demo
 
-**Live Demo:** [Add your GitHub Pages URL here]
+**Live Demo:** [https://eorla.jjjp.ca]
 
 ## Quick Start
 
