@@ -16,7 +16,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
 
-    <title>Web Launcher</title>
+    <title>🚀 Launcher</title>
     <style>
         * {
             margin: 0;
@@ -42,7 +42,7 @@
         }
 
         .container {
-            max-width: 450px;
+            max-width: 520px;
             width: 100%;
             position: relative;
         }
@@ -73,7 +73,6 @@
             font-size: 1rem;
             opacity: 0.9;
         }
-        
 
         /* Settings Button */
         .settings-btn,
@@ -440,6 +439,10 @@
         .link-manager-url {
             font-size: 0.85rem;
             color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 500px;
         }
 
         .link-manager-actions {
@@ -510,7 +513,6 @@
             .header {
                 margin-bottom: 20px;
             }
-            
 
             .header h1 {
                 font-size: 1.5rem;
@@ -526,10 +528,15 @@
                 width: 35px;
                 height: 35px;
                 font-size: 1.2rem;
+                top: 10px;
+            }
+
+            .settings-btn {
+                right: 10px;
             }
 
             .search-btn {
-                right: 42px;
+                right: 50px;
             }
 
             .dashboard {
@@ -578,6 +585,10 @@
             .modal-body {
                 padding: 16px;
             }
+
+            .link-manager-url {
+                max-width: 200px;
+            }
         }
     </style>
 </head>
@@ -605,9 +616,28 @@
                 <button class="close-btn" onclick="closeModal('policiesModal')">✕</button>
             </div>
             <div class="modal-body">
-                <div class="search-box">
-                    <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()">
+                <div id="csvMetadata" style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1; display: none;">
+                    <strong>📄 Index Last Updated:</strong> <span id="csvLastModified">Loading...</span>
                 </div>
+                
+                <div class="search-box">
+                    <div style="position: relative;">
+                        <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()" oninput="toggleClearButton('policySearch', 'policySearchClear')">
+                        <button id="policySearchClear" onclick="clearSearch('policySearch')" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">✕</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <select id="folderFilter" onchange="filterPolicies()" style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                        <option value="">All Folders</option>
+                    </select>
+                    <select id="subfolderFilter" onchange="filterPolicies()" style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                        <option value="">All Subfolders</option>
+                    </select>
+                </div>
+                
+                <div id="policiesCount" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;"></div>
+                
                 <ul class="policy-list" id="policiesList"></ul>
             </div>
         </div>
@@ -617,14 +647,35 @@
     <div id="searchModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Search Links</h2>
+                <h2>Search</h2>
                 <button class="close-btn" onclick="closeModal('searchModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div class="search-box">
-                    <input type="text" id="linkSearch" placeholder="Search links..." onkeyup="filterLinks()" autofocus>
+                    <div style="position: relative;">
+                        <input type="text" id="linkSearch" placeholder="Search links and policies..." onkeyup="filterLinksAndPolicies()" oninput="toggleClearButton('linkSearch', 'linkSearchClear')" autofocus>
+                        <button id="linkSearchClear" onclick="clearSearch('linkSearch')" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">✕</button>
+                    </div>
                 </div>
-                <ul class="policy-list" id="searchResults"></ul>
+                
+                <!-- Links Section -->
+                <div id="linksSection" style="display: none;">
+                    <h3 style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>🔗</span> Links
+                    </h3>
+                    <ul class="policy-list" id="searchResults"></ul>
+                </div>
+                
+                <!-- Policies Section -->
+                <div id="policiesSection" style="display: none; margin-top: 24px;">
+                    <h3 style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>📄</span> Policies
+                    </h3>
+                    <ul class="policy-list" id="policySearchResults"></ul>
+                </div>
+                
+                <!-- Empty state when nothing found -->
+                <div id="searchEmptyState" style="display: none;" class="empty-state">No results found</div>
             </div>
         </div>
     </div>
@@ -653,7 +704,7 @@
                         <h3 style="margin-bottom: 12px;">Add New Link</h3>
                         <div class="form-group">
                             <label>Name</label>
-                            <input type="text" id="newLinkName" placeholder="e.g., Teams">
+                            <input type="text" id="newLinkName" placeholder="e.g., Schedule">
                         </div>
                         <div class="form-group">
                             <label>URL</label>
@@ -789,17 +840,125 @@
             try {
                 const response = await fetch('data.json');
                 defaultData = await response.json();
+                
+                // Load policies from CSV
+                await loadPoliciesFromCSV();
             } catch (error) {
                 console.error('Could not load data.json, using fallback data');
                 // Fallback data if JSON file is not accessible
                 defaultData = {
                     links: [
-                        { id: 1, name: 'HUB', url: 'https://hub.company.com', icon: '🏢', color: 'blue' },
+                        { id: 1, name: 'Google', url: 'https://google.com', icon: '🌐', color: 'white' },
                         { id: 2, name: 'Outlook', url: 'https://outlook.office.com', icon: '📧', color: 'blue' }
                     ],
                     policies: []
                 };
             }
+        }
+
+        // Load and parse policies from CSV
+        async function loadPoliciesFromCSV() {
+            try {
+                const response = await fetch('Export.csv');
+                if (!response.ok) {
+                    console.warn('Export.csv not found, policies will be empty');
+                    policies = [];
+                    return;
+                }
+                
+                const csvText = await response.text();
+                const lastModified = response.headers.get('Last-Modified');
+                
+                console.log('CSV loaded, length:', csvText.length);
+                
+                // Show last modified date
+                if (lastModified) {
+                    const date = new Date(lastModified);
+                    document.getElementById('csvLastModified').textContent = date.toLocaleString();
+                    document.getElementById('csvMetadata').style.display = 'block';
+                }
+                
+                // Parse CSV
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+                
+                console.log('CSV Headers:', headers);
+                console.log('Total lines:', lines.length);
+                
+                // Find column indices
+                const descIndex = headers.findIndex(h => h.trim().toLowerCase() === 'description');
+                const folderIndex = headers.findIndex(h => h.trim().toLowerCase() === 'folder');
+                const subfolderIndex = headers.findIndex(h => h.trim().toLowerCase() === 'subfolder');
+                const ownerIndex = headers.findIndex(h => h.trim().toLowerCase() === 'owner');
+                const hyperlinkIndex = headers.findIndex(h => h.trim().toLowerCase() === 'document hyperlink');
+                const redactedIndex = headers.findIndex(h => h.trim().toLowerCase() === 'redacted on');
+                
+                console.log('Column indices:', {
+                    description: descIndex,
+                    folder: folderIndex,
+                    subfolder: subfolderIndex,
+                    owner: ownerIndex,
+                    hyperlink: hyperlinkIndex,
+                    redactedOn: redactedIndex
+                });
+                
+                policies = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const cols = parseCSVLine(lines[i]);
+                    
+                    const description = cols[descIndex]?.trim() || '';
+                    const folder = cols[folderIndex]?.trim() || '';
+                    const subfolder = cols[subfolderIndex]?.trim() || '';
+                    const owner = cols[ownerIndex]?.trim() || '';
+                    const guid = cols[hyperlinkIndex]?.trim() || '';
+                    const redactedOn = cols[redactedIndex]?.trim() || '';
+                    
+                    if (description && guid) {
+                        policies.push({
+                            id: i,
+                            title: description,
+                            category: folder,
+                            subfolder: subfolder,
+                            owner: owner,
+                            redactedOn: redactedOn,
+                            url: `https://eorla.omni-assistant.net/lab/Document/DocumentDownloader.aspx?Df_Guid=${guid}`
+                        });
+                    }
+                }
+                
+                console.log(`Loaded ${policies.length} policies from CSV`);
+                console.log('First 3 policies:', policies.slice(0, 3));
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                policies = [];
+            }
+        }
+
+        // Parse CSV line handling quoted fields
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            
+            return result;
         }
 
         // Load user customizations from localStorage
@@ -837,7 +996,8 @@
                 links = defaultData.links.map(link => ({ ...link, clicks: 0, isCustom: false }));
             }
 
-            policies = defaultData.policies;
+            // Policies are loaded from CSV, not from defaultData
+            console.log('Total policies loaded:', policies.length);
         }
 
         // Save user data to localStorage
@@ -922,7 +1082,7 @@
                     <li class="link-manager-item">
                         <div class="link-manager-info">
                             <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}</div>
-                            <div class="link-manager-url">${link.url} - ${link.clicks} clicks</div>
+                            <div class="link-manager-url" title="${link.url} - ${link.clicks} clicks">${link.url} - ${link.clicks} clicks</div>
                         </div>
                         <div class="link-manager-actions">
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>` : ''}
@@ -939,43 +1099,89 @@
 
             if (policies.length === 0) {
                 policiesList.innerHTML = '<div class="empty-state">No policies available</div>';
+                document.getElementById('policiesCount').textContent = '';
                 return;
             }
 
-            policiesList.innerHTML = policies.map(policy => `
+            // Populate filter dropdowns
+            populateFilters();
+
+            // Get current filter values
+            const searchTerm = document.getElementById('policySearch').value.toLowerCase();
+            const folderFilter = document.getElementById('folderFilter').value;
+            const subfolderFilter = document.getElementById('subfolderFilter').value;
+
+            // Filter policies
+            let filtered = policies;
+
+            if (searchTerm) {
+                filtered = filtered.filter(policy =>
+                    (policy.title && policy.title.toLowerCase().includes(searchTerm)) ||
+                    (policy.category && policy.category.toLowerCase().includes(searchTerm)) ||
+                    (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) ||
+                    (policy.owner && policy.owner.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (folderFilter) {
+                filtered = filtered.filter(policy => policy.category === folderFilter);
+            }
+
+            if (subfolderFilter) {
+                filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
+            }
+
+            // Update count
+            document.getElementById('policiesCount').textContent = `Showing ${filtered.length} of ${policies.length} policies`;
+
+            if (filtered.length === 0) {
+                policiesList.innerHTML = '<div class="empty-state">No policies found</div>';
+                return;
+            }
+
+            policiesList.innerHTML = filtered.map(policy => `
                 <li class="policy-item" onclick="window.open('${policy.url}', '_blank')">
                     <div class="policy-info">
                         <div class="policy-title">${policy.title}</div>
-                        <span class="policy-category">${policy.category}</span>
+                        ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
+                            ${policy.owner && policy.redactedOn ? ' • ' : ''}
+                            ${policy.redactedOn ? `Updated: ${policy.redactedOn}` : ''}
+                        </div>
+                        ${policy.subfolder ? `<span class="policy-category">${policy.subfolder}</span>` : ''}
                     </div>
                     <span class="external-icon">↗</span>
                 </li>
             `).join('');
         }
 
+        // Populate filter dropdowns with unique values
+        function populateFilters() {
+            const folderFilter = document.getElementById('folderFilter');
+            const subfolderFilter = document.getElementById('subfolderFilter');
+
+            // Get unique folders and subfolders
+            const folders = [...new Set(policies.map(p => p.category).filter(Boolean))].sort();
+            const subfolders = [...new Set(policies.map(p => p.subfolder).filter(Boolean))].sort();
+
+            // Populate folder dropdown
+            const currentFolder = folderFilter.value;
+            folderFilter.innerHTML = '<option value="">All Folders</option>' +
+                folders.map(f => `<option value="${f}" ${f === currentFolder ? 'selected' : ''}>${f}</option>`).join('');
+
+            // Populate subfolder dropdown
+            const currentSubfolder = subfolderFilter.value;
+            subfolderFilter.innerHTML = '<option value="">All Subfolders</option>' +
+                subfolders.map(s => {
+                    const displayName = s.length > 38 ? s.substring(0, 38) + '...' : s;
+                    return `<option value="${s}" ${s === currentSubfolder ? 'selected' : ''} title="${s}">${displayName}</option>`;
+                }).join('');
+        }
+
         // Filter policies
         function filterPolicies() {
-            const searchTerm = document.getElementById('policySearch').value.toLowerCase();
-            const policiesList = document.getElementById('policiesList');
-
-            const filtered = policies.filter(policy =>
-                policy.title.toLowerCase().includes(searchTerm) ||
-                policy.category.toLowerCase().includes(searchTerm)
-            );
-
-            if (filtered.length === 0) {
-                policiesList.innerHTML = '<div class="empty-state">No policies found</div>';
-            } else {
-                policiesList.innerHTML = filtered.map(policy => `
-                    <li class="policy-item" onclick="window.open('${policy.url}', '_blank')">
-                        <div class="policy-info">
-                            <div class="policy-title">${policy.title}</div>
-                            <span class="policy-category">${policy.category}</span>
-                        </div>
-                        <span class="external-icon">↗</span>
-                    </li>
-                `).join('');
-            }
+            renderPolicies();
         }
 
         // Handle link click
@@ -995,7 +1201,7 @@
 
         // Open search
         function openSearch() {
-            renderSearchResults();
+            filterLinksAndPolicies(); // Use combined search
             document.getElementById('searchModal').classList.add('active');
             // Focus the search input after a small delay
             setTimeout(() => {
@@ -1003,83 +1209,57 @@
             }, 100);
         }
 
-        // Render search results (initially show all)
-        function renderSearchResults() {
-            const searchResults = document.getElementById('searchResults');
-
-            if (links.length === 0) {
-                searchResults.innerHTML = '<div class="empty-state">No links available</div>';
-                return;
-            }
-
-            // Show all links sorted by new status first, then clicks
-            const sortedLinks = [...links].sort((a, b) => {
-                const aIsNew = a.isNew && a.clicks === 0;
-                const bIsNew = b.isNew && b.clicks === 0;
-
-                if (aIsNew && !bIsNew) return -1;
-                if (!aIsNew && bIsNew) return 1;
-
-                return b.clicks - a.clicks;
-            });
-
-            searchResults.innerHTML = sortedLinks.map(link => {
-                const isNew = link.isNew && link.clicks === 0;
-                const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
-                let iconDisplay;
-
-                if (isImageIcon) {
-                    iconDisplay = `<img src="${link.icon}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;" onerror="this.style.display='none';">`;
-                } else {
-                    iconDisplay = link.icon + ' ';
-                }
-
-                return `
-                    <li class="policy-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
-                        <div class="policy-info">
-                            <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
-                            <span class="policy-category">${link.clicks} clicks</span>
-                        </div>
-                        <span class="external-icon">↗</span>
-                    </li>
-                `;
-            }).join('');
-        }
-
-        // Filter links in search
-        function filterLinks() {
+        // Combined search for links and policies
+        function filterLinksAndPolicies() {
             const searchTerm = document.getElementById('linkSearch').value.toLowerCase();
             const searchResults = document.getElementById('searchResults');
+            const policySearchResults = document.getElementById('policySearchResults');
+            const linksSection = document.getElementById('linksSection');
+            const policiesSection = document.getElementById('policiesSection');
+            const emptyState = document.getElementById('searchEmptyState');
 
-            const filtered = links.filter(link => {
-                // Search in name
+            // Filter links
+            const filteredLinks = links.filter(link => {
                 if (link.name.toLowerCase().includes(searchTerm)) return true;
-
-                // Search in URL
                 if (link.url.toLowerCase().includes(searchTerm)) return true;
-
-                // Search in aliases
                 if (link.aliases && Array.isArray(link.aliases)) {
                     return link.aliases.some(alias => alias.toLowerCase().includes(searchTerm));
                 }
-
                 return false;
             });
 
-            if (filtered.length === 0) {
-                searchResults.innerHTML = '<div class="empty-state">No links found</div>';
-            } else {
-                const sortedFiltered = [...filtered].sort((a, b) => {
-                    const aIsNew = a.isNew && a.clicks === 0;
-                    const bIsNew = b.isNew && b.clicks === 0;
+            // Filter policies
+            const filteredPolicies = policies.filter(policy => {
+                if (policy.title && policy.title.toLowerCase().includes(searchTerm)) return true;
+                if (policy.category && policy.category.toLowerCase().includes(searchTerm)) return true;
+                if (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) return true;
+                if (policy.owner && policy.owner.toLowerCase().includes(searchTerm)) return true;
+                return false;
+            });
 
-                    if (aIsNew && !bIsNew) return -1;
-                    if (!aIsNew && bIsNew) return 1;
+            // Sort links by NEW status, then clicks
+            const sortedLinks = [...filteredLinks].sort((a, b) => {
+                const aIsNew = a.isNew && a.clicks === 0;
+                const bIsNew = b.isNew && b.clicks === 0;
+                if (aIsNew && !bIsNew) return -1;
+                if (!aIsNew && bIsNew) return 1;
+                return b.clicks - a.clicks;
+            });
 
-                    return b.clicks - a.clicks;
-                });
+            // Show/hide sections based on results
+            if (sortedLinks.length === 0 && filteredPolicies.length === 0) {
+                linksSection.style.display = 'none';
+                policiesSection.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
 
-                searchResults.innerHTML = sortedFiltered.map(link => {
+            emptyState.style.display = 'none';
+
+            // Render links section
+            if (sortedLinks.length > 0) {
+                linksSection.style.display = 'block';
+                searchResults.innerHTML = sortedLinks.map(link => {
                     const isNew = link.isNew && link.clicks === 0;
                     const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
                     let iconDisplay;
@@ -1091,7 +1271,7 @@
                     }
 
                     return `
-                        <li class="policy-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                        <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
                             <div class="policy-info">
                                 <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
                                 <span class="policy-category">${link.clicks} clicks</span>
@@ -1100,6 +1280,63 @@
                         </li>
                     `;
                 }).join('');
+            } else {
+                linksSection.style.display = 'none';
+            }
+
+            // Render policies section
+            if (filteredPolicies.length > 0) {
+                policiesSection.style.display = 'block';
+                policySearchResults.innerHTML = filteredPolicies.slice(0, 20).map(policy => `
+                    <li class="policy-item search-result-item" onclick="window.open('${policy.url}', '_blank')">
+                        <div class="policy-info">
+                            <div class="policy-title">${policy.title}</div>
+                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
+                            ${policy.subfolder ? `<span class="policy-category">${policy.subfolder}</span>` : ''}
+                        </div>
+                        <span class="external-icon">↗</span>
+                    </li>
+                `).join('');
+                
+                if (filteredPolicies.length > 20) {
+                    policySearchResults.innerHTML += `<div style="text-align: center; padding: 16px; color: #6b7280; font-size: 0.9rem;">Showing first 20 of ${filteredPolicies.length} policies. Refine your search for more specific results.</div>`;
+                }
+            } else {
+                policiesSection.style.display = 'none';
+            }
+        }
+
+        // Legacy function for backwards compatibility
+        function filterLinks() {
+            filterLinksAndPolicies();
+        }
+
+        // Toggle clear button visibility
+        function toggleClearButton(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+            if (input && button) {
+                button.style.display = input.value.length > 0 ? 'block' : 'none';
+            }
+        }
+
+        // Clear search input
+        function clearSearch(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.value = '';
+                input.focus();
+                
+                // Trigger appropriate filter function
+                if (inputId === 'linkSearch') {
+                    filterLinksAndPolicies();
+                } else if (inputId === 'policySearch') {
+                    filterPolicies();
+                }
+                
+                // Hide clear button
+                const buttonId = inputId + 'Clear';
+                toggleClearButton(inputId, buttonId);
             }
         }
 
@@ -1181,7 +1418,7 @@
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'workspace-hub-export.json';
+            link.download = 'launcher-export.json';
             link.click();
             URL.revokeObjectURL(url);
         }
@@ -1275,6 +1512,70 @@
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', init);
+
+        // Global keyboard listener for search activation
+        document.addEventListener('keydown', function(e) {
+            // Ignore if user is typing in an input field or modal is open
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ignore if any modal is open
+            if (document.querySelector('.modal.active')) {
+                return;
+            }
+            
+            // Check if it's a printable character (letters, numbers, space, etc.)
+            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                openSearch();
+                // Small delay to let the modal open, then focus and add the character
+                setTimeout(() => {
+                    const searchInput = document.getElementById('linkSearch');
+                    searchInput.value = e.key;
+                    searchInput.focus();
+                    // Trigger search with the initial character
+                    filterLinks();
+                }, 50);
+            }
+        });
+
+        // Handle Enter key in search to open first result
+        document.addEventListener('DOMContentLoaded', function() {
+            const linkSearchInput = document.getElementById('linkSearch');
+            if (linkSearchInput) {
+                linkSearchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        
+                        // Try to get first link result, otherwise first policy result
+                        const firstLinkResult = document.querySelector('#searchResults .search-result-item');
+                        const firstPolicyResult = document.querySelector('#policySearchResults .search-result-item');
+                        
+                        if (firstLinkResult) {
+                            firstLinkResult.click();
+                        } else if (firstPolicyResult) {
+                            firstPolicyResult.click();
+                        }
+                    }
+                });
+            }
+            
+            // Handle Enter key for policies search
+            const policySearchInput = document.getElementById('policySearch');
+            if (policySearchInput) {
+                policySearchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        
+                        // Get the first visible result
+                        const firstResult = document.querySelector('#policiesList .policy-item');
+                        if (firstResult) {
+                            firstResult.click();
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

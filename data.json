@@ -83,58 +83,69 @@
       "icon": "./icons/cap.png",
       "color": "white",
       "isNew": false
-    }
-  ],
-  "policies": [
-    {
-      "id": 1,
-      "title": "Remote Work Policy",
-      "category": "HR",
-      "url": "https://docs.company.com/remote-work"
     },
     {
-      "id": 2,
-      "title": "Data Security Guidelines",
-      "category": "IT",
-      "url": "https://docs.company.com/data-security"
+      "id": 11,
+      "name": "CAP Invasive Breast pT Category",
+      "url": "https://documents.cap.org/protocols/Breast.Invasive_4.10.0.0.REL.CAPCP.pdf#page=15",
+      "icon": "🔗",
+      "color": "blue",
+      "isNew": false,
+      "aliases": [
+        "staging"
+      ]
     },
     {
-      "id": 3,
-      "title": "Expense Reimbursement",
-      "category": "Finance",
-      "url": "https://docs.company.com/expenses"
+      "id": 12,
+      "name": "SURGPATH",
+      "url": "https://theottawahospital.sharepoint.com/sites/SURGPATH768",
+      "icon": "S",
+      "color": "blue",
+      "isNew": false,
+      "aliases": [
+        "surg path",
+        "portal"
+      ]
     },
     {
-      "id": 4,
-      "title": "Code of Conduct",
-      "category": "HR",
-      "url": "https://docs.company.com/conduct"
+      "id": 13,
+      "name": "Histology Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/",
+      "icon": "HS",
+      "color": "red",
+      "isNew": false,
+      "aliases": [
+        "histo",
+        "portal"
+      ]
+    },
+      {
+        "id": 14,
+        "name": "Cytology Portal",
+        "url": "https://theottawahospital.sharepoint.com/sites/CytotechnologistsandCytotechnicians",
+        "icon": "CY",
+        "color": "blue",
+        "isNew": false,
+        "aliases": [
+          "cyto",
+          "portal"
+        ]
     },
     {
-      "id": 5,
-      "title": "Leave & Time Off",
-      "category": "HR",
-      "url": "https://docs.company.com/leave"
-    },
-    {
-      "id": 6,
-      "title": "Incident Response",
-      "category": "IT",
-      "url": "https://docs.company.com/incident"
-    },
-    {
-      "id": 7,
-      "title": "Equipment Return",
-      "category": "IT",
-      "url": "https://docs.company.com/equipment"
-    },
-    {
-      "id": 8,
-      "title": "Travel Policy",
-      "category": "Finance",
-      "url": "https://docs.company.com/travel"
-    }
-  ],
+      "id": 15,
+      "name": "Immuno Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/ihctechs",
+      "icon": "IHC",
+      "color": "green",
+      "isNew": false,
+      "aliases": [
+        "immuno",
+        "portal",
+        "ihc",
+        "immunohistochemistry"
+      ]
+  }
+], 
   "_comments": {
     "icon_options": "Use emoji ('🚀'), image URL ('https://example.com/icon.png'), or local path ('/icons/custom.png')",
     "color_options": "Use preset names ('blue', 'green', 'purple', 'orange', 'red', 'indigo', 'pink', 'teal') or hex codes ('#3b82f6')",
