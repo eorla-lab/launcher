@@ -616,30 +616,37 @@
                 <button class="close-btn" onclick="closeModal('policiesModal')">✕</button>
             </div>
             <div class="modal-body">
-                <div id="csvMetadata" style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1; display: none;">
+                <div id="csvMetadata"
+                    style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1; display: none;">
                     <strong>📄 Index Last Updated:</strong> <span id="csvLastModified">Loading...</span>
                 </div>
-                
+
                 <div class="search-box">
                     <div style="position: relative;">
-                        <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()" oninput="toggleClearButton('policySearch', 'policySearchClear')">
-                        <button id="policySearchClear" onclick="clearSearch('policySearch')" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">✕</button>
+                        <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()"
+                            oninput="toggleClearButton('policySearch', 'policySearchClear')">
+                        <button id="policySearchClear" onclick="clearSearch('policySearch')"
+                            style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                            onmouseover="this.style.background='#f3f4f6'"
+                            onmouseout="this.style.background='none'">✕</button>
                     </div>
                 </div>
-                
+
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <select id="folderFilter" onchange="filterPolicies()" style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <select id="folderFilter" onchange="filterPolicies()"
+                        style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <option value="">All Folders</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <select id="subfolderFilter" onchange="filterPolicies()" style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <select id="subfolderFilter" onchange="filterPolicies()"
+                        style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <option value="">All Subfolders</option>
                     </select>
                 </div>
-                
+
                 <div id="policiesCount" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;"></div>
-                
+
                 <ul class="policy-list" id="policiesList"></ul>
             </div>
         </div>
@@ -655,27 +662,34 @@
             <div class="modal-body">
                 <div class="search-box">
                     <div style="position: relative;">
-                        <input type="text" id="linkSearch" placeholder="Search links and policies..." onkeyup="filterLinksAndPolicies()" oninput="toggleClearButton('linkSearch', 'linkSearchClear')" autofocus>
-                        <button id="linkSearchClear" onclick="clearSearch('linkSearch')" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">✕</button>
+                        <input type="text" id="linkSearch" placeholder="Search links and policies..."
+                            onkeyup="filterLinksAndPolicies()"
+                            oninput="toggleClearButton('linkSearch', 'linkSearchClear')" autofocus>
+                        <button id="linkSearchClear" onclick="clearSearch('linkSearch')"
+                            style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                            onmouseover="this.style.background='#f3f4f6'"
+                            onmouseout="this.style.background='none'">✕</button>
                     </div>
                 </div>
-                
+
                 <!-- Links Section -->
                 <div id="linksSection" style="display: none;">
-                    <h3 style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <h3
+                        style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span>🔗</span> Links
                     </h3>
                     <ul class="policy-list" id="searchResults"></ul>
                 </div>
-                
+
                 <!-- Policies Section -->
                 <div id="policiesSection" style="display: none; margin-top: 24px;">
-                    <h3 style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <h3
+                        style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span>📄</span> Policies
                     </h3>
                     <ul class="policy-list" id="policySearchResults"></ul>
                 </div>
-                
+
                 <!-- Empty state when nothing found -->
                 <div id="searchEmptyState" style="display: none;" class="empty-state">No results found</div>
             </div>
@@ -793,6 +807,7 @@
         let defaultData = { links: [], policies: [] };
         let links = [];
         let policies = [];
+        let policyClicks = {}; // Track policy clicks by GUID
 
         // Calculate if background color is light or dark
         function getContrastColor(color) {
@@ -832,6 +847,7 @@
         // Initialize
         async function init() {
             await loadDefaultData();
+            loadPolicyClicks(); // Load policy click data
             loadUserData();
             renderDashboard();
             renderPolicies();
@@ -842,7 +858,7 @@
             try {
                 const response = await fetch('data.json');
                 defaultData = await response.json();
-                
+
                 // Load policies from CSV
                 await loadPoliciesFromCSV();
             } catch (error) {
@@ -867,57 +883,78 @@
                     policies = [];
                     return;
                 }
-                
+
                 const csvText = await response.text();
                 const lastModified = response.headers.get('Last-Modified');
-                
+
                 console.log('CSV loaded, length:', csvText.length);
-                
+
                 // Show last modified date
                 if (lastModified) {
                     const date = new Date(lastModified);
                     document.getElementById('csvLastModified').textContent = date.toLocaleString();
                     document.getElementById('csvMetadata').style.display = 'block';
                 }
-                
+
                 // Parse CSV
                 const lines = csvText.split('\n');
                 const headers = lines[0].split(',');
-                
+
                 console.log('CSV Headers:', headers);
                 console.log('Total lines:', lines.length);
-                
+
                 // Find column indices
                 const descIndex = headers.findIndex(h => h.trim().toLowerCase() === 'description');
                 const folderIndex = headers.findIndex(h => h.trim().toLowerCase() === 'folder');
                 const subfolderIndex = headers.findIndex(h => h.trim().toLowerCase() === 'subfolder');
                 const ownerIndex = headers.findIndex(h => h.trim().toLowerCase() === 'owner');
                 const hyperlinkIndex = headers.findIndex(h => h.trim().toLowerCase() === 'document hyperlink');
-                const redactedIndex = headers.findIndex(h => h.trim().toLowerCase() === 'redacted on');
-                
+                const lastRevisionIndex = headers.findIndex(h => h.trim().toLowerCase() === 'last revision');
+                const writtenByIndex = headers.findIndex(h => h.trim().toLowerCase() === 'written by');
+                const revisedByIndex = headers.findIndex(h => h.trim().toLowerCase() === 'revised by');
+                const versionIndex = headers.findIndex(h => h.trim().toLowerCase() === 'version');
+                const modificationTypeIndex = headers.findIndex(h => h.trim().toLowerCase() === 'modification type');
+                const docNumIndex = headers.findIndex(h => h.trim().toLowerCase() === 'doc #');
+                const docTypeIndex = headers.findIndex(h => h.trim().toLowerCase() === 'document type');
+                const lateDateIndex = headers.findIndex(h => h.trim().toLowerCase() === 'late date');
+
                 console.log('Column indices:', {
                     description: descIndex,
                     folder: folderIndex,
                     subfolder: subfolderIndex,
                     owner: ownerIndex,
                     hyperlink: hyperlinkIndex,
-                    redactedOn: redactedIndex
+                    lastRevision: lastRevisionIndex,
+                    writtenBy: writtenByIndex,
+                    revisedBy: revisedByIndex,
+                    version: versionIndex,
+                    modificationType: modificationTypeIndex,
+                    docNum: docNumIndex,
+                    docType: docTypeIndex,
+                    lateDate: lateDateIndex
                 });
-                
+
                 policies = [];
-                
+
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
-                    
+
                     const cols = parseCSVLine(lines[i]);
-                    
+
                     const description = cols[descIndex]?.trim() || '';
                     const folder = cols[folderIndex]?.trim() || '';
                     const subfolder = cols[subfolderIndex]?.trim() || '';
                     const owner = cols[ownerIndex]?.trim() || '';
                     const guid = cols[hyperlinkIndex]?.trim() || '';
-                    const redactedOn = cols[redactedIndex]?.trim() || '';
-                    
+                    const lastRevision = cols[lastRevisionIndex]?.trim() || '';
+                    const writtenBy = cols[writtenByIndex]?.trim() || '';
+                    const revisedBy = cols[revisedByIndex]?.trim() || '';
+                    const version = cols[versionIndex]?.trim() || '';
+                    const modificationType = cols[modificationTypeIndex]?.trim() || '';
+                    const docNum = cols[docNumIndex]?.trim() || '';
+                    const docType = cols[docTypeIndex]?.trim() || '';
+                    const lateDate = cols[lateDateIndex]?.trim() || '';
+
                     if (description && guid) {
                         policies.push({
                             id: i,
@@ -925,15 +962,25 @@
                             category: folder,
                             subfolder: subfolder,
                             owner: owner,
-                            redactedOn: redactedOn,
+                            lastRevision: lastRevision,
+                            writtenBy: writtenBy,
+                            revisedBy: revisedBy,
+                            version: version,
+                            modificationType: modificationType,
+                            docNum: docNum,
+                            docType: docType,
+                            lateDate: lateDate,
+                            guid: guid, // Store GUID for click tracking
+                            clicks: getPolicyClicks(guid), // Get click count from localStorage
+                            isNew: modificationType.toLowerCase() === 'new version', // Mark as new if it's a new version
                             url: `https://eorla.omni-assistant.net/lab/Document/DocumentDownloader.aspx?Df_Guid=${guid}`
                         });
                     }
                 }
-                
+
                 console.log(`Loaded ${policies.length} policies from CSV`);
                 console.log('First 3 policies:', policies.slice(0, 3));
-                
+
             } catch (error) {
                 console.error('Error loading CSV:', error);
                 policies = [];
@@ -945,10 +992,10 @@
             const result = [];
             let current = '';
             let inQuotes = false;
-            
+
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
-                
+
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if (char === ',' && !inQuotes) {
@@ -959,7 +1006,7 @@
                 }
             }
             result.push(current);
-            
+
             return result;
         }
 
@@ -1005,6 +1052,56 @@
         // Save user data to localStorage
         function saveUserData() {
             localStorage.setItem('workspaceData', JSON.stringify({ links }));
+        }
+
+        // Load policy clicks from localStorage
+        function loadPolicyClicks() {
+            const saved = localStorage.getItem('policyClicks');
+            if (saved) {
+                try {
+                    policyClicks = JSON.parse(saved);
+                } catch (e) {
+                    policyClicks = {};
+                }
+            }
+        }
+
+        // Save policy clicks to localStorage
+        function savePolicyClicks() {
+            localStorage.setItem('policyClicks', JSON.stringify(policyClicks));
+        }
+
+        // Get click count for a policy by GUID
+        function getPolicyClicks(guid) {
+            return policyClicks[guid] || 0;
+        }
+
+        // Increment policy click count
+        function incrementPolicyClicks(guid) {
+            policyClicks[guid] = (policyClicks[guid] || 0) + 1;
+            savePolicyClicks();
+        }
+
+        // Handle policy click
+        function handlePolicyClick(guid, url) {
+            incrementPolicyClicks(guid);
+
+            // Update the clicks count in the policies array
+            const policy = policies.find(p => p.guid === guid);
+            if (policy) {
+                policy.clicks = getPolicyClicks(guid);
+                // Remove NEW badge after first click
+                if (policy.isNew && policy.clicks === 1) {
+                    policy.isNew = false;
+                }
+            }
+
+            // Re-render if in policies modal to update counts
+            if (document.getElementById('policiesModal').classList.contains('active')) {
+                renderPolicies();
+            }
+
+            window.open(url, '_blank');
         }
 
         // Render dashboard with all tiles sorted by new status first, then clicks
@@ -1133,6 +1230,14 @@
                 filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
             }
 
+            // Sort by Late Date (newest first), then by clicks (descending)
+            filtered.sort((a, b) => {
+                const dateA = parseLateDate(a.lateDate);
+                const dateB = parseLateDate(b.lateDate);
+
+                return dateB - dateA || (b.clicks || 0) - (a.clicks || 0);
+            });
+
             // Update count
             document.getElementById('policiesCount').textContent = `Showing ${filtered.length} of ${policies.length} policies`;
 
@@ -1141,22 +1246,56 @@
                 return;
             }
 
-            policiesList.innerHTML = filtered.map(policy => `
-                <li class="policy-item" onclick="window.open('${policy.url}', '_blank')">
+            policiesList.innerHTML = filtered.map(policy => {
+                const isNew = policy.isNew && policy.clicks === 0;
+                return `
+                <li class="policy-item" onclick="handlePolicyClick('${policy.guid}', '${policy.url}')">
                     <div class="policy-info">
-                        <div class="policy-title">${policy.title}</div>
+                        <div class="policy-title">
+                            ${policy.title}
+                            ${isNew ? '<span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px;">NEW</span>' : ''}
+                        </div>
                         ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
                         <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
-                            ${policy.owner && policy.redactedOn ? ' • ' : ''}
-                            ${policy.redactedOn ? `Updated: ${policy.redactedOn}` : ''}
+                            ${policy.docNum ? `Doc #${policy.docNum}` : ''}
+                            ${policy.docNum && policy.version ? ' • ' : ''}
+                            ${policy.version ? `${policy.version}` : ''}
+                            ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
+                            ${policy.docType ? `${policy.docType}` : ''}
                         </div>
-                        ${policy.subfolder ? `<span class="policy-category">${policy.subfolder}</span>` : ''}
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
+                            ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
+                            ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
+                            ${policy.modificationType ? `${policy.modificationType}` : ''}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
+                            ${policy.writtenBy && policy.owner ? ' • ' : ''}
+                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
+                            ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
+                            ${policy.clicks ? `${policy.clicks} clicks` : ''}
+                        </div>
+                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
                     </div>
                     <span class="external-icon">↗</span>
                 </li>
-            `).join('');
+            `;
+            }).join('');
         }
+
+        function parseLateDate(str) {
+                if (!str) return new Date(0);
+
+                const [datePart, timePart, meridian] = str.split(' ');
+                const [year, month, day] = datePart.split('-').map(Number);
+                let [hour, minute, second] = timePart.split(':').map(Number);
+
+                if (meridian === 'PM' && hour !== 12) hour += 12;
+                if (meridian === 'AM' && hour === 12) hour = 0;
+
+                return new Date(year, month - 1, day, hour, minute, second);
+            }
 
         // Populate filter dropdowns with unique values
         function populateFilters() {
@@ -1179,6 +1318,12 @@
                     const displayName = s.length > 38 ? s.substring(0, 38) + '...' : s;
                     return `<option value="${s}" ${s === currentSubfolder ? 'selected' : ''} title="${s}">${displayName}</option>`;
                 }).join('');
+        }
+
+        // Filter policies by subfolder (triggered by clicking subfolder badge)
+        function filterBySubfolder(subfolder) {
+            document.getElementById('subfolderFilter').value = subfolder;
+            renderPolicies();
         }
 
         // Filter policies
@@ -1248,8 +1393,20 @@
                 return b.clicks - a.clicks;
             });
 
+            // Sort policies by Late Date (newest first), then by clicks (descending)
+            const sortedPolicies = [...filteredPolicies].sort((a, b) => {
+                const dateA = a.lateDate ? new Date(a.lateDate) : new Date(0);
+                const dateB = b.lateDate ? new Date(b.lateDate) : new Date(0);
+
+                if (dateB - dateA !== 0) {
+                    return dateB - dateA;
+                }
+
+                return (b.clicks || 0) - (a.clicks || 0);
+            });
+
             // Show/hide sections based on results
-            if (sortedLinks.length === 0 && filteredPolicies.length === 0) {
+            if (sortedLinks.length === 0 && sortedPolicies.length === 0) {
                 linksSection.style.display = 'none';
                 policiesSection.style.display = 'none';
                 emptyState.style.display = 'block';
@@ -1287,10 +1444,10 @@
             }
 
             // Render policies section
-            if (filteredPolicies.length > 0) {
+            if (sortedPolicies.length > 0) {
                 policiesSection.style.display = 'block';
-                policySearchResults.innerHTML = filteredPolicies.slice(0, 20).map(policy => `
-                    <li class="policy-item search-result-item" onclick="window.open('${policy.url}', '_blank')">
+                policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
+                    <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.url}')">
                         <div class="policy-info">
                             <div class="policy-title">${policy.title}</div>
                             ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
@@ -1299,9 +1456,9 @@
                         <span class="external-icon">↗</span>
                     </li>
                 `).join('');
-                
-                if (filteredPolicies.length > 20) {
-                    policySearchResults.innerHTML += `<div style="text-align: center; padding: 16px; color: #6b7280; font-size: 0.9rem;">Showing first 20 of ${filteredPolicies.length} policies. Refine your search for more specific results.</div>`;
+
+                if (sortedPolicies.length > 20) {
+                    policySearchResults.innerHTML += `<div style="text-align: center; padding: 16px; color: #6b7280; font-size: 0.9rem;">Showing first 20 of ${sortedPolicies.length} policies. Refine your search for more specific results.</div>`;
                 }
             } else {
                 policiesSection.style.display = 'none';
@@ -1328,14 +1485,14 @@
             if (input) {
                 input.value = '';
                 input.focus();
-                
+
                 // Trigger appropriate filter function
                 if (inputId === 'linkSearch') {
                     filterLinksAndPolicies();
                 } else if (inputId === 'policySearch') {
                     filterPolicies();
                 }
-                
+
                 // Hide clear button
                 const buttonId = inputId + 'Clear';
                 toggleClearButton(inputId, buttonId);
@@ -1516,17 +1673,17 @@
         window.addEventListener('DOMContentLoaded', init);
 
         // Global keyboard listener for search activation
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             // Ignore if user is typing in an input field or modal is open
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
                 return;
             }
-            
+
             // Ignore if any modal is open
             if (document.querySelector('.modal.active')) {
                 return;
             }
-            
+
             // Check if it's a printable character (letters, numbers, space, etc.)
             if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 openSearch();
@@ -1542,33 +1699,43 @@
         });
 
         // Handle Enter key in search to open first result
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const linkSearchInput = document.getElementById('linkSearch');
             if (linkSearchInput) {
-                linkSearchInput.addEventListener('keydown', function(e) {
+                linkSearchInput.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        
-                        // Try to get first link result, otherwise first policy result
-                        const firstLinkResult = document.querySelector('#searchResults .search-result-item');
-                        const firstPolicyResult = document.querySelector('#policySearchResults .search-result-item');
-                        
-                        if (firstLinkResult) {
-                            firstLinkResult.click();
-                        } else if (firstPolicyResult) {
-                            firstPolicyResult.click();
+
+                        // Check if links section is visible and has results
+                        const linksSection = document.getElementById('linksSection');
+                        const policiesSection = document.getElementById('policiesSection');
+
+                        if (linksSection.style.display !== 'none') {
+                            const firstLinkResult = document.querySelector('#searchResults .search-result-item');
+                            if (firstLinkResult) {
+                                firstLinkResult.click();
+                                return;
+                            }
+                        }
+
+                        // If no links, try policies
+                        if (policiesSection.style.display !== 'none') {
+                            const firstPolicyResult = document.querySelector('#policySearchResults .search-result-item');
+                            if (firstPolicyResult) {
+                                firstPolicyResult.click();
+                            }
                         }
                     }
                 });
             }
-            
+
             // Handle Enter key for policies search
             const policySearchInput = document.getElementById('policySearch');
             if (policySearchInput) {
-                policySearchInput.addEventListener('keydown', function(e) {
+                policySearchInput.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        
+
                         // Get the first visible result
                         const firstResult = document.querySelector('#policiesList .policy-item');
                         if (firstResult) {
