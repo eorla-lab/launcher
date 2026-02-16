@@ -2,58 +2,86 @@
   "links": [
     {
       "id": 1,
-      "name": "HUB",
-      "url": "https://hub.company.com",
-      "icon": "🏢",
-      "color": "blue",
-      "isNew": true
+      "name": "EORLA Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/eorlaportal",
+      "icon": "./icons/eorla.jpeg",
+      "color": "white",
+      "isNew": false
     },
     {
       "id": 2,
       "name": "Outlook",
       "url": "https://outlook.office.com",
-      "icon": "📧",
-      "color": "blue",
+      "icon": "./icons/outlook.ico",
+      "color": "white",
+      "aliases": [
+        "mail",
+        "email"
+      ],
       "isNew": false
     },
     {
       "id": 3,
-      "name": "Teams",
-      "url": "https://teams.microsoft.com",
-      "icon": "💬",
-      "color": "purple",
+      "name": "TOHHUB",
+      "url": "https://theottawahospital.sharepoint.com/sites/TOHHUB",
+      "icon": "./icons/tohhub.png",
+      "color": "white",
       "isNew": false
     },
     {
       "id": 4,
-      "name": "SharePoint",
-      "url": "https://sharepoint.company.com",
-      "icon": "📱",
-      "color": "orange",
+      "name": "Anatomical Pathology Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/apportal",
+      "icon": "AP",
+      "color": "#134030",
       "isNew": false
     },
     {
       "id": 5,
-      "name": "Jira",
-      "url": "https://company.atlassian.net",
-      "icon": "💼",
-      "color": "red",
+      "name": "Atlas of Pathology",
+      "url": "https://www.pathologyatlas.ca/",
+      "icon": "./icons/pathologyatlas.png",
+      "color": "#0c056d",
       "isNew": false
     },
     {
       "id": 6,
-      "name": "GitHub",
-      "url": "https://github.com/yourcompany",
-      "icon": "🎯",
-      "color": "indigo",
+      "name": "UKG",
+      "url": "https://ottawahospital-sso.prd.mykronos.com/wfd/home",
+      "icon": "./icons/UKG.ico",
+      "color": "white",
       "isNew": false
     },
     {
       "id": 7,
-      "name": "Analytics",
-      "url": "https://analytics.company.com",
-      "icon": "📊",
-      "color": "pink",
+      "name": "Vacation Planners",
+      "url": "https://theottawahospital.sharepoint.com/sites/eorlaportal/EORLA%20Vacation%20Planners/",
+      "icon": "🏝️",
+      "color": "yellow",
+      "isNew": false
+    },
+    {
+      "id": 8,
+      "name": "Omni-Assistant",
+      "url": "https://eorla.omni-assistant.net/lab/",
+      "icon": "./icons/omni.png",
+      "color": "white",
+      "isNew": false
+    },
+    {
+      "id": 9,
+      "name": "Surg Path Schedule",
+      "url": "https://theottawahospital-my.sharepoint.com/:x:/r/personal/jstinson_eorla_ca/_layouts/15/doc2.aspx?sourcedoc=%7BFF35DE9D-6844-4DA3-B4E8-5A732744B27F%7D&file=Surgical%20Pathology%20Schedule.xlsx",
+      "icon": "📆",
+      "color": "white",
+      "isNew": false
+    },
+    {
+      "id": 10,
+      "name": "CAP Protocols",
+      "url": "https://www.cap.org/protocols-and-guidelines/cancer-reporting-tools/cancer-protocol-templates",
+      "icon": "./icons/cap.png",
+      "color": "white",
       "isNew": false
     }
   ],
