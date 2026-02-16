@@ -1,6 +1,12 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Web Launcher",
+  "short_name": "Launcher",
+  "description": "Quick access to tools and resources",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#69c9d0",
+  "theme_color": "#69c9d0",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -13,9 +19,21 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }
