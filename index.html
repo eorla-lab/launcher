@@ -632,17 +632,25 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <select id="folderFilter" onchange="filterPolicies()"
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+                    <select id="folderFilter" onchange="filterPolicies(); toggleFilterClearButtons();"
                         style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <option value="">All Folders</option>
                     </select>
+                    <button id="clearFolderBtn" onclick="clearFolderFilter()"
+                        style="display: none; padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; transition: background 0.2s;"
+                        onmouseover="this.style.background='#4b5563'"
+                        onmouseout="this.style.background='#6b7280'">Clear</button>
                 </div>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <select id="subfolderFilter" onchange="filterPolicies()"
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+                    <select id="subfolderFilter" onchange="filterPolicies(); toggleFilterClearButtons();"
                         style="flex: 1; padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px;">
                         <option value="">All Subfolders</option>
                     </select>
+                    <button id="clearSubfolderBtn" onclick="clearSubfolderFilter()"
+                        style="display: none; padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; transition: background 0.2s;"
+                        onmouseover="this.style.background='#4b5563'"
+                        onmouseout="this.style.background='#6b7280'">Clear</button>
                 </div>
 
                 <div id="policiesCount" style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;"></div>
@@ -685,7 +693,7 @@
                 <div id="policiesSection" style="display: none; margin-top: 24px;">
                     <h3
                         style="font-size: 1rem; color: #374151; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>📄</span> Policies
+                        <span>📚</span> Policies
                     </h3>
                     <ul class="policy-list" id="policySearchResults"></ul>
                 </div>
@@ -808,6 +816,7 @@
         let links = [];
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
+        let docNumberClicks = {}; // Track policy clicks by Doc #
 
         // Calculate if background color is light or dark
         function getContrastColor(color) {
@@ -846,8 +855,8 @@
 
         // Initialize
         async function init() {
+            loadPolicyClicks(); // Load policy click data FIRST
             await loadDefaultData();
-            loadPolicyClicks(); // Load policy click data
             loadUserData();
             renderDashboard();
             renderPolicies();
@@ -874,6 +883,19 @@
             }
         }
 
+        function parseLateDate(str) {
+            if (!str) return new Date(0);
+
+            const [datePart, timePart, meridian] = str.split(' ');
+            const [year, month, day] = datePart.split('-').map(Number);
+            let [hour, minute, second] = timePart.split(':').map(Number);
+
+            if (meridian === 'PM' && hour !== 12) hour += 12;
+            if (meridian === 'AM' && hour === 12) hour = 0;
+
+            return new Date(year, month - 1, day, hour, minute, second);
+        }
+
         // Load and parse policies from CSV
         async function loadPoliciesFromCSV() {
             try {
@@ -892,7 +914,11 @@
                 // Show last modified date
                 if (lastModified) {
                     const date = new Date(lastModified);
-                    document.getElementById('csvLastModified').textContent = date.toLocaleString();
+                    document.getElementById('csvLastModified').textContent = date.toLocaleString('en-CA', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
                     document.getElementById('csvMetadata').style.display = 'block';
                 }
 
@@ -956,6 +982,10 @@
                     const lateDate = cols[lateDateIndex]?.trim() || '';
 
                     if (description && guid) {
+                        const guidClicks = getPolicyClicks(guid);
+                        const docClicks = getDocNumberClicks(docNum);
+                        const totalClicks = guidClicks + docClicks;
+
                         policies.push({
                             id: i,
                             title: description,
@@ -971,8 +1001,8 @@
                             docType: docType,
                             lateDate: lateDate,
                             guid: guid, // Store GUID for click tracking
-                            clicks: getPolicyClicks(guid), // Get click count from localStorage
-                            isNew: modificationType.toLowerCase() === 'new version', // Mark as new if it's a new version
+                            clicks: totalClicks, // Sum of GUID + Doc # clicks
+                            isNew: modificationType.toLowerCase() === 'new version' && docClicks === 0, // NEW badge based on Doc # clicks only
                             url: `https://eorla.omni-assistant.net/lab/Document/DocumentDownloader.aspx?Df_Guid=${guid}`
                         });
                     }
@@ -1064,11 +1094,21 @@
                     policyClicks = {};
                 }
             }
+
+            const savedDocClicks = localStorage.getItem('docNumberClicks');
+            if (savedDocClicks) {
+                try {
+                    docNumberClicks = JSON.parse(savedDocClicks);
+                } catch (e) {
+                    docNumberClicks = {};
+                }
+            }
         }
 
         // Save policy clicks to localStorage
         function savePolicyClicks() {
             localStorage.setItem('policyClicks', JSON.stringify(policyClicks));
+            localStorage.setItem('docNumberClicks', JSON.stringify(docNumberClicks));
         }
 
         // Get click count for a policy by GUID
@@ -1076,22 +1116,33 @@
             return policyClicks[guid] || 0;
         }
 
-        // Increment policy click count
-        function incrementPolicyClicks(guid) {
+        // Get click count for a policy by Doc #
+        function getDocNumberClicks(docNum) {
+            return docNumberClicks[docNum] || 0;
+        }
+
+        // Increment policy click count (both GUID and Doc #)
+        function incrementPolicyClicks(guid, docNum) {
             policyClicks[guid] = (policyClicks[guid] || 0) + 1;
+            if (docNum) {
+                docNumberClicks[docNum] = (docNumberClicks[docNum] || 0) + 1;
+            }
             savePolicyClicks();
         }
 
         // Handle policy click
-        function handlePolicyClick(guid, url) {
-            incrementPolicyClicks(guid);
+        function handlePolicyClick(guid, docNum, url) {
+            incrementPolicyClicks(guid, docNum);
 
-            // Update the clicks count in the policies array
+            // Update the clicks count in the policies array  
             const policy = policies.find(p => p.guid === guid);
             if (policy) {
-                policy.clicks = getPolicyClicks(guid);
-                // Remove NEW badge after first click
-                if (policy.isNew && policy.clicks === 1) {
+                const guidClicks = getPolicyClicks(guid);
+                const docClicks = getDocNumberClicks(docNum);
+                policy.clicks = guidClicks + docClicks;
+
+                // Remove NEW badge after first click on this Doc #
+                if (policy.isNew && docClicks > 0) {
                     policy.isNew = false;
                 }
             }
@@ -1150,7 +1201,7 @@
             // Add Policy Search tile
             html += `
                 <button class="tile" onclick="openFeature('policies')">
-                    <div class="tile-icon green">📄</div>
+                    <div class="tile-icon indigo">📚</div>
                     <div class="tile-name">Policies</div>
                 </button>
             `;
@@ -1180,8 +1231,9 @@
                 return `
                     <li class="link-manager-item">
                         <div class="link-manager-info">
-                            <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}</div>
-                            <div class="link-manager-url" title="${link.url} - ${link.clicks} clicks">${link.url} - ${link.clicks} clicks</div>
+                            <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}<span class="link-manager-url">${link.clicks} clicks</span></div>
+                            
+                            <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
                         <div class="link-manager-actions">
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>` : ''}
@@ -1230,12 +1282,25 @@
                 filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
             }
 
-            // Sort by Late Date (newest first), then by clicks (descending)
+            // Sort: Clicked policies first (by clicks desc), then unclicked by Late Date (newest first)
             filtered.sort((a, b) => {
-                const dateA = parseLateDate(a.lateDate);
-                const dateB = parseLateDate(b.lateDate);
+                const aHasClicks = (a.clicks || 0) > 0;
+                const bHasClicks = (b.clicks || 0) > 0;
 
-                return dateB - dateA || (b.clicks || 0) - (a.clicks || 0);
+                // If one has clicks and other doesn't, clicked comes first
+                if (aHasClicks && !bHasClicks) return -1;
+                if (!aHasClicks && bHasClicks) return 1;
+
+                // Both have clicks or both don't have clicks
+                if (aHasClicks && bHasClicks) {
+                    // Both clicked: sort by clicks descending
+                    return (b.clicks || 0) - (a.clicks || 0);
+                } else {
+                    // Both unclicked: sort by date descending
+                    const dateA = parseLateDate(a.lateDate);
+                    const dateB = parseLateDate(b.lateDate);
+                    return dateB - dateA;
+                }
             });
 
             // Update count
@@ -1249,11 +1314,11 @@
             policiesList.innerHTML = filtered.map(policy => {
                 const isNew = policy.isNew && policy.clicks === 0;
                 return `
-                <li class="policy-item" onclick="handlePolicyClick('${policy.guid}', '${policy.url}')">
+                <li class="policy-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                     <div class="policy-info">
                         <div class="policy-title">
                             ${policy.title}
-                            ${isNew ? '<span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px;">NEW</span>' : ''}
+                            ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
                         </div>
                         ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
                         <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
@@ -1284,19 +1349,6 @@
             }).join('');
         }
 
-        function parseLateDate(str) {
-                if (!str) return new Date(0);
-
-                const [datePart, timePart, meridian] = str.split(' ');
-                const [year, month, day] = datePart.split('-').map(Number);
-                let [hour, minute, second] = timePart.split(':').map(Number);
-
-                if (meridian === 'PM' && hour !== 12) hour += 12;
-                if (meridian === 'AM' && hour === 12) hour = 0;
-
-                return new Date(year, month - 1, day, hour, minute, second);
-            }
-
         // Populate filter dropdowns with unique values
         function populateFilters() {
             const folderFilter = document.getElementById('folderFilter');
@@ -1323,12 +1375,43 @@
         // Filter policies by subfolder (triggered by clicking subfolder badge)
         function filterBySubfolder(subfolder) {
             document.getElementById('subfolderFilter').value = subfolder;
-            renderPolicies();
+            filterPolicies();
+            toggleFilterClearButtons();
+        }
+
+        // Clear folder filter
+        function clearFolderFilter() {
+            document.getElementById('folderFilter').value = '';
+            filterPolicies();
+            toggleFilterClearButtons();
+        }
+
+        // Clear subfolder filter
+        function clearSubfolderFilter() {
+            document.getElementById('subfolderFilter').value = '';
+            filterPolicies();
+            toggleFilterClearButtons();
+        }
+
+        // Toggle visibility of filter clear buttons
+        function toggleFilterClearButtons() {
+            const folderFilter = document.getElementById('folderFilter');
+            const subfolderFilter = document.getElementById('subfolderFilter');
+            const clearFolderBtn = document.getElementById('clearFolderBtn');
+            const clearSubfolderBtn = document.getElementById('clearSubfolderBtn');
+
+            if (clearFolderBtn) {
+                clearFolderBtn.style.display = folderFilter.value ? 'block' : 'none';
+            }
+            if (clearSubfolderBtn) {
+                clearSubfolderBtn.style.display = subfolderFilter.value ? 'block' : 'none';
+            }
         }
 
         // Filter policies
         function filterPolicies() {
             renderPolicies();
+            toggleFilterClearButtons();
         }
 
         // Handle link click
@@ -1393,16 +1476,21 @@
                 return b.clicks - a.clicks;
             });
 
-            // Sort policies by Late Date (newest first), then by clicks (descending)
+            // Sort policies: Clicked first (by clicks), then unclicked by date
             const sortedPolicies = [...filteredPolicies].sort((a, b) => {
-                const dateA = a.lateDate ? new Date(a.lateDate) : new Date(0);
-                const dateB = b.lateDate ? new Date(b.lateDate) : new Date(0);
+                const aHasClicks = (a.clicks || 0) > 0;
+                const bHasClicks = (b.clicks || 0) > 0;
 
-                if (dateB - dateA !== 0) {
+                if (aHasClicks && !bHasClicks) return -1;
+                if (!aHasClicks && bHasClicks) return 1;
+
+                if (aHasClicks && bHasClicks) {
+                    return (b.clicks || 0) - (a.clicks || 0);
+                } else {
+                    const dateA = parseLateDate(a.lateDate);
+                    const dateB = parseLateDate(b.lateDate);
                     return dateB - dateA;
                 }
-
-                return (b.clicks || 0) - (a.clicks || 0);
             });
 
             // Show/hide sections based on results
@@ -1447,7 +1535,7 @@
             if (sortedPolicies.length > 0) {
                 policiesSection.style.display = 'block';
                 policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
-                    <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.url}')">
+                    <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                         <div class="policy-info">
                             <div class="policy-title">${policy.title}</div>
                             ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
@@ -1617,10 +1705,19 @@
             if (!confirm('This will delete all your customizations and click data. Are you sure?')) return;
 
             localStorage.removeItem('workspaceData');
+            localStorage.removeItem('policyClicks'); // Also reset policy clicks
+            localStorage.removeItem('docNumberClicks'); // Also reset doc number clicks
+            policyClicks = {}; // Clear in-memory policy clicks
+            docNumberClicks = {}; // Clear in-memory doc number clicks
             loadUserData();
-            renderDashboard();
-            renderLinkManager();
-            alert('Reset complete!');
+            loadPolicyClicks(); // Reload (will be empty)
+            // Reload policies to update click counts and NEW badges
+            loadPoliciesFromCSV().then(() => {
+                renderDashboard();
+                renderLinkManager();
+                renderPolicies();
+                alert('Reset complete!');
+            });
         }
 
         // Open settings
@@ -1641,6 +1738,19 @@
         // Close modal
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
+
+            // Clear search inputs when closing modals
+            if (modalId === 'searchModal') {
+                document.getElementById('linkSearch').value = '';
+                toggleClearButton('linkSearch', 'linkSearchClear');
+            } else if (modalId === 'policiesModal') {
+                document.getElementById('policySearch').value = '';
+                toggleClearButton('policySearch', 'policySearchClear');
+                // Also clear filters
+                document.getElementById('folderFilter').value = '';
+                document.getElementById('subfolderFilter').value = '';
+                toggleFilterClearButtons();
+            }
         }
 
         // Switch tab
