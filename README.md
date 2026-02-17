@@ -2,7 +2,7 @@
 
 A customizable web app launcher for quick access to internal tools, policies, and resources. Perfect for company intranets or personal productivity dashboards.
 
-![Workspace Hub Screenshot](https://via.placeholder.com/800x400?text=Add+Your+Screenshot+Here)
+![Workspace Hub Screenshot](screenshot.png)
 
 ## Features
 
