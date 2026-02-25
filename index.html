@@ -16,7 +16,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
 
-    <title>🚀</title>
+    <title>Launcher</title>
     <style>
         * {
             margin: 0;
@@ -62,11 +62,14 @@
             display: inline-block;
         }
 
-        .header h1::before {
-            content: "🚀";
-            position: absolute;
-            right: 100%;
-            margin-right: 12px;
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            margin: 0 auto 14px;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
 
         .header p {
@@ -204,6 +207,63 @@
             border-radius: 10px;
             font-weight: 700;
             letter-spacing: 0.5px;
+        }
+
+        /* Skeleton loading tiles */
+        .tile-skeleton {
+            background: rgba(255, 255, 255, 0.25);
+            cursor: default;
+            animation: skeletonPulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes skeletonPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Add link button */
+        .add-btn {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.6rem;
+            font-weight: 300;
+            line-height: 1;
+            transition: background 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Notepad textarea */
+        .notepad-textarea {
+            width: 100%;
+            min-height: 380px;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.7;
+            color: #1f2937;
+        }
+
+        .notepad-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
 
         /* Modal */
@@ -539,6 +599,14 @@
                 right: 50px;
             }
 
+            .add-btn {
+                right: 90px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.3rem;
+                top: 10px;
+            }
+
             .dashboard {
                 gap: 8px;
             }
@@ -595,16 +663,26 @@
 
 <body>
     <div class="container">
+        <button class="add-btn" onclick="openQuickAdd()" title="Add new link">+</button>
         <button class="search-btn" onclick="openSearch()" title="Search Links">🔍</button>
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
+            <img src="./icons/eorla.jpeg" alt="EORLA" class="header-logo">
             <h1>Launcher</h1>
             <p>Quick access to tools and resources</p>
         </div>
 
         <div class="dashboard" id="dashboard">
-            <!-- Tiles will be rendered by JavaScript -->
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
+            <div class="tile tile-skeleton"></div>
         </div>
     </div>
 
@@ -700,6 +778,20 @@
 
                 <!-- Empty state when nothing found -->
                 <div id="searchEmptyState" style="display: none;" class="empty-state">No results found</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notepad Modal -->
+    <div id="notepadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Notepad</h2>
+                <button class="close-btn" onclick="closeModal('notepadModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 14px;">Notes are saved automatically to your browser.</p>
+                <textarea class="notepad-textarea" id="notepadText" placeholder="Start typing your notes here..."></textarea>
             </div>
         </div>
     </div>
@@ -1174,8 +1266,8 @@
 
             let html = '';
 
-            // Render quick link tiles (max 8)
-            sortedLinks.slice(0, 8).forEach(link => {
+            // Render quick link tiles (max 7, leaving room for notepad + policies tiles)
+            sortedLinks.slice(0, 7).forEach(link => {
                 const isNew = link.isNew && link.clicks === 0;
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
                 const isHexColor = link.color && link.color.startsWith('#');
@@ -1197,6 +1289,14 @@
                     </button>
                 `;
             });
+
+            // Add Notepad tile
+            html += `
+                <button class="tile" onclick="openFeature('notepad')">
+                    <div class="tile-icon orange">📝</div>
+                    <div class="tile-name">Notepad</div>
+                </button>
+            `;
 
             // Add Policy Search tile
             html += `
@@ -1730,9 +1830,31 @@
         function openFeature(feature) {
             if (feature === 'policies') {
                 document.getElementById('policiesModal').classList.add('active');
+            } else if (feature === 'notepad') {
+                openNotepad();
             } else if (feature === 'search') {
                 openSearch();
             }
+        }
+
+        // Open notepad
+        function openNotepad() {
+            document.getElementById('notepadText').value = localStorage.getItem('notepadContent') || '';
+            document.getElementById('notepadModal').classList.add('active');
+        }
+
+        // Open quick-add: opens settings on Manage tab with the add form expanded
+        function openQuickAdd() {
+            renderLinkManager();
+            document.getElementById('settingsModal').classList.add('active');
+            // Activate manage tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('manageTab').classList.add('active');
+            document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
+            // Show add form immediately
+            document.getElementById('addLinkForm').style.display = 'block';
+            setTimeout(() => document.getElementById('newLinkName').focus(), 100);
         }
 
         // Close modal
@@ -1780,7 +1902,17 @@
         });
 
         // Initialize on load
-        window.addEventListener('DOMContentLoaded', init);
+        window.addEventListener('DOMContentLoaded', function() {
+            init();
+
+            // Notepad auto-save on every keystroke
+            const notepadEl = document.getElementById('notepadText');
+            if (notepadEl) {
+                notepadEl.addEventListener('input', function () {
+                    localStorage.setItem('notepadContent', this.value);
+                });
+            }
+        });
 
         // Global keyboard listener for search activation
         document.addEventListener('keydown', function (e) {
