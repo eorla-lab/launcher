@@ -247,23 +247,101 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Notepad textarea */
-        .notepad-textarea {
-            width: 100%;
-            min-height: 380px;
-            padding: 14px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            resize: vertical;
-            line-height: 1.7;
-            color: #1f2937;
+        /* Sticky Notes */
+        .sticky-note {
+            background: #fef9c3;
+            border-radius: 2px 2px 6px 2px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            position: relative;
+            box-shadow: 2px 3px 10px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(0,0,0,0.06);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 46px;
+            transition: box-shadow 0.2s, transform 0.15s;
+            border-left: 3px solid #fbbf24;
         }
 
-        .notepad-textarea:focus {
+        .sticky-note:hover {
+            box-shadow: 3px 5px 14px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+
+        .sticky-note:hover .sticky-delete {
+            opacity: 1;
+        }
+
+        .sticky-preview {
+            flex: 1;
+            font-size: 0.88rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sticky-meta {
+            font-size: 0.7rem;
+            color: #a16207;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .sticky-delete {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .sticky-delete:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+        }
+
+        .sticky-note--expanded {
+            flex-direction: column;
+            align-items: stretch;
+            cursor: default;
+            background: #fef3c7;
+            box-shadow: 3px 6px 18px rgba(0,0,0,0.2);
+            transform: none !important;
+        }
+
+        .sticky-textarea {
+            width: 100%;
+            min-height: 90px;
+            background: transparent;
+            border: none;
             outline: none;
-            border-color: #3b82f6;
+            font-size: 0.88rem;
+            font-family: inherit;
+            color: #1f2937;
+            resize: vertical;
+            line-height: 1.7;
+            padding: 0;
+        }
+
+        .sticky-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(180,140,0,0.15);
+        }
+
+        .sticky-meta-row .sticky-delete {
+            opacity: 1;
         }
 
         /* Modal */
@@ -786,12 +864,15 @@
     <div id="notepadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📝 Notepad</h2>
+                <h2>📝 Notes</h2>
                 <button class="close-btn" onclick="closeModal('notepadModal')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 14px;">Notes are saved automatically to your browser.</p>
-                <textarea class="notepad-textarea" id="notepadText" placeholder="Start typing your notes here..."></textarea>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <button class="btn btn-primary" onclick="addNote()" style="padding: 8px 16px;">+ New Note</button>
+                    <span style="font-size: 0.8rem; color: #9ca3af;">Saved automatically</span>
+                </div>
+                <div id="notepadNotesContainer"></div>
             </div>
         </div>
     </div>
@@ -909,6 +990,9 @@
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
         let docNumberClicks = {}; // Track policy clicks by Doc #
+        let notepadClicks = 0; // Track notepad tile click count for grid ranking
+        let notepadNotes = []; // Array of sticky note objects
+        let condenseTimer = null; // Debounce timer for collapsing expanded notes
 
         // Calculate if background color is light or dark
         function getContrastColor(color) {
@@ -948,6 +1032,7 @@
         // Initialize
         async function init() {
             loadPolicyClicks(); // Load policy click data FIRST
+            loadNotepadClicks(); // Load notepad click count for grid ranking
             await loadDefaultData();
             loadUserData();
             renderDashboard();
@@ -1251,8 +1336,20 @@
         function renderDashboard() {
             const dashboard = document.getElementById('dashboard');
 
-            // Sort links: new links first (0 clicks), then by clicks (descending)
-            const sortedLinks = [...links].sort((a, b) => {
+            // Virtual notepad link — competes for grid slots by click count
+            const notepadVirtualLink = {
+                id: 'notepad',
+                name: 'Notepad',
+                url: '',
+                icon: '📝',
+                color: 'orange',
+                clicks: notepadClicks,
+                isNew: false,
+                aliases: ['notes', 'sticky', 'memo', 'write', 'pad']
+            };
+
+            // Sort links + notepad: new links first, then by clicks
+            const sortedLinks = [...links, notepadVirtualLink].sort((a, b) => {
                 const aIsNew = a.isNew && a.clicks === 0;
                 const bIsNew = b.isNew && b.clicks === 0;
 
@@ -1266,8 +1363,8 @@
 
             let html = '';
 
-            // Render quick link tiles (max 7, leaving room for notepad + policies tiles)
-            sortedLinks.slice(0, 7).forEach(link => {
+            // Fill 8 slots — notepad only appears once its click count ranks it here
+            sortedLinks.slice(0, 8).forEach(link => {
                 const isNew = link.isNew && link.clicks === 0;
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
                 const isHexColor = link.color && link.color.startsWith('#');
@@ -1276,13 +1373,16 @@
                 if (isImageIcon) {
                     iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color : ''}"><img src="${link.icon}" style="width: 32px; height: 32px; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='❓';"></div>`;
                 } else {
-                    // Text or emoji icon - apply contrast color for text
                     const textColor = getContrastColor(link.color);
                     iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color + '; ' : ''}color: ${textColor};">${link.icon}</div>`;
                 }
 
+                const onclickHandler = link.id === 'notepad'
+                    ? 'handleNotepadClick()'
+                    : `handleLinkClick(${link.id}, '${link.url}')`;
+
                 html += `
-                    <button class="tile" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                    <button class="tile" onclick="${onclickHandler}">
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -1290,15 +1390,7 @@
                 `;
             });
 
-            // Add Notepad tile
-            html += `
-                <button class="tile" onclick="openFeature('notepad')">
-                    <div class="tile-icon orange">📝</div>
-                    <div class="tile-name">Notepad</div>
-                </button>
-            `;
-
-            // Add Policy Search tile
+            // Policies tile is always fixed at position 9
             html += `
                 <button class="tile" onclick="openFeature('policies')">
                     <div class="tile-icon indigo">📚</div>
@@ -1516,6 +1608,7 @@
 
         // Handle link click
         function handleLinkClick(linkId, url) {
+            if (linkId === 'notepad') { handleNotepadClick(); return; }
             const link = links.find(l => l.id === linkId);
             if (link) {
                 link.clicks++;
@@ -1548,10 +1641,22 @@
             const policiesSection = document.getElementById('policiesSection');
             const emptyState = document.getElementById('searchEmptyState');
 
-            // Filter links
-            const filteredLinks = links.filter(link => {
+            // Include notepad virtual link in search
+            const notepadSearchLink = {
+                id: 'notepad',
+                name: 'Notepad',
+                url: '',
+                icon: '📝',
+                color: 'orange',
+                clicks: notepadClicks,
+                isNew: false,
+                aliases: ['notes', 'sticky', 'memo', 'write', 'pad']
+            };
+
+            // Filter links (including notepad)
+            const filteredLinks = [...links, notepadSearchLink].filter(link => {
                 if (link.name.toLowerCase().includes(searchTerm)) return true;
-                if (link.url.toLowerCase().includes(searchTerm)) return true;
+                if (link.url && link.url.toLowerCase().includes(searchTerm)) return true;
                 if (link.aliases && Array.isArray(link.aliases)) {
                     return link.aliases.some(alias => alias.toLowerCase().includes(searchTerm));
                 }
@@ -1617,8 +1722,12 @@
                         iconDisplay = link.icon + ' ';
                     }
 
+                    const onclickHandler = link.id === 'notepad'
+                        ? 'handleNotepadClick()'
+                        : `handleLinkClick(${link.id}, '${link.url}')`;
+
                     return `
-                        <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                        <li class="policy-item search-result-item" onclick="${onclickHandler}">
                             <div class="policy-info">
                                 <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
                                 <span class="policy-category">${link.clicks} clicks</span>
@@ -1830,18 +1939,181 @@
         function openFeature(feature) {
             if (feature === 'policies') {
                 document.getElementById('policiesModal').classList.add('active');
-            } else if (feature === 'notepad') {
-                openNotepad();
             } else if (feature === 'search') {
                 openSearch();
             }
         }
 
-        // Open notepad
+        // ── Notepad ──────────────────────────────────────────────
+
+        // Load notepad click count from localStorage
+        function loadNotepadClicks() {
+            notepadClicks = parseInt(localStorage.getItem('notepadClicks') || '0', 10);
+        }
+
+        // Load notepad notes from localStorage (with migration from old single-note format)
+        function loadNotepadNotes() {
+            const saved = localStorage.getItem('notepadNotes');
+            try {
+                notepadNotes = saved ? JSON.parse(saved) : [];
+            } catch (e) {
+                notepadNotes = [];
+            }
+            // Migrate legacy single textarea note
+            const legacy = localStorage.getItem('notepadContent');
+            if (legacy && legacy.trim() && notepadNotes.length === 0) {
+                const now = new Date().toISOString();
+                notepadNotes = [{ id: Date.now(), content: legacy, createdAt: now, modifiedAt: now }];
+                saveNotepadNotes();
+                localStorage.removeItem('notepadContent');
+            }
+        }
+
+        function saveNotepadNotes() {
+            localStorage.setItem('notepadNotes', JSON.stringify(notepadNotes));
+        }
+
+        // Handle notepad tile click from grid or search
+        function handleNotepadClick() {
+            notepadClicks++;
+            localStorage.setItem('notepadClicks', String(notepadClicks));
+            renderDashboard();
+            // Close search modal if it was open
+            closeModal('searchModal');
+            openNotepad();
+        }
+
+        // Open the notepad modal
         function openNotepad() {
-            document.getElementById('notepadText').value = localStorage.getItem('notepadContent') || '';
+            loadNotepadNotes();
+            renderNotepadNotes();
             document.getElementById('notepadModal').classList.add('active');
         }
+
+        // Render all notes in condensed state
+        function renderNotepadNotes() {
+            const container = document.getElementById('notepadNotesContainer');
+            if (notepadNotes.length === 0) {
+                container.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 32px 20px; font-size: 0.9rem;">No notes yet. Click <strong>+ New Note</strong> to start.</p>';
+                return;
+            }
+            const showDelete = notepadNotes.length > 1;
+            container.innerHTML = notepadNotes.map(note => {
+                const firstLine = note.content
+                    ? note.content.split('\n')[0].trim()
+                    : '';
+                const preview = firstLine || '<em style="color:#9ca3af">Empty note</em>';
+                const metaText = formatNoteDate(note.modifiedAt || note.createdAt);
+                return `
+                    <div class="sticky-note" data-note-id="${note.id}" onclick="expandNote(${note.id})">
+                        <div class="sticky-preview">${firstLine ? htmlEsc(firstLine) : '<em style="color:#9ca3af">Empty note</em>'}</div>
+                        <div class="sticky-meta">${metaText}</div>
+                        ${showDelete ? `<button class="sticky-delete" onclick="event.stopPropagation(); deleteNote(${note.id})" title="Delete note">✕</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Expand a note into a textarea
+        function expandNote(noteId) {
+            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
+
+            const note = notepadNotes.find(n => n.id === noteId);
+            if (!note) return;
+            const noteEl = document.querySelector(`.sticky-note[data-note-id="${noteId}"]`);
+            if (!noteEl) return;
+
+            // Already expanded?
+            if (noteEl.classList.contains('sticky-note--expanded')) return;
+
+            noteEl.classList.add('sticky-note--expanded');
+            noteEl.onclick = null;
+
+            // Build DOM to safely set values (avoids HTML-injection in textarea)
+            noteEl.innerHTML = '';
+            const textarea = document.createElement('textarea');
+            textarea.className = 'sticky-textarea';
+            textarea.value = note.content || '';
+            textarea.placeholder = 'Write your note…';
+            textarea.addEventListener('blur', () => condenseNote(noteId));
+            textarea.addEventListener('input', () => {
+                note.content = textarea.value;
+                note.modifiedAt = new Date().toISOString();
+                saveNotepadNotes();
+            });
+
+            const metaRow = document.createElement('div');
+            metaRow.className = 'sticky-meta-row';
+
+            const metaSpan = document.createElement('span');
+            metaSpan.className = 'sticky-meta';
+            metaSpan.textContent = `Created ${formatNoteDate(note.createdAt)}`;
+            metaRow.appendChild(metaSpan);
+
+            if (notepadNotes.length > 1) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'sticky-delete';
+                delBtn.title = 'Delete note';
+                delBtn.textContent = '✕';
+                delBtn.addEventListener('mousedown', e => e.preventDefault()); // keep focus on textarea
+                delBtn.addEventListener('click', () => deleteNote(noteId));
+                metaRow.appendChild(delBtn);
+            }
+
+            noteEl.appendChild(textarea);
+            noteEl.appendChild(metaRow);
+
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+
+        // Collapse an expanded note back to a bar (delayed so clicks can fire first)
+        function condenseNote(noteId) {
+            condenseTimer = setTimeout(() => {
+                condenseTimer = null;
+                renderNotepadNotes();
+            }, 160);
+        }
+
+        // Add a new blank note at the top and immediately expand it
+        function addNote() {
+            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
+            const now = new Date().toISOString();
+            const newNote = { id: Date.now(), content: '', createdAt: now, modifiedAt: now };
+            notepadNotes.unshift(newNote);
+            saveNotepadNotes();
+            renderNotepadNotes();
+            expandNote(newNote.id);
+        }
+
+        // Delete a note (only shown when there are 2+ notes)
+        function deleteNote(noteId) {
+            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
+            if (!confirm('Delete this note?')) return;
+            notepadNotes = notepadNotes.filter(n => n.id !== noteId);
+            saveNotepadNotes();
+            renderNotepadNotes();
+        }
+
+        // Format a date for note metadata
+        function formatNoteDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const now = new Date();
+            if (d.toDateString() === now.toDateString()) {
+                return d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' });
+            }
+            const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+            if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+            return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+        }
+
+        // Safe HTML escaping for note previews
+        function htmlEsc(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ─────────────────────────────────────────────────────────
 
         // Open quick-add: opens settings on Manage tab with the add form expanded
         function openQuickAdd() {
@@ -1902,17 +2174,7 @@
         });
 
         // Initialize on load
-        window.addEventListener('DOMContentLoaded', function() {
-            init();
-
-            // Notepad auto-save on every keystroke
-            const notepadEl = document.getElementById('notepadText');
-            if (notepadEl) {
-                notepadEl.addEventListener('input', function () {
-                    localStorage.setItem('notepadContent', this.value);
-                });
-            }
-        });
+        window.addEventListener('DOMContentLoaded', init);
 
         // Global keyboard listener for search activation
         document.addEventListener('keydown', function (e) {
