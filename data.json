@@ -24,7 +24,7 @@
       "id": 3,
       "name": "TOHHUB",
       "url": "https://theottawahospital.sharepoint.com/sites/TOHHUB",
-      "icon": "./icons/tohhub.png",
+      "icon": "./icons/TOH_HUB.ico",
       "color": "white",
       "isNew": false
     },
@@ -34,7 +34,12 @@
       "url": "https://theottawahospital.sharepoint.com/sites/apportal",
       "icon": "AP",
       "color": "#134030",
-      "isNew": false
+      "isNew": false,
+      "aliases": [
+        "AP Portal",
+        "AP",
+        "portal"
+      ]
     },
     {
       "id": 5,
@@ -104,6 +109,7 @@
       "isNew": false,
       "aliases": [
         "surg path",
+        "surg",
         "portal"
       ]
     },
@@ -144,7 +150,49 @@
         "ihc",
         "immunohistochemistry"
       ]
-  }
+  },
+  {
+    "id": 16,
+    "name": "CPSO Search",
+    "url": "https://register.cpso.on.ca",
+    "icon": "./icons/CPSO.png",
+    "color": "#00838e",
+    "isNew": false,
+    "aliases": [
+      "doctor",
+      "search",
+      "doctor search",
+      "registry"
+    ]
+},
+{
+  "id": 17,
+  "name": "CMQ Search",
+  "url": "https://www.cmq.org/en/directory",
+  "icon": "./icons/cmq.png",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "doctor",
+    "search",
+    "doctor search",
+    "registry"
+  ]
+},
+{
+  "id": 18,
+  "name": "EORLA Helpdesk",
+  "url": "https://eorla-helpdesk.atlassian.net/servicedesk/customer/portal/2",
+  "icon": "./icons/eorla.jpeg",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "eorla",
+    "ticket",
+    "help",
+    "helpdesk"
+  ]
+}
 ], 
   "_comments": {
     "icon_options": "Use emoji ('🚀'), image URL ('https://example.com/icon.png'), or local path ('/icons/custom.png')",

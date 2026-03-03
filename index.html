@@ -99,7 +99,7 @@
         }
 
         .search-btn {
-            right: 70px;
+            right: 120px;
         }
 
         .settings-btn:hover,
@@ -225,7 +225,7 @@
         .add-btn {
             position: fixed;
             top: 20px;
-            right: 120px;
+            right: 170px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -243,6 +243,12 @@
             justify-content: center;
         }
 
+        .add-btn .plus {
+    position: relative;
+    top: -2px; /* move the + up inside the button */
+}
+        
+
         .add-btn:hover {
             background: rgba(255, 255, 255, 0.3);
         }
@@ -251,7 +257,7 @@
         .notepad-btn {
             position: fixed;
             top: 20px;
-            right: 170px;
+            right: 70px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -786,9 +792,10 @@
 
 <body>
     <div class="container">
-        <button class="notepad-btn" onclick="openNotepad()" title="Notes">📝</button>
-        <button class="add-btn" onclick="openQuickAdd()" title="Add new link">+</button>
+        
+        <button class="add-btn" onclick="openQuickAdd()" title="Add new link"><span class="plus">+</span></button>
         <button class="search-btn" onclick="openSearch()" title="Search Links">🔍</button>
+        <button class="notepad-btn" onclick="openNotepad()" title="Notes">📝</button>
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
@@ -1421,7 +1428,7 @@
             // Policies tile is always fixed at position 9
             html += `
                 <button class="tile" onclick="openFeature('policies')">
-                    <div class="tile-icon indigo">📚</div>
+                    <div class="tile-icon white">📚</div>
                     <div class="tile-name">Policies</div>
                 </button>
             `;
