@@ -30,7 +30,7 @@
     },
     {
       "id": 4,
-      "name": "Anatomical Pathology Portal",
+      "name": "AP Portal",
       "url": "https://theottawahospital.sharepoint.com/sites/apportal",
       "icon": "AP",
       "color": "#134030",
@@ -38,6 +38,8 @@
       "aliases": [
         "AP Portal",
         "AP",
+        "Anatomical",
+        "Pathology",
         "portal"
       ]
     },
@@ -191,6 +193,105 @@
     "ticket",
     "help",
     "helpdesk"
+  ]
+},
+{
+  "id": 19,
+  "name": "Block Photos",
+  "url": "https://theottawahospital.sharepoint.com/sites/blocks",
+  "icon": "B",
+  "color": "blue",
+  "isNew": false,
+  "aliases": [
+    "blocks",
+    "photos"
+  ]
+},
+{
+  "id": 20,
+  "name": "SDS Lookup",
+  "url": "https://chemmanagement.ehs.com/9/97a67b67-9675-44c3-a3b9-92ed1b124fd4/ebinder",
+  "icon": "./icons/TOH_MSDSOnline.ico",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "Chemical",
+    "MSDS",
+    "SDS"
+  ]
+},
+{
+  "id": 21,
+  "name": "ServiceNow",
+  "url": "https://toh.service-now.com/sp",
+  "icon": "./icons/TOH_ServiceNow.ico",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "service",
+    "ticket",
+    "help",
+    "helpdesk"
+  ]
+},
+{
+  "id": 22,
+  "name": "Histology",
+  "url": "https://teams.microsoft.com/l/channel/19:P3MsV_iy_Z0eMt1TYr6FTSHPQDC5SSajxho263xh4n41%40thread.tacv2/General?groupId=588f98ce-a13c-4e4c-839f-a339bdf864bc",
+  "icon": "./icons/teams.png",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "Teams",
+    "histology",
+    "histo",
+    "Histology teams"
+  ]
+},
+{
+  "id": 23,
+  "name": "Engage",
+  "url": "https://engage.cloud.microsoft/main/org/toh.ca/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMDgxODM1OTkxMDQifQ/all",
+  "icon": "./icons/engage.png",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "department",
+    "interdepartmental",
+    "AP",
+    "Viva",
+    "Communication"
+  ]
+},
+{
+  "id": 24,
+  "name": "Citrix MyApps",
+  "url": "https://myapps.ottawahospital.on.ca/",
+  "icon": "./icons/citrix.png",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "myapps",
+    "my",
+    "apps",
+    "elm",
+    "iexpense",
+    "oracle",
+    "hris",
+    "epic"
+  ]
+},
+{
+  "id": 25,
+  "name": "OneDrive",
+  "url": "https://theottawahospital-my.sharepoint.com/",
+  "icon": "./icons/onedrive.png",
+  "color": "white",
+  "isNew": false,
+  "aliases": [
+    "files",
+    "one",
+    "drive"
   ]
 }
 ], 

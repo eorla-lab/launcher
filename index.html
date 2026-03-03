@@ -1410,7 +1410,7 @@
 
                 let iconHtml;
                 if (isImageIcon) {
-                    iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color : ''}"><img src="${link.icon}" style="width: 32px; height: 32px; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='❓';"></div>`;
+                    iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color : ''}"><img src="${link.icon}" style="width: 38px; height: 38px; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='❓';"></div>`;
                 } else {
                     const textColor = getContrastColor(link.color);
                     iconHtml = `<div class="tile-icon ${isHexColor ? '' : link.color}" style="${isHexColor ? 'background: ' + link.color + '; ' : ''}color: ${textColor};">${link.icon}</div>`;
