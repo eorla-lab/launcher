@@ -70,6 +70,17 @@
             margin: 0 auto 14px;
             display: block;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .header-logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+        }
+
+        .header-logo:active {
+            cursor: grabbing;
         }
 
         .header p {
@@ -871,7 +882,7 @@
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
-            <img src="./icons/eorla.jpeg" alt="EORLA" class="header-logo">
+            <img src="./icons/eorla.jpeg" alt="EORLA" class="header-logo" draggable="true" id="headerLogo" title="Drag to share this app">
             <h1>Launcher</h1>
             <p>Quick access to tools and resources</p>
         </div>
@@ -2409,6 +2420,20 @@
                     e.dataTransfer.effectAllowed = 'copyLink';
                 });
             });
+
+            // Logo drag-out: shares the app URL itself (set up once, not per render)
+            const logo = document.getElementById('headerLogo');
+            if (logo && !logo._dragBound) {
+                logo._dragBound = true;
+                logo.addEventListener('dragstart', function(e) {
+                    const appUrl = 'https://eorla-lab.github.io/launcher';
+                    e.dataTransfer.setData('application/x-launcher-tile', 'true');
+                    e.dataTransfer.setData('text/uri-list', appUrl);
+                    e.dataTransfer.setData('text/plain', appUrl);
+                    e.dataTransfer.setData('text/x-moz-url', appUrl + '\n' + 'EORLA Launcher');
+                    e.dataTransfer.effectAllowed = 'copyLink';
+                });
+            }
         }
 
         // ─────────────────────────────────────────────────────────
