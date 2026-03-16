@@ -70,6 +70,17 @@
             margin: 0 auto 14px;
             display: block;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .header-logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+        }
+
+        .header-logo:active {
+            cursor: grabbing;
         }
 
         .header p {
@@ -650,6 +661,69 @@
             color: #6b7280;
         }
 
+        /* Load more button for paginated policies */
+        .policy-load-more {
+            text-align: center;
+            padding: 16px;
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            list-style: none;
+        }
+
+        .policy-load-more:hover {
+            background: #eff6ff;
+        }
+
+        /* Drag-and-drop overlay */
+        .drop-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(59, 130, 246, 0.12);
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .drop-overlay.active {
+            display: flex;
+        }
+
+        .drop-overlay-inner {
+            background: white;
+            border: 3px dashed #3b82f6;
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .drop-overlay-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .drop-overlay-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .drop-overlay-hint {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
         /* Tabs */
         .tabs {
             display: flex;
@@ -791,6 +865,15 @@
 </head>
 
 <body>
+    <!-- Drop overlay for drag-and-drop link creation -->
+    <div class="drop-overlay" id="dropOverlay">
+        <div class="drop-overlay-inner">
+            <div class="drop-overlay-icon">🔗</div>
+            <div class="drop-overlay-text">Drop to create a link</div>
+            <div class="drop-overlay-hint">URL or text</div>
+        </div>
+    </div>
+
     <div class="container">
         
         <button class="add-btn" onclick="openQuickAdd()" title="Add new link"><span class="plus">+</span></button>
@@ -799,7 +882,7 @@
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
-            <img src="./icons/eorla.jpeg" alt="EORLA" class="header-logo">
+            <img src="./icons/eorla.jpeg" alt="EORLA" class="header-logo" draggable="true" id="headerLogo" title="Drag to share this app">
             <h1>Launcher</h1>
             <p>Quick access to tools and resources</p>
         </div>
@@ -1045,6 +1128,11 @@
         let docNumberClicks = {}; // Track policy clicks by Doc #
         let notepadNotes = []; // Array of sticky note objects
         let condenseTimer = null; // Debounce timer for collapsing expanded notes
+
+        // Paginated policy rendering
+        const POLICY_PAGE_SIZE = 50;
+        let currentFilteredPolicies = []; // cached sorted/filtered list
+        let policiesRenderedCount = 0; // how many are currently in the DOM
 
         // Calculate if background color is light or dark
         function getContrastColor(color) {
@@ -1417,7 +1505,7 @@
                 }
 
                 html += `
-                    <button class="tile" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                    <button class="tile" draggable="true" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')">
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -1434,6 +1522,9 @@
             `;
 
             dashboard.innerHTML = html;
+
+            // Set up drag-out handlers on the new tiles
+            setupTileDragOut();
         }
 
         // Render link manager
@@ -1471,7 +1562,96 @@
             }).join('');
         }
 
-        // Render policies
+        // Shared sort comparator for policies (clicked first by count, then unclicked by date)
+        function policySort(a, b) {
+            const aHasClicks = (a.clicks || 0) > 0;
+            const bHasClicks = (b.clicks || 0) > 0;
+            if (aHasClicks && !bHasClicks) return -1;
+            if (!aHasClicks && bHasClicks) return 1;
+            if (aHasClicks && bHasClicks) {
+                return (b.clicks || 0) - (a.clicks || 0);
+            } else {
+                return parseLateDate(b.lateDate) - parseLateDate(a.lateDate);
+            }
+        }
+
+        // Build HTML for a single policy item
+        function buildPolicyItemHTML(policy) {
+            const isNew = policy.isNew && policy.clicks === 0;
+            const safeGuid = policy.guid.replace(/'/g, "\\'");
+            const safeDocNum = policy.docNum.replace(/'/g, "\\'");
+            const safeUrl = policy.url.replace(/'/g, "\\'");
+            return `
+                <li class="policy-item" onclick="handlePolicyClick('${safeGuid}', '${safeDocNum}', '${safeUrl}')">
+                    <div class="policy-info">
+                        <div class="policy-title">
+                            ${policy.title}
+                            ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
+                        </div>
+                        ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${safeDocNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
+                            ${policy.docNum && policy.version ? ' • ' : ''}
+                            ${policy.version ? `${policy.version}` : ''}
+                            ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
+                            ${policy.docType ? `${policy.docType}` : ''}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
+                            ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
+                            ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
+                            ${policy.modificationType ? `${policy.modificationType}` : ''}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                            ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
+                            ${policy.writtenBy && policy.owner ? ' • ' : ''}
+                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
+                            ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
+                            ${policy.clicks ? `${policy.clicks} clicks` : ''}
+                        </div>
+                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
+                    </div>
+                    <span class="external-icon">↗</span>
+                </li>
+            `;
+        }
+
+        // Render the next batch of policies into the list (append, don't replace)
+        function renderPolicyBatch() {
+            const policiesList = document.getElementById('policiesList');
+            const nextBatch = currentFilteredPolicies.slice(policiesRenderedCount, policiesRenderedCount + POLICY_PAGE_SIZE);
+            if (nextBatch.length === 0) return;
+
+            // Remove existing "load more" sentinel if present
+            const sentinel = document.getElementById('policyLoadMore');
+            if (sentinel) sentinel.remove();
+
+            const fragment = document.createDocumentFragment();
+            const temp = document.createElement('div');
+            temp.innerHTML = nextBatch.map(buildPolicyItemHTML).join('');
+            while (temp.firstChild) fragment.appendChild(temp.firstChild);
+
+            policiesRenderedCount += nextBatch.length;
+
+            // Add a "load more" sentinel if there are still more
+            if (policiesRenderedCount < currentFilteredPolicies.length) {
+                const loadMore = document.createElement('li');
+                loadMore.id = 'policyLoadMore';
+                loadMore.className = 'policy-load-more';
+                loadMore.textContent = `Show more (${currentFilteredPolicies.length - policiesRenderedCount} remaining)`;
+                loadMore.onclick = function() { renderPolicyBatch(); };
+                fragment.appendChild(loadMore);
+            }
+
+            policiesList.appendChild(fragment);
+
+            // Update count text
+            document.getElementById('policiesCount').textContent =
+                `Showing ${policiesRenderedCount} of ${currentFilteredPolicies.length} policies` +
+                (currentFilteredPolicies.length < policies.length ? ` (${policies.length} total)` : '');
+        }
+
+        // Render policies (paginated: first batch only, scroll or click for more)
         function renderPolicies() {
             const policiesList = document.getElementById('policiesList');
 
@@ -1509,71 +1689,22 @@
                 filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
             }
 
-            // Sort: Clicked policies first (by clicks desc), then unclicked by Late Date (newest first)
-            filtered.sort((a, b) => {
-                const aHasClicks = (a.clicks || 0) > 0;
-                const bHasClicks = (b.clicks || 0) > 0;
+            // Sort using shared comparator
+            filtered.sort(policySort);
 
-                // If one has clicks and other doesn't, clicked comes first
-                if (aHasClicks && !bHasClicks) return -1;
-                if (!aHasClicks && bHasClicks) return 1;
-
-                // Both have clicks or both don't have clicks
-                if (aHasClicks && bHasClicks) {
-                    // Both clicked: sort by clicks descending
-                    return (b.clicks || 0) - (a.clicks || 0);
-                } else {
-                    // Both unclicked: sort by date descending
-                    const dateA = parseLateDate(a.lateDate);
-                    const dateB = parseLateDate(b.lateDate);
-                    return dateB - dateA;
-                }
-            });
-
-            // Update count
-            document.getElementById('policiesCount').textContent = `Showing ${filtered.length} of ${policies.length} policies`;
+            // Cache for pagination
+            currentFilteredPolicies = filtered;
+            policiesRenderedCount = 0;
 
             if (filtered.length === 0) {
                 policiesList.innerHTML = '<div class="empty-state">No policies found</div>';
+                document.getElementById('policiesCount').textContent = `0 of ${policies.length} policies`;
                 return;
             }
 
-            policiesList.innerHTML = filtered.map(policy => {
-                const isNew = policy.isNew && policy.clicks === 0;
-                return `
-                <li class="policy-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
-                    <div class="policy-info">
-                        <div class="policy-title">
-                            ${policy.title}
-                            ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
-                        </div>
-                        ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${policy.docNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
-                            ${policy.docNum && policy.version ? ' • ' : ''}
-                            ${policy.version ? `${policy.version}` : ''}
-                            ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
-                            ${policy.docType ? `${policy.docType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
-                            ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
-                            ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
-                            ${policy.modificationType ? `${policy.modificationType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
-                            ${policy.writtenBy && policy.owner ? ' • ' : ''}
-                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
-                            ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
-                            ${policy.clicks ? `${policy.clicks} clicks` : ''}
-                        </div>
-                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
-                    </div>
-                    <span class="external-icon">↗</span>
-                </li>
-            `;
-            }).join('');
+            // Clear and render first batch
+            policiesList.innerHTML = '';
+            renderPolicyBatch();
         }
 
         // Populate filter dropdowns with unique values
@@ -1720,21 +1851,7 @@
             });
 
             // Sort policies: Clicked first (by clicks), then unclicked by date
-            const sortedPolicies = [...filteredPolicies].sort((a, b) => {
-                const aHasClicks = (a.clicks || 0) > 0;
-                const bHasClicks = (b.clicks || 0) > 0;
-
-                if (aHasClicks && !bHasClicks) return -1;
-                if (!aHasClicks && bHasClicks) return 1;
-
-                if (aHasClicks && bHasClicks) {
-                    return (b.clicks || 0) - (a.clicks || 0);
-                } else {
-                    const dateA = parseLateDate(a.lateDate);
-                    const dateB = parseLateDate(b.lateDate);
-                    return dateB - dateA;
-                }
-            });
+            const sortedPolicies = [...filteredPolicies].sort(policySort);
 
             // Show/hide sections based on results
             if (sortedLinks.length === 0 && sortedPolicies.length === 0) {
@@ -1970,6 +2087,7 @@
         }
 
         // Open feature modal
+        let policyObserver = null;
         function openFeature(feature) {
             if (feature === 'policies') {
                 // Restore the saved folder filter before rendering
@@ -1978,6 +2096,29 @@
                 renderPolicies();
                 toggleFilterClearButtons();
                 document.getElementById('policiesModal').classList.add('active');
+
+                // Set up IntersectionObserver to auto-load more policies on scroll
+                if (policyObserver) policyObserver.disconnect();
+                policyObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && policiesRenderedCount < currentFilteredPolicies.length) {
+                            renderPolicyBatch();
+                        }
+                    });
+                }, { root: document.querySelector('#policiesModal .modal-body'), rootMargin: '200px' });
+
+                // Observe the load-more sentinel if it exists
+                const sentinel = document.getElementById('policyLoadMore');
+                if (sentinel) policyObserver.observe(sentinel);
+
+                // Re-observe after each batch render (MutationObserver on policiesList)
+                const listEl = document.getElementById('policiesList');
+                const mutObs = new MutationObserver(() => {
+                    const s = document.getElementById('policyLoadMore');
+                    if (s && policyObserver) policyObserver.observe(s);
+                });
+                mutObs.observe(listEl, { childList: true });
+
             } else if (feature === 'search') {
                 openSearch();
             }
@@ -2140,6 +2281,159 @@
         // Safe HTML escaping for note previews
         function htmlEsc(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ── Drag & Drop: Drop INTO the app to create a link ─────────────
+        (function() {
+            let dragCounter = 0; // track nested dragenter/dragleave
+            const overlay = document.getElementById('dropOverlay');
+
+            document.addEventListener('dragenter', function(e) {
+                // Only show for external drags (not our own tile drags)
+                if (e.dataTransfer.types.includes('text/uri-list') ||
+                    e.dataTransfer.types.includes('text/plain') ||
+                    e.dataTransfer.types.includes('text/html')) {
+                    // Ignore if the drag originated from our own tiles
+                    if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
+                    dragCounter++;
+                    if (dragCounter === 1) {
+                        overlay.classList.add('active');
+                    }
+                }
+            });
+
+            document.addEventListener('dragleave', function(e) {
+                dragCounter--;
+                if (dragCounter <= 0) {
+                    dragCounter = 0;
+                    overlay.classList.remove('active');
+                }
+            });
+
+            document.addEventListener('dragover', function(e) {
+                if (overlay.classList.contains('active')) {
+                    e.preventDefault(); // allow drop
+                }
+            });
+
+            document.addEventListener('drop', function(e) {
+                dragCounter = 0;
+                overlay.classList.remove('active');
+
+                // If a modal is already open for something else, skip
+                if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
+
+                e.preventDefault();
+
+                // Try to extract a URL first
+                const uriList = e.dataTransfer.getData('text/uri-list');
+                const plainText = (e.dataTransfer.getData('text/plain') || '').trim();
+                const htmlData = e.dataTransfer.getData('text/html');
+
+                let droppedUrl = '';
+                let droppedName = '';
+
+                // Check URI list (browsers set this when dragging links)
+                if (uriList) {
+                    const firstUri = uriList.split('\n').find(line => !line.startsWith('#') && line.trim());
+                    if (firstUri) droppedUrl = firstUri.trim();
+                }
+
+                // Check plain text for URL
+                if (!droppedUrl && plainText && /^https?:\/\//i.test(plainText)) {
+                    droppedUrl = plainText;
+                }
+
+                // Try to extract link text from HTML
+                if (htmlData) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlData;
+                    const anchor = tempDiv.querySelector('a');
+                    if (anchor) {
+                        if (!droppedUrl && anchor.href) droppedUrl = anchor.href;
+                        if (anchor.textContent.trim()) droppedName = anchor.textContent.trim();
+                    }
+                }
+
+                // If no URL found, treat plain text as a name
+                if (!droppedUrl && plainText) {
+                    droppedName = plainText;
+                }
+
+                // Try to guess a name from the URL if we don't have one
+                if (droppedUrl && !droppedName) {
+                    try {
+                        const urlObj = new URL(droppedUrl);
+                        droppedName = urlObj.hostname.replace(/^www\./, '');
+                    } catch (err) {
+                        droppedName = '';
+                    }
+                }
+
+                // Open the add-link form pre-filled
+                renderLinkManager();
+                document.getElementById('settingsModal').classList.add('active');
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById('manageTab').classList.add('active');
+                document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
+                document.getElementById('addLinkForm').style.display = 'block';
+
+                document.getElementById('newLinkName').value = droppedName;
+                document.getElementById('newLinkUrl').value = droppedUrl;
+
+                // Focus the right field
+                setTimeout(() => {
+                    if (droppedUrl) {
+                        // URL is filled, let them edit the name
+                        document.getElementById('newLinkName').focus();
+                        document.getElementById('newLinkName').select();
+                    } else {
+                        // No URL, focus the URL field
+                        document.getElementById('newLinkUrl').focus();
+                    }
+                }, 100);
+            });
+        })();
+
+        // ── Drag & Drop: Drag tiles OUT to desktop as .url shortcut ──────
+        // Uses drag events on tile buttons to set text/uri-list data
+        // This lets users drag a tile to their desktop/file manager
+        function setupTileDragOut() {
+            document.querySelectorAll('#dashboard .tile[draggable="true"]').forEach(tile => {
+                tile.addEventListener('dragstart', function(e) {
+                    const url = tile.dataset.url;
+                    const name = tile.dataset.name || 'Link';
+                    if (!url) return;
+
+                    // Mark as internal drag so the drop overlay doesn't show
+                    e.dataTransfer.setData('application/x-launcher-tile', 'true');
+
+                    // Standard: browsers and OS handle text/uri-list for bookmark/shortcut creation
+                    e.dataTransfer.setData('text/uri-list', url);
+                    e.dataTransfer.setData('text/plain', url);
+
+                    // .url file format (Windows internet shortcut) — some file managers honor this
+                    const urlFileContent = `[InternetShortcut]\r\nURL=${url}\r\n`;
+                    e.dataTransfer.setData('text/x-moz-url', url + '\n' + name);
+
+                    e.dataTransfer.effectAllowed = 'copyLink';
+                });
+            });
+
+            // Logo drag-out: shares the app URL itself (set up once, not per render)
+            const logo = document.getElementById('headerLogo');
+            if (logo && !logo._dragBound) {
+                logo._dragBound = true;
+                logo.addEventListener('dragstart', function(e) {
+                    const appUrl = 'https://eorla-lab.github.io/launcher';
+                    e.dataTransfer.setData('application/x-launcher-tile', 'true');
+                    e.dataTransfer.setData('text/uri-list', appUrl);
+                    e.dataTransfer.setData('text/plain', appUrl);
+                    e.dataTransfer.setData('text/x-moz-url', appUrl + '\n' + 'EORLA Launcher');
+                    e.dataTransfer.effectAllowed = 'copyLink';
+                });
+            }
         }
 
         // ─────────────────────────────────────────────────────────
