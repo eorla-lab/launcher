@@ -1078,18 +1078,31 @@
 
                 <!-- Import/Export Tab -->
                 <div id="importExportTab" class="tab-content">
-                    <h3 style="margin-bottom: 12px;">Export Your Customizations</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px;">Download your custom links and click data as JSON.
-                        You can send this to the admin to update the default configuration.</p>
-                    <button class="btn btn-primary" onclick="exportData()">📥 Export as JSON</button>
+                    <h3 style="margin-bottom: 12px;">Layout</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Export tile layout. This code captures the order of your top links</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center;">
+                        <input type="text" id="layoutCodeDisplay" readonly style="flex: 1; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-family: monospace; background: #f9fafb; color: #374151;" placeholder="Click Generate to see your code">
+                        <button class="btn btn-primary" onclick="copyLayoutUrl()" title="Copy shareable link" style="padding: 10px 16px; white-space: nowrap;">Copy Link</button>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="layoutCodeInput" placeholder="Enter a layout code here" style="flex: 1; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
+                        <button class="btn btn-secondary" onclick="applyLayoutCode(document.getElementById('layoutCodeInput').value)" style="padding: 10px 16px; white-space: nowrap;">Apply Code</button>
+                    </div>
 
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
-                    <h3 style="margin-bottom: 12px;">Import Configuration</h3>
+                    <h3 style="margin-bottom: 12px;">Export</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Download your links to a file.
+                        You can send this to the admin to update the default configuration.</p>
+                    <button class="btn btn-primary" onclick="exportData()">Export as JSON</button>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                    <h3 style="margin-bottom: 12px;">Import</h3>
                     <p style="color: #6b7280; margin-bottom: 16px;">Import a JSON file to restore or update your links.
                     </p>
                     <input type="file" id="importFile" accept=".json" style="margin-bottom: 12px;">
-                    <button class="btn btn-secondary" onclick="importData()">📤 Import JSON</button>
+                    <button class="btn btn-secondary" onclick="importData()">Import JSON</button>
 
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
@@ -1176,6 +1189,7 @@
             loadUserData();
             renderDashboard();
             renderPolicies();
+            checkLayoutParam(); // Check for ?layout= URL parameter
         }
 
         // Load default data from JSON file
@@ -1549,7 +1563,7 @@
                 return `
                     <li class="link-manager-item">
                         <div class="link-manager-info">
-                            <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}<span class="link-manager-url">${link.clicks} clicks</span></div>
+                            <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} clicks</span></div>
                             
                             <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
@@ -2018,6 +2032,248 @@
             }
         }
 
+        // ── Layout Code System ────────────────────────────────────
+        // Factoradic encoding: stores the permutation "pick 8 ordered
+        // from N default links" using Lehmer codes, packed into a
+        // single BigInt and encoded in base62 (0-9 a-z A-Z).
+        // 10 characters supports up to 177 links in data.json.
+        //
+        // The reference list is defaultData.links in its original
+        // array order (stable — admin controls data.json ordering).
+
+        const LAYOUT_SLOTS = 8;
+        const CODE_LENGTH = 10;
+        const BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        function toBase62(bigint, length) {
+            const chars = [];
+            const base = 62n;
+            for (let i = 0; i < length; i++) {
+                chars.unshift(BASE62_CHARS[Number(bigint % base)]);
+                bigint = bigint / base;
+            }
+            return chars.join('');
+        }
+
+        function fromBase62(str) {
+            let result = 0n;
+            for (let i = 0; i < str.length; i++) {
+                const idx = BASE62_CHARS.indexOf(str[i]);
+                if (idx === -1) return -1n;
+                result = result * 62n + BigInt(idx);
+            }
+            return result;
+        }
+
+        // Encode: takes an array of data.json indices (positions in
+        // defaultData.links) and produces a factoradic-packed base62 string.
+        function encodeLayout(indices) {
+            const n = defaultData.links.length;
+            const slots = indices.slice(0, LAYOUT_SLOTS);
+
+            // Build Lehmer code: for each pick, record its position
+            // in the *remaining* list after previous picks are removed.
+            const available = Array.from({ length: n }, (_, i) => i);
+            const lehmer = [];
+            for (const idx of slots) {
+                const pos = available.indexOf(idx);
+                if (pos === -1) return null; // invalid index
+                lehmer.push(pos);
+                available.splice(pos, 1);
+            }
+
+            // Pack Lehmer digits into a single number using mixed-radix:
+            // lehmer[0] * (N-1)*(N-2)*...*(N-7)  +  lehmer[1] * (N-2)*...*(N-7)  + ...
+            let packed = 0n;
+            for (let i = 0; i < lehmer.length; i++) {
+                packed = packed * BigInt(n - i) + BigInt(lehmer[i]);
+            }
+
+            return toBase62(packed, CODE_LENGTH);
+        }
+
+        // Decode: takes a base62 string and returns an array of data.json indices.
+        function decodeLayout(code) {
+            if (!code || code.length !== CODE_LENGTH) return [];
+
+            const packed = fromBase62(code);
+            if (packed < 0n) return [];
+
+            const n = defaultData.links.length;
+            if (n === 0) return [];
+
+            // Unpack Lehmer code using mixed-radix decomposition (reverse order)
+            let remainder = packed;
+            const lehmer = [];
+            for (let i = LAYOUT_SLOTS - 1; i >= 0; i--) {
+                const radix = BigInt(n - i);
+                lehmer.unshift(Number(remainder % radix));
+                remainder = remainder / radix;
+            }
+
+            // If remainder > 0, code is out of range (invalid)
+            if (remainder > 0n) return [];
+
+            // Reconstruct indices from Lehmer code
+            const available = Array.from({ length: n }, (_, i) => i);
+            const indices = [];
+            for (const pos of lehmer) {
+                if (pos >= available.length) return []; // corrupt code
+                indices.push(available[pos]);
+                available.splice(pos, 1);
+            }
+
+            return indices;
+        }
+
+        // Convert between link IDs and data.json indices
+        function linkIdToIndex(id) {
+            return defaultData.links.findIndex(l => l.id === id);
+        }
+
+        function indexToLinkId(idx) {
+            return defaultData.links[idx]?.id;
+        }
+
+        function generateLayoutCode() {
+            // Get default (non-custom) links sorted by current ranking
+            const defaultLinks = links
+                .filter(l => !l.isCustom)
+                .sort((a, b) => {
+                    const aIsNew = a.isNew && a.clicks === 0;
+                    const bIsNew = b.isNew && b.clicks === 0;
+                    if (aIsNew && !bIsNew) return -1;
+                    if (!aIsNew && bIsNew) return 1;
+                    return b.clicks - a.clicks;
+                });
+
+            // Map top 8 link IDs to their index in defaultData.links
+            const top = defaultLinks.slice(0, LAYOUT_SLOTS);
+            const indices = top.map(l => linkIdToIndex(l.id)).filter(i => i !== -1);
+
+            if (indices.length === 0) {
+                alert('No default links to encode.');
+                return '';
+            }
+
+            // Pad to 8 slots if fewer (use first available unused indices)
+            const used = new Set(indices);
+            let filler = 0;
+            while (indices.length < LAYOUT_SLOTS && filler < defaultData.links.length) {
+                if (!used.has(filler)) {
+                    indices.push(filler);
+                    used.add(filler);
+                }
+                filler++;
+            }
+
+            const code = encodeLayout(indices);
+            if (!code) {
+                alert('Error generating layout code.');
+                return '';
+            }
+
+            document.getElementById('layoutCodeDisplay').value = code;
+            return code;
+        }
+
+        function getLayoutUrl() {
+            const code = document.getElementById('layoutCodeDisplay').value || generateLayoutCode();
+            return window.location.origin + window.location.pathname + '?layout=' + code;
+        }
+
+        function copyLayoutUrl() {
+            const code = document.getElementById('layoutCodeDisplay').value;
+            if (!code) generateLayoutCode();
+            const url = getLayoutUrl();
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target.closest('button');
+                const prev = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => { btn.textContent = prev; }, 1500);
+            });
+        }
+
+        function applyLayoutCode(code) {
+            if (!code || !code.trim()) {
+                alert('Please enter a layout code.');
+                return;
+            }
+
+            code = code.trim();
+
+            if (code.length !== CODE_LENGTH) {
+                alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
+                return;
+            }
+
+            // Decode the factoradic base62 code into data.json indices
+            const indices = decodeLayout(code);
+
+            if (indices.length === 0) {
+                alert('Invalid layout code. Please check and try again.');
+                return;
+            }
+
+            // Convert indices to link IDs
+            const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
+
+            if (linkIds.length === 0) {
+                alert('Could not resolve any links from this code. The code may be from a different version.');
+                return;
+            }
+
+            // Build a name preview
+            const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
+                const dl = defaultData.links.find(l => l.id === id);
+                return dl ? dl.name : '(#' + id + ')';
+            });
+
+            const confirmed = confirm(
+                'Apply this layout?\n\n' +
+                'Your top tiles will become:\n' +
+                previewNames.map((n, i) => (i + 1) + '. ' + n).join('\n') +
+                '\n\nThis will override your current tile sorting for default links. Custom links are not affected.'
+            );
+
+            if (!confirmed) return;
+
+            // Apply: assign descending synthetic click counts
+            const baseClicks = linkIds.length * 100;
+
+            links.forEach(link => {
+                if (link.isCustom) return;
+
+                const rankIndex = linkIds.indexOf(link.id);
+                if (rankIndex !== -1) {
+                    link.clicks = baseClicks - (rankIndex * 100);
+                    link.isNew = false;
+                } else {
+                    link.clicks = 0;
+                }
+            });
+
+            saveUserData();
+            renderDashboard();
+            renderLinkManager();
+
+            // Clean the URL if we got here from a ?layout= param
+            if (window.location.search.includes('layout=')) {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+
+            alert('Layout applied!');
+        }
+
+        // Check for ?layout= URL parameter on load
+        function checkLayoutParam() {
+            const params = new URLSearchParams(window.location.search);
+            const layoutCode = params.get('layout');
+            if (layoutCode) {
+                setTimeout(() => applyLayoutCode(layoutCode), 300);
+            }
+        }
+
         // Export data
         function exportData() {
             const dataStr = JSON.stringify({ links }, null, 2);
@@ -2481,6 +2737,7 @@
                 document.getElementById('manageTab').classList.add('active');
             } else if (tabName === 'import-export') {
                 document.getElementById('importExportTab').classList.add('active');
+                generateLayoutCode();
             } else if (tabName === 'changelog') {
                 document.getElementById('changelogTab').classList.add('active');
             }
