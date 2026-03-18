@@ -257,6 +257,7 @@
         .add-btn .plus {
     position: relative;
     top: -2px; /* move the + up inside the button */
+    top: -1px; /* move the + up inside the button */
 }
         
 
@@ -793,6 +794,8 @@
 
         .tab-content.active {
             display: block;
+            min-height: 0;
+            height: 800px;
         }
 
         /* Settings modal uses flex layout so tabs stay fixed and content scrolls */
@@ -800,6 +803,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            max-height: 80vh; /* or max-height: 80vh; */
         }
 
         #settingsModal .tabs {
@@ -809,7 +813,7 @@
         #settingsModal .tab-content.active {
             flex: 1;
             overflow-y: auto;
-            min-height: 0;
+            height: 400px;
         }
 
         @media (max-width: 640px) {
@@ -1090,6 +1094,8 @@
 
                 <!-- Manage Links Tab -->
                 <div id="manageTab" class="tab-content active">
+                    <div id="manageTabContent" style="height: 800px;">
+
                     <button class="btn btn-primary" onclick="showAddLinkForm()" style="margin-bottom: 20px;">+ Add
                         Custom Link</button>
 
@@ -1135,10 +1141,12 @@
 
                     <h3 style="margin-bottom: 12px;">Your Links</h3>
                     <ul class="link-manager" id="linkManager"></ul>
+                    </div>
                 </div>
 
                 <!-- Import/Export Tab -->
                 <div id="importExportTab" class="tab-content">
+                    <div id="importExportTabContent" style="height: 800px;">
                     <h3 style="margin-bottom: 12px;">Layout</h3>
                     <p style="color: #6b7280; margin-bottom: 16px;">Export tile layout. This code captures the order of your top links</p>
                     <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center;">
@@ -1153,8 +1161,8 @@
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
                     <h3 style="margin-bottom: 12px;">Export</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px;">Download your links as data.json for GitHub comparison.</p>
-                    <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">Export as data.json</button>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Download your links to a JSON file that can be shared.</p>
+                    <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">Export Links</button>
 
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
@@ -1166,32 +1174,24 @@
                     <h3 style="margin-bottom: 12px;">Reset</h3>
                     <p style="color: #6b7280; margin-bottom: 16px;">Reset to default links and clear all click data.</p>
                     <button class="btn btn-danger" onclick="resetToDefaults()" style="width: 100%;">🔄 Reset to Defaults</button>
+                    </div>
                 </div>
 
                 <!-- Changelog Tab -->
                 <div id="changelogTab" class="tab-content">
-                    <div id="changelogContent">
+                    <div id="changelogContent" style="height: 800px;">
                         <div style="margin-bottom: 24px;">
-                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1.0</h3>
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-                                <li>Paginated policy loading for better performance (4000+ policies)</li>
                                 <li>Drag and drop URLs or text into the app to create links</li>
                                 <li>Drag tiles out of the app to bookmarks, desktop, or other apps</li>
-                                <li>Draggable logo to share the app URL</li>
-                                <li>Layout codes: 10-character shareable codes to replicate tile arrangements</li>
-                                <li>Layout codes can be shared as URLs with ?layout= parameter</li>
                                 <li>Right-click context menu on tiles to reset clicks or remove custom links</li>
-                                <li>Drag and drop JSON file import (replaces file picker)</li>
-                                <li>Export now outputs data.json format for GitHub comparison</li>
-                                <li>Index date now pulled from most recent "Last Approbation" in CSV</li>
-                                <li>Icon display improvements in Manage Links</li>
-                                <li>Pluralization fix for click counts</li>
-                                <li>Manage Links list sorted by click count</li>
+                                <li>Layout codes: save and apply your tile arrangement between different workstations</li>
                             </ul>
                         </div>
                         <div style="margin-bottom: 24px;">
-                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.0.0</h3>
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.0</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">February 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
                                 <li>Initial release</li>

@@ -5,8 +5,7 @@
       "name": "EORLA Portal",
       "url": "https://theottawahospital.sharepoint.com/sites/eorlaportal",
       "icon": "./icons/eorla.jpeg",
-      "color": "white",
-      "isNew": false
+      "color": "white"
     },
     {
       "id": 2,
@@ -17,16 +16,14 @@
       "aliases": [
         "mail",
         "email"
-      ],
-      "isNew": false
+      ]
     },
     {
       "id": 3,
       "name": "TOHHUB",
       "url": "https://theottawahospital.sharepoint.com/sites/TOHHUB",
       "icon": "./icons/TOH_HUB.ico",
-      "color": "white",
-      "isNew": false
+      "color": "white"
     },
     {
       "id": 4,
@@ -34,7 +31,6 @@
       "url": "https://theottawahospital.sharepoint.com/sites/apportal",
       "icon": "AP",
       "color": "#134030",
-      "isNew": false,
       "aliases": [
         "AP Portal",
         "AP",
@@ -48,48 +44,42 @@
       "name": "Atlas of Pathology",
       "url": "https://www.pathologyatlas.ca/",
       "icon": "./icons/pathologyatlas.png",
-      "color": "#0c056d",
-      "isNew": false
+      "color": "#0c056d"
     },
     {
       "id": 6,
       "name": "UKG",
       "url": "https://ottawahospital-sso.prd.mykronos.com/wfd/home",
       "icon": "./icons/ukg.png",
-      "color": "#13352c",
-      "isNew": false
+      "color": "#13352c"
     },
     {
       "id": 7,
       "name": "Vacation Planners",
       "url": "https://theottawahospital.sharepoint.com/sites/eorlaportal/EORLA%20Vacation%20Planners/",
       "icon": "🏝️",
-      "color": "yellow",
-      "isNew": false
+      "color": "yellow"
     },
     {
       "id": 8,
       "name": "Omni-Assistant",
       "url": "https://eorla.omni-assistant.net/lab/",
       "icon": "./icons/omni.png",
-      "color": "white",
-      "isNew": false
+      "color": "white"
     },
     {
       "id": 9,
       "name": "Surg Path Schedule",
       "url": "https://theottawahospital-my.sharepoint.com/:x:/r/personal/jstinson_eorla_ca/_layouts/15/doc2.aspx?sourcedoc=%7BFF35DE9D-6844-4DA3-B4E8-5A732744B27F%7D&file=Surgical%20Pathology%20Schedule.xlsx",
       "icon": "📆",
-      "color": "white",
-      "isNew": false
+      "color": "white"
     },
     {
       "id": 10,
       "name": "CAP Protocols",
       "url": "https://www.cap.org/protocols-and-guidelines/cancer-reporting-tools/cancer-protocol-templates",
       "icon": "./icons/cap.png",
-      "color": "white",
-      "isNew": false
+      "color": "white"
     },
     {
       "id": 11,
@@ -97,7 +87,6 @@
       "url": "https://documents.cap.org/protocols/Breast.Invasive_4.10.0.0.REL.CAPCP.pdf#page=15",
       "icon": "🔗",
       "color": "blue",
-      "isNew": false,
       "aliases": [
         "staging"
       ]
@@ -108,7 +97,6 @@
       "url": "https://theottawahospital.sharepoint.com/sites/SURGPATH768",
       "icon": "S",
       "color": "blue",
-      "isNew": false,
       "aliases": [
         "surg path",
         "surg",
@@ -121,23 +109,21 @@
       "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/",
       "icon": "HS",
       "color": "red",
-      "isNew": false,
       "aliases": [
         "histo",
         "portal"
       ]
     },
-      {
-        "id": 14,
-        "name": "Cytology Portal",
-        "url": "https://theottawahospital.sharepoint.com/sites/CytotechnologistsandCytotechnicians",
-        "icon": "CY",
-        "color": "blue",
-        "isNew": false,
-        "aliases": [
-          "cyto",
-          "portal"
-        ]
+    {
+      "id": 14,
+      "name": "Cytology Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/CytotechnologistsandCytotechnicians",
+      "icon": "CY",
+      "color": "blue",
+      "aliases": [
+        "cyto",
+        "portal"
+      ]
     },
     {
       "id": 15,
@@ -145,304 +131,278 @@
       "url": "https://theottawahospital.sharepoint.com/sites/ihctechs",
       "icon": "IHC",
       "color": "green",
-      "isNew": false,
       "aliases": [
         "immuno",
         "portal",
         "ihc",
         "immunohistochemistry"
       ]
-  },
-  {
-    "id": 16,
-    "name": "CPSO Search",
-    "url": "https://register.cpso.on.ca",
-    "icon": "./icons/CPSO.png",
-    "color": "#00838e",
-    "isNew": false,
-    "aliases": [
-      "doctor",
-      "search",
-      "doctor search",
-      "registry"
-    ]
-},
-{
-  "id": 17,
-  "name": "CMQ Search",
-  "url": "https://www.cmq.org/en/directory",
-  "icon": "./icons/cmq.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "doctor",
-    "search",
-    "doctor search",
-    "registry"
+    },
+    {
+      "id": 16,
+      "name": "CPSO Search",
+      "url": "https://register.cpso.on.ca",
+      "icon": "./icons/CPSO.png",
+      "color": "#00838e",
+      "aliases": [
+        "doctor",
+        "search",
+        "doctor search",
+        "registry"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "CMQ Search",
+      "url": "https://www.cmq.org/en/directory",
+      "icon": "./icons/cmq.png",
+      "color": "white",
+      "aliases": [
+        "doctor",
+        "search",
+        "doctor search",
+        "registry"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "EORLA Helpdesk",
+      "url": "https://eorla-helpdesk.atlassian.net/servicedesk/customer/portal/2",
+      "icon": "./icons/eorla.jpeg",
+      "color": "white",
+      "aliases": [
+        "eorla",
+        "ticket",
+        "help",
+        "helpdesk"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Block Photos",
+      "url": "https://theottawahospital.sharepoint.com/sites/blocks",
+      "icon": "B",
+      "color": "blue",
+      "aliases": [
+        "blocks",
+        "photos"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "SDS Lookup",
+      "url": "https://chemmanagement.ehs.com/9/97a67b67-9675-44c3-a3b9-92ed1b124fd4/ebinder",
+      "icon": "./icons/TOH_MSDSOnline.png",
+      "color": "white",
+      "aliases": [
+        "Chemical",
+        "MSDS",
+        "SDS"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "ServiceNow",
+      "url": "https://toh.service-now.com/sp",
+      "icon": "./icons/TOH_ServiceNow.ico",
+      "color": "white",
+      "aliases": [
+        "service",
+        "ticket",
+        "help",
+        "helpdesk"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Histology",
+      "url": "https://teams.microsoft.com/l/channel/19:P3MsV_iy_Z0eMt1TYr6FTSHPQDC5SSajxho263xh4n41%40thread.tacv2/General?groupId=588f98ce-a13c-4e4c-839f-a339bdf864bc&web=1",
+      "icon": "./icons/teams.png",
+      "color": "white",
+      "aliases": [
+        "Teams",
+        "histology",
+        "histo",
+        "Histology teams"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Engage",
+      "url": "https://engage.cloud.microsoft/main/org/toh.ca/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMDgxODM1OTkxMDQifQ/all",
+      "icon": "./icons/engage.png",
+      "color": "white",
+      "aliases": [
+        "department",
+        "interdepartmental",
+        "AP",
+        "Viva",
+        "Communication"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Citrix MyApps",
+      "url": "https://myapps.ottawahospital.on.ca/",
+      "icon": "./icons/citrix.png",
+      "color": "white",
+      "aliases": [
+        "myapps",
+        "my",
+        "apps",
+        "elm",
+        "iexpense",
+        "oracle",
+        "hris",
+        "epic"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "OneDrive",
+      "url": "https://theottawahospital-my.sharepoint.com/",
+      "icon": "./icons/onedrive.png",
+      "color": "white",
+      "aliases": [
+        "file",
+        "one",
+        "drive"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "CAP Protocol Link List",
+      "url": "https://theottawahospital-my.sharepoint.com/:l:/g/personal/jpelley_eorla_ca/JABSKZLtkAH6QJp9PFRvJ5VqASauUHNLgbHPu1qMAhLwsXI?e=kGM7WS",
+      "icon": "./icons/lists.png",
+      "color": "white",
+      "aliases": [
+        "CAP",
+        "Cancer",
+        "pT",
+        "protocol"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Histo Huddle Notes",
+      "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=MVTRw0&CID=dff366ae%2D9696%2D4963%2Da852%2Df1be0b73c76d&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FHistologyStaff%2FShared%20Documents%2FGeneral%2FHuddle%20Notes",
+      "icon": "H",
+      "color": "red",
+      "aliases": [
+        "histo",
+        "histology",
+        "huddle",
+        "histo huddle"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Surgpath Huddle Minutes",
+      "url": "https://theottawahospital.sharepoint.com/sites/SURGPATH768/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=FYCrfQ&CID=9d5b71f8%2D496d%2D412f%2Dae84%2D3cff4983b7c4&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FSURGPATH768%2FShared%20Documents%2FSurgical%20Pathology%20Huddle",
+      "icon": "S",
+      "color": "blue",
+      "aliases": [
+        "surg",
+        "path",
+        "huddle",
+        "surg path huddle",
+        "path huddle",
+        "surgpath huddle",
+        "minutes"
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Microtomy QC Charts",
+      "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=hFrCf4&CID=6a3e0838%2D4a40%2D4cf3%2Dbcf7%2D1ac086b42d2a&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FHistologyStaff%2FShared%20Documents%2FGeneral%2FQuality%20Control%2F2026%2FMicrotomy%20QC%20Charts%20%2D%202026",
+      "icon": "QC",
+      "color": "green",
+      "aliases": [
+        "temperature",
+        "chart",
+        "histo",
+        "microtomy",
+        "microtome"
+      ]
+    },
+    {
+      "id": 30,
+      "name": "HRIS",
+      "url": "https://ohhcmweb01.civic1.ottawahospital.on.ca:1443/HRPRD/signon.html",
+      "icon": "./icons/TOH_HRIS.jpeg",
+      "color": "white",
+      "aliases": [
+        "paystub",
+        "HR",
+        "oracle",
+        "pay",
+        "peoplesoft"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "SLS",
+      "url": "https://rl6c.rlsolutions.com/TheOttawaHospital_Prod",
+      "icon": "SLS",
+      "color": "red",
+      "aliases": [
+        "patient",
+        "psls",
+        "incident",
+        "report"
+      ]
+    },
+    {
+      "id": 32,
+      "name": "HRIS (external)",
+      "url": "https://myhris.ottawahospital.on.ca/",
+      "icon": "./icons/TOH_HRIS.jpeg",
+      "color": "white",
+      "aliases": [
+        "paystub",
+        "HR",
+        "oracle",
+        "pay",
+        "peoplesoft",
+        "external"
+      ]
+    },
+    {
+      "id": 33,
+      "name": "SharePoint",
+      "url": "https://theottawahospital.sharepoint.com/_layouts/15/sharepoint.aspx",
+      "icon": "./icons/sharepoint.png",
+      "color": "white",
+      "aliases": [
+        "share",
+        "site"
+      ]
+    },
+    {
+      "id": 34,
+      "name": "QC Stock Tissue Inventory",
+      "url": "https://theottawahospital.sharepoint.com/:x:/r/sites/ihctechs/_layouts/15/Doc.aspx?sourcedoc=%7B43CB0EC4-CD39-4239-997A-38F6B2AA0827%7D&file=QC%20Stock%20Tissue%20Inventory.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1",
+      "icon": "QC",
+      "color": "white",
+      "aliases": [
+        "QC",
+        "control",
+        "ihc tissue",
+        "tissue"
+      ]
+    },
+    {
+      "id": 35,
+      "name": "ELM",
+      "url": "https://myelm.ottawahospital.on.ca:1443/psp/ELMPRD/?cmd=login&languageCd=ENG&",
+      "icon": "./icons/TOH_ELM.png",
+      "color": "white",
+      "aliases": [
+        "learning",
+        "electronic",
+        "module",
+        "tissue"
+      ]
+    }
   ]
-},
-{
-  "id": 18,
-  "name": "EORLA Helpdesk",
-  "url": "https://eorla-helpdesk.atlassian.net/servicedesk/customer/portal/2",
-  "icon": "./icons/eorla.jpeg",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "eorla",
-    "ticket",
-    "help",
-    "helpdesk"
-  ]
-},
-{
-  "id": 19,
-  "name": "Block Photos",
-  "url": "https://theottawahospital.sharepoint.com/sites/blocks",
-  "icon": "B",
-  "color": "blue",
-  "isNew": false,
-  "aliases": [
-    "blocks",
-    "photos"
-  ]
-},
-{
-  "id": 20,
-  "name": "SDS Lookup",
-  "url": "https://chemmanagement.ehs.com/9/97a67b67-9675-44c3-a3b9-92ed1b124fd4/ebinder",
-  "icon": "./icons/TOH_MSDSOnline.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "Chemical",
-    "MSDS",
-    "SDS"
-  ]
-},
-{
-  "id": 21,
-  "name": "ServiceNow",
-  "url": "https://toh.service-now.com/sp",
-  "icon": "./icons/TOH_ServiceNow.ico",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "service",
-    "ticket",
-    "help",
-    "helpdesk"
-  ]
-},
-{
-  "id": 22,
-  "name": "Histology",
-  "url": "https://teams.microsoft.com/l/channel/19:P3MsV_iy_Z0eMt1TYr6FTSHPQDC5SSajxho263xh4n41%40thread.tacv2/General?groupId=588f98ce-a13c-4e4c-839f-a339bdf864bc",
-  "icon": "./icons/teams.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "Teams",
-    "histology",
-    "histo",
-    "Histology teams"
-  ]
-},
-{
-  "id": 23,
-  "name": "Engage",
-  "url": "https://engage.cloud.microsoft/main/org/toh.ca/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMDgxODM1OTkxMDQifQ/all",
-  "icon": "./icons/engage.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "department",
-    "interdepartmental",
-    "AP",
-    "Viva",
-    "Communication"
-  ]
-},
-{
-  "id": 24,
-  "name": "Citrix MyApps",
-  "url": "https://myapps.ottawahospital.on.ca/",
-  "icon": "./icons/citrix.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "myapps",
-    "my",
-    "apps",
-    "elm",
-    "iexpense",
-    "oracle",
-    "hris",
-    "epic"
-  ]
-},
-{
-  "id": 25,
-  "name": "OneDrive",
-  "url": "https://theottawahospital-my.sharepoint.com/",
-  "icon": "./icons/onedrive.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "file",
-    "one",
-    "drive"
-  ]
-},
-{
-  "id": 26,
-  "name": "CAP Protocol Link List",
-  "url": "https://theottawahospital-my.sharepoint.com/:l:/g/personal/jpelley_eorla_ca/JABSKZLtkAH6QJp9PFRvJ5VqASauUHNLgbHPu1qMAhLwsXI?e=kGM7WS",
-  "icon": "./icons/lists.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "CAP",
-    "Cancer",
-    "pT",
-    "protocol"
-  ]
-},
-{
-  "id": 27,
-  "name": "Huddle Notes",
-  "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=MVTRw0&CID=dff366ae%2D9696%2D4963%2Da852%2Df1be0b73c76d&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FHistologyStaff%2FShared%20Documents%2FGeneral%2FHuddle%20Notes",
-  "icon": "H",
-  "color": "red",
-  "isNew": false,
-  "aliases": [
-    "histo",
-    "histology",
-    "huddle",
-    "histo huddle"
-  ]
-},
-{
-  "id": 28,
-  "name": "Huddle Minutes",
-  "url": "https://theottawahospital.sharepoint.com/sites/SURGPATH768/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=FYCrfQ&CID=9d5b71f8%2D496d%2D412f%2Dae84%2D3cff4983b7c4&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FSURGPATH768%2FShared%20Documents%2FSurgical%20Pathology%20Huddle",
-  "icon": "S",
-  "color": "blue",
-  "isNew": false,
-  "aliases": [
-    "surg",
-    "path",
-    "huddle",
-    "surg path huddle",
-    "path huddle",
-    "surgpath huddle",
-    "minutes"
-]
-},
-{
-  "id": 29,
-  "name": "Microtomy QC Charts",
-  "url": "https://theottawahospital.sharepoint.com/sites/HistologyStaff/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=hFrCf4&CID=6a3e0838%2D4a40%2D4cf3%2Dbcf7%2D1ac086b42d2a&FolderCTID=0x012000649BB5D0FC8F1644AE84E5EF58D10157&id=%2Fsites%2FHistologyStaff%2FShared%20Documents%2FGeneral%2FQuality%20Control%2F2026%2FMicrotomy%20QC%20Charts%20%2D%202026",
-  "icon": "QC",
-  "color": "green",
-  "isNew": false,
-  "aliases": [
-    "temperature",
-    "chart",
-    "histo",
-    "microtomy",
-    "microtome"
-]
-},
-{
-  "id": 30,
-  "name": "HRIS",
-  "url": "https://ohhcmweb01.civic1.ottawahospital.on.ca:1443/HRPRD/signon.html",
-  "icon": "./icons/TOH_HRIS.jpeg",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "paystub",
-    "HR",
-    "oracle",
-    "pay",
-    "peoplesoft"
-]
-},
-{
-  "id": 31,
-  "name": "SLS",
-  "url": "https://rl6c.rlsolutions.com/TheOttawaHospital_Prod",
-  "icon": "SLS",
-  "color": "red",
-  "isNew": false,
-  "aliases": [
-    "patient",
-    "psls",
-    "incident",
-    "report"
-]
-},
-{
-  "id": 32,
-  "name": "HRIS (external)",
-  "url": "https://myhris.ottawahospital.on.ca/",
-  "icon": "./icons/TOH_HRIS.jpeg",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "paystub",
-    "HR",
-    "oracle",
-    "pay",
-    "peoplesoft",
-    "external"
-]
-},
-{
-  "id": 33,
-  "name": "SharePoint",
-  "url": "https://theottawahospital.sharepoint.com/_layouts/15/sharepoint.aspx",
-  "icon": "./icons/sharepoint.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "share",
-    "site"
-]
-},
-{
-  "id": 34,
-  "name": "QC Stock Tissue Inventory",
-  "url": "https://theottawahospital.sharepoint.com/:x:/r/sites/ihctechs/_layouts/15/Doc.aspx?sourcedoc=%7B43CB0EC4-CD39-4239-997A-38F6B2AA0827%7D&file=QC%20Stock%20Tissue%20Inventory.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1",
-  "icon": "QC",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "QC",
-    "control",
-    "ihc tissue",
-    "tissue"
-]
-},
-{
-  "id": 35,
-  "name": "ELM",
-  "url": "https://myelm.ottawahospital.on.ca:1443/psp/ELMPRD/?cmd=login&languageCd=ENG&",
-  "icon": "./icons/TOH_ELM.png",
-  "color": "white",
-  "isNew": false,
-  "aliases": [
-    "learning",
-    "electronic",
-    "module",
-    "tissue"
-]
-}
-], 
-  "_comments": {
-    "icon_options": "Use emoji ('🚀'), image URL ('https://example.com/icon.png'), or local path ('/icons/custom.png')",
-    "color_options": "Use preset names ('blue', 'green', 'purple', 'orange', 'red', 'indigo', 'pink', 'teal') or hex codes ('#3b82f6')",
-    "isNew": "Set to true to show NEW badge until first click"
-  }
 }
