@@ -604,6 +604,47 @@
             color: #6b7280;
         }
 
+        mark.search-hl {
+            background: #fef08a;
+            color: inherit;
+            border-radius: 2px;
+            padding: 0 1px;
+            font-weight: inherit;
+        }
+
+        .policy-details {
+            display: none;
+            margin-top: 6px;
+        }
+
+        .policy-details.policy-details--open {
+            display: block;
+        }
+
+        .policy-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .policy-expand-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            line-height: 1;
+        }
+
+        .policy-expand-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
         /* Link Management */
         .link-manager {
             list-style: none;
@@ -1221,6 +1262,20 @@
         let currentFilteredPolicies = []; // cached sorted/filtered list
         let policiesRenderedCount = 0; // how many are currently in the DOM
 
+        // Highlight search term occurrences in text (returns HTML string)
+        function highlightText(text, term) {
+            if (!term || !text) return text || '';
+            const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="search-hl">$1</mark>');
+        }
+
+        // Toggle policy details section open/closed
+        function togglePolicyDetails(btn) {
+            const details = btn.closest('.policy-item').querySelector('.policy-details');
+            const expanded = details.classList.toggle('policy-details--open');
+            btn.textContent = expanded ? '▴' : '▾';
+        }
+
         // Calculate if background color is light or dark
         function getContrastColor(color) {
             // Handle preset color names
@@ -1690,42 +1745,52 @@
         }
 
         // Build HTML for a single policy item
-        function buildPolicyItemHTML(policy) {
+        function buildPolicyItemHTML(policy, searchTerm = '') {
             const isNew = policy.isNew && policy.clicks === 0;
             const safeGuid = policy.guid.replace(/'/g, "\\'");
             const safeDocNum = policy.docNum.replace(/'/g, "\\'");
             const safeUrl = policy.url.replace(/'/g, "\\'");
+            const titleHtml = highlightText(policy.title, searchTerm);
+            const categoryHtml = policy.category ? highlightText(policy.category, searchTerm) : '';
+            const hasDetails = policy.docNum || policy.version || policy.docType ||
+                               policy.lastRevision || policy.revisedBy || policy.modificationType ||
+                               policy.writtenBy || policy.owner || policy.clicks;
             return `
                 <li class="policy-item" onclick="handlePolicyClick('${safeGuid}', '${safeDocNum}', '${safeUrl}')">
                     <div class="policy-info">
                         <div class="policy-title">
-                            ${policy.title}
+                            ${titleHtml}
                             ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
                         </div>
-                        ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${safeDocNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
-                            ${policy.docNum && policy.version ? ' • ' : ''}
-                            ${policy.version ? `${policy.version}` : ''}
-                            ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
-                            ${policy.docType ? `${policy.docType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
-                            ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
-                            ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
-                            ${policy.modificationType ? `${policy.modificationType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
-                            ${policy.writtenBy && policy.owner ? ' • ' : ''}
-                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
-                            ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
-                            ${policy.clicks ? `${policy.clicks} ${policy.clicks === 1 ? 'click' : 'clicks'}` : ''}
-                        </div>
-                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
+                        ${categoryHtml ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${categoryHtml}</div>` : ''}
+                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${highlightText(policy.subfolder, searchTerm)}</span>` : ''}
+                        ${hasDetails ? `<div class="policy-details">
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${safeDocNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
+                                ${policy.docNum && policy.version ? ' • ' : ''}
+                                ${policy.version ? `${policy.version}` : ''}
+                                ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
+                                ${policy.docType ? `${policy.docType}` : ''}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
+                                ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
+                                ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
+                                ${policy.modificationType ? `${policy.modificationType}` : ''}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
+                                ${policy.writtenBy && policy.owner ? ' • ' : ''}
+                                ${policy.owner ? `Owner: ${policy.owner}` : ''}
+                                ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
+                                ${policy.clicks ? `${policy.clicks} ${policy.clicks === 1 ? 'click' : 'clicks'}` : ''}
+                            </div>
+                        </div>` : ''}
                     </div>
-                    <span class="external-icon">↗</span>
+                    <div class="policy-actions">
+                        ${hasDetails ? `<button class="policy-expand-btn" onclick="event.stopPropagation(); togglePolicyDetails(this)" title="Show details">▾</button>` : ''}
+                        <span class="external-icon">↗</span>
+                    </div>
                 </li>
             `;
         }
@@ -1740,9 +1805,10 @@
             const sentinel = document.getElementById('policyLoadMore');
             if (sentinel) sentinel.remove();
 
+            const searchTerm = (document.getElementById('policySearch')?.value || '').toLowerCase();
             const fragment = document.createDocumentFragment();
             const temp = document.createElement('div');
-            temp.innerHTML = nextBatch.map(buildPolicyItemHTML).join('');
+            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, searchTerm)).join('');
             while (temp.firstChild) fragment.appendChild(temp.firstChild);
 
             policiesRenderedCount += nextBatch.length;
@@ -1994,7 +2060,7 @@
                     return `
                         <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
                             <div class="policy-info">
-                                <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
+                                <div class="policy-title">${iconDisplay}${highlightText(link.name, searchTerm)} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
                                 <span class="policy-category">${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}</span>
                             </div>
                             <span class="external-icon">↗</span>
@@ -2011,9 +2077,9 @@
                 policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
                     <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                         <div class="policy-info">
-                            <div class="policy-title">${policy.title}</div>
-                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
-                            ${policy.subfolder ? `<span class="policy-category">${policy.subfolder}</span>` : ''}
+                            <div class="policy-title">${highlightText(policy.title, searchTerm)}</div>
+                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${highlightText(policy.category, searchTerm)}</div>` : ''}
+                            ${policy.subfolder ? `<span class="policy-category">${highlightText(policy.subfolder, searchTerm)}</span>` : ''}
                         </div>
                         <span class="external-icon">↗</span>
                     </li>
@@ -2898,10 +2964,14 @@
             }
         }
 
-        // Close modal on background click
+        // Close modal on background click (but not when user is selecting text)
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function (e) {
-                if (e.target === this) {
+            let mousedownOnBackdrop = false;
+            modal.addEventListener('mousedown', function(e) {
+                mousedownOnBackdrop = e.target === this;
+            });
+            modal.addEventListener('click', function(e) {
+                if (e.target === this && mousedownOnBackdrop) {
                     this.classList.remove('active');
                 }
             });
