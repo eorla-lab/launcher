@@ -256,7 +256,7 @@
 
         .add-btn .plus {
     position: relative;
-    top: -2px; /* move the + up inside the button */
+    top: -1px; /* move the + up inside the button */
 }
         
 
@@ -724,6 +724,45 @@
             margin-top: 6px;
         }
 
+        /* Context menu for tiles */
+        .tile-context-menu {
+            position: fixed;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+            z-index: 10000;
+            min-width: 180px;
+            padding: 6px 0;
+            display: none;
+        }
+
+        .tile-context-menu.active {
+            display: block;
+        }
+
+        .tile-context-menu-item {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+
+        .tile-context-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .tile-context-menu-item.danger {
+            color: #ef4444;
+        }
+
+        .tile-context-menu-item.danger:hover {
+            background: #fef2f2;
+        }
+
         /* Tabs */
         .tabs {
             display: flex;
@@ -754,6 +793,25 @@
 
         .tab-content.active {
             display: block;
+            min-height: 0;
+        }
+
+        /* Settings modal uses flex layout so tabs stay fixed and content scrolls */
+        #settingsModal .modal-body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: 80vh; /* or max-height: 80vh; */
+        }
+
+        #settingsModal .tabs {
+            flex-shrink: 0;
+        }
+
+        #settingsModal .tab-content.active {
+            flex: 1;
+            overflow-y: auto;
+            height: 400px;
         }
 
         @media (max-width: 640px) {
@@ -870,8 +928,13 @@
         <div class="drop-overlay-inner">
             <div class="drop-overlay-icon">🔗</div>
             <div class="drop-overlay-text">Drop to create a link</div>
-            <div class="drop-overlay-hint">URL or text</div>
+            <div class="drop-overlay-hint">URL, text, or JSON file</div>
         </div>
+    </div>
+
+    <!-- Context menu for tiles -->
+    <div class="tile-context-menu" id="tileContextMenu">
+        <div id="ctxMenuItems"></div>
     </div>
 
     <div class="container">
@@ -1029,6 +1092,8 @@
 
                 <!-- Manage Links Tab -->
                 <div id="manageTab" class="tab-content active">
+                    <div id="manageTabContent" style="height: 620px;">
+
                     <button class="btn btn-primary" onclick="showAddLinkForm()" style="margin-bottom: 20px;">+ Add
                         Custom Link</button>
 
@@ -1074,35 +1139,57 @@
 
                     <h3 style="margin-bottom: 12px;">Your Links</h3>
                     <ul class="link-manager" id="linkManager"></ul>
+                    </div>
                 </div>
 
                 <!-- Import/Export Tab -->
                 <div id="importExportTab" class="tab-content">
-                    <h3 style="margin-bottom: 12px;">Export Your Customizations</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px;">Download your custom links and click data as JSON.
-                        You can send this to the admin to update the default configuration.</p>
-                    <button class="btn btn-primary" onclick="exportData()">📥 Export as JSON</button>
+                    <div id="importExportTabContent" style="height: 620px;">
+                    <h3 style="margin-bottom: 12px;">Layout</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Export tile layout. This code captures the order of your top links</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center;">
+                        <input type="text" id="layoutCodeDisplay" readonly style="flex: 1; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-family: monospace; background: #f9fafb; color: #374151;" placeholder="Click Generate to see your code">
+                        <button class="btn btn-primary" onclick="copyLayoutUrl()" title="Copy shareable link" style="padding: 10px 16px; white-space: nowrap; width: 140px;">Copy Link</button>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="layoutCodeInput" placeholder="Enter a layout code here" style="flex: 1; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
+                        <button class="btn btn-secondary" onclick="applyLayoutCode(document.getElementById('layoutCodeInput').value)" style="padding: 10px 16px; white-space: nowrap; width: 140px;">Apply Code</button>
+                    </div>
 
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
-                    <h3 style="margin-bottom: 12px;">Import Configuration</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px;">Import a JSON file to restore or update your links.
-                    </p>
-                    <input type="file" id="importFile" accept=".json" style="margin-bottom: 12px;">
-                    <button class="btn btn-secondary" onclick="importData()">📤 Import JSON</button>
+                    <h3 style="margin-bottom: 12px;">Export</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Download your links to a JSON file that can be shared.</p>
+                    <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">Export Links</button>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+                    <h3 style="margin-bottom: 12px;">Import</h3>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Drag and drop a JSON file anywhere on the app to import it.</p>
 
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
                     <h3 style="margin-bottom: 12px;">Reset</h3>
                     <p style="color: #6b7280; margin-bottom: 16px;">Reset to default links and clear all click data.</p>
-                    <button class="btn btn-danger" onclick="resetToDefaults()">🔄 Reset to Defaults</button>
+                    <button class="btn btn-danger" onclick="resetToDefaults()" style="width: 100%;">🔄 Reset to Defaults</button>
+                    </div>
                 </div>
 
                 <!-- Changelog Tab -->
                 <div id="changelogTab" class="tab-content">
-                    <div id="changelogContent">
+                    <div id="changelogContent" style="height: 620px;">
                         <div style="margin-bottom: 24px;">
-                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.0.0</h3>
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1</h3>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
+                            <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
+                                <li>Drag and drop URLs or text into the app to create links</li>
+                                <li>Drag tiles out of the app to bookmarks, desktop, or other apps</li>
+                                <li>Right-click context menu on tiles to reset clicks or remove custom links</li>
+                                <li>Layout codes: save and apply your tile arrangement between different workstations</li>
+                            </ul>
+                        </div>
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.0</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">February 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
                                 <li>Initial release</li>
@@ -1176,6 +1263,7 @@
             loadUserData();
             renderDashboard();
             renderPolicies();
+            checkLayoutParam(); // Check for ?layout= URL parameter
         }
 
         // Load default data from JSON file
@@ -1223,20 +1311,8 @@
                 }
 
                 const csvText = await response.text();
-                const lastModified = response.headers.get('Last-Modified');
 
                 console.log('CSV loaded, length:', csvText.length);
-
-                // Show last modified date
-                if (lastModified) {
-                    const date = new Date(lastModified);
-                    document.getElementById('csvLastModified').textContent = date.toLocaleString('en-CA', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    });
-                    document.getElementById('csvMetadata').style.display = 'block';
-                }
 
                 // Parse CSV
                 const lines = csvText.split('\n');
@@ -1259,6 +1335,7 @@
                 const docNumIndex = headers.findIndex(h => h.trim().toLowerCase() === 'doc #');
                 const docTypeIndex = headers.findIndex(h => h.trim().toLowerCase() === 'document type');
                 const lateDateIndex = headers.findIndex(h => h.trim().toLowerCase() === 'late date');
+                const lastApprobationIndex = headers.findIndex(h => h.trim().toLowerCase() === 'last approbation');
 
                 console.log('Column indices:', {
                     description: descIndex,
@@ -1326,6 +1403,28 @@
 
                 console.log(`Loaded ${policies.length} policies from CSV`);
                 console.log('First 3 policies:', policies.slice(0, 3));
+
+                // Find the most recent "Last Approbation" date in the CSV
+                if (lastApprobationIndex !== -1) {
+                    let mostRecent = new Date(0);
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue;
+                        const cols = parseCSVLine(lines[i]);
+                        const dateStr = cols[lastApprobationIndex]?.trim();
+                        if (dateStr) {
+                            const parsed = parseLateDate(dateStr);
+                            if (parsed > mostRecent) mostRecent = parsed;
+                        }
+                    }
+                    if (mostRecent.getTime() > 0) {
+                        document.getElementById('csvLastModified').textContent = mostRecent.toLocaleString('en-CA', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+                        document.getElementById('csvMetadata').style.display = 'block';
+                    }
+                }
 
             } catch (error) {
                 console.error('Error loading CSV:', error);
@@ -1505,7 +1604,7 @@
                 }
 
                 html += `
-                    <button class="tile" draggable="true" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                    <button class="tile" draggable="true" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -1536,21 +1635,36 @@
                 return;
             }
 
-            linkManager.innerHTML = links.map(link => {
+            // Sort by NEW first, then clicks descending (consistent with dashboard)
+            const sortedLinks = [...links].sort((a, b) => {
+                const aIsNew = a.isNew && a.clicks === 0;
+                const bIsNew = b.isNew && b.clicks === 0;
+                if (aIsNew && !bIsNew) return -1;
+                if (!aIsNew && bIsNew) return 1;
+                return b.clicks - a.clicks;
+            });
+
+            linkManager.innerHTML = sortedLinks.map(link => {
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
+                const isHexColor = link.color && link.color.startsWith('#');
+                const presetColors = { blue:'#3b82f6', green:'#10b981', purple:'#8b5cf6', orange:'#f59e0b', red:'#ef4444', indigo:'#6366f1', pink:'#ec4899', teal:'#14b8a6', gray:'#9ca3af' };
+                const bgColor = isHexColor ? link.color : (presetColors[link.color] || '#e5e7eb');
+                const textColor = getContrastColor(link.color || 'gray');
                 let iconDisplay;
 
                 if (isImageIcon) {
-                    iconDisplay = `<img src="${link.icon}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;" onerror="this.style.display='none';">`;
+                    iconDisplay = `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;border-radius:6px;background:${bgColor};margin-right:10px;"><img src="${link.icon}" style="width:20px;height:20px;object-fit:contain;" onerror="this.style.display='none';"></span>`;
                 } else {
-                    iconDisplay = link.icon + ' ';
+                    iconDisplay = `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;border-radius:6px;background:${bgColor};color:${textColor};font-size:14px;margin-right:10px;">${link.icon}</span>`;
                 }
 
+                const clickWord = link.clicks === 1 ? 'click' : 'clicks';
+
                 return `
-                    <li class="link-manager-item">
-                        <div class="link-manager-info">
-                            <div class="link-manager-name">${iconDisplay}${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom)</span>' : ''}<span class="link-manager-url">${link.clicks} clicks</span></div>
-                            
+                    <li class="link-manager-item" style="display:flex;align-items:center;">
+                        ${iconDisplay}
+                        <div class="link-manager-info" style="flex:1;min-width:0;">
+                            <div class="link-manager-name">${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
                             <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
                         <div class="link-manager-actions">
@@ -1607,7 +1721,7 @@
                             ${policy.writtenBy && policy.owner ? ' • ' : ''}
                             ${policy.owner ? `Owner: ${policy.owner}` : ''}
                             ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
-                            ${policy.clicks ? `${policy.clicks} clicks` : ''}
+                            ${policy.clicks ? `${policy.clicks} ${policy.clicks === 1 ? 'click' : 'clicks'}` : ''}
                         </div>
                         ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
                     </div>
@@ -1881,7 +1995,7 @@
                         <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
                             <div class="policy-info">
                                 <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
-                                <span class="policy-category">${link.clicks} clicks</span>
+                                <span class="policy-category">${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}</span>
                             </div>
                             <span class="external-icon">↗</span>
                         </li>
@@ -2018,40 +2132,296 @@
             }
         }
 
-        // Export data
-        function exportData() {
-            const dataStr = JSON.stringify({ links }, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'launcher-export.json';
-            link.click();
-            URL.revokeObjectURL(url);
+        // ── Layout Code System ────────────────────────────────────
+        // Factoradic encoding: stores the permutation "pick 8 ordered
+        // from N default links" using Lehmer codes, packed into a
+        // single BigInt and encoded in base62 (0-9 a-z A-Z).
+        // 10 characters supports up to 177 links in data.json.
+        //
+        // The reference list is defaultData.links in its original
+        // array order (stable — admin controls data.json ordering).
+
+        const LAYOUT_SLOTS = 8;
+        const CODE_LENGTH = 10;
+        const BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        function toBase62(bigint, length) {
+            const chars = [];
+            const base = 62n;
+            for (let i = 0; i < length; i++) {
+                chars.unshift(BASE62_CHARS[Number(bigint % base)]);
+                bigint = bigint / base;
+            }
+            return chars.join('');
         }
 
-        // Import data
-        function importData() {
-            const fileInput = document.getElementById('importFile');
-            const file = fileInput.files[0];
+        function fromBase62(str) {
+            let result = 0n;
+            for (let i = 0; i < str.length; i++) {
+                const idx = BASE62_CHARS.indexOf(str[i]);
+                if (idx === -1) return -1n;
+                result = result * 62n + BigInt(idx);
+            }
+            return result;
+        }
 
-            if (!file) {
-                alert('Please select a file');
+        // Encode: takes an array of data.json indices (positions in
+        // defaultData.links) and produces a factoradic-packed base62 string.
+        function encodeLayout(indices) {
+            const n = defaultData.links.length;
+            const slots = indices.slice(0, LAYOUT_SLOTS);
+
+            // Build Lehmer code: for each pick, record its position
+            // in the *remaining* list after previous picks are removed.
+            const available = Array.from({ length: n }, (_, i) => i);
+            const lehmer = [];
+            for (const idx of slots) {
+                const pos = available.indexOf(idx);
+                if (pos === -1) return null; // invalid index
+                lehmer.push(pos);
+                available.splice(pos, 1);
+            }
+
+            // Pack Lehmer digits into a single number using mixed-radix:
+            // lehmer[0] * (N-1)*(N-2)*...*(N-7)  +  lehmer[1] * (N-2)*...*(N-7)  + ...
+            let packed = 0n;
+            for (let i = 0; i < lehmer.length; i++) {
+                packed = packed * BigInt(n - i) + BigInt(lehmer[i]);
+            }
+
+            return toBase62(packed, CODE_LENGTH);
+        }
+
+        // Decode: takes a base62 string and returns an array of data.json indices.
+        function decodeLayout(code) {
+            if (!code || code.length !== CODE_LENGTH) return [];
+
+            const packed = fromBase62(code);
+            if (packed < 0n) return [];
+
+            const n = defaultData.links.length;
+            if (n === 0) return [];
+
+            // Unpack Lehmer code using mixed-radix decomposition (reverse order)
+            let remainder = packed;
+            const lehmer = [];
+            for (let i = LAYOUT_SLOTS - 1; i >= 0; i--) {
+                const radix = BigInt(n - i);
+                lehmer.unshift(Number(remainder % radix));
+                remainder = remainder / radix;
+            }
+
+            // If remainder > 0, code is out of range (invalid)
+            if (remainder > 0n) return [];
+
+            // Reconstruct indices from Lehmer code
+            const available = Array.from({ length: n }, (_, i) => i);
+            const indices = [];
+            for (const pos of lehmer) {
+                if (pos >= available.length) return []; // corrupt code
+                indices.push(available[pos]);
+                available.splice(pos, 1);
+            }
+
+            return indices;
+        }
+
+        // Convert between link IDs and data.json indices
+        function linkIdToIndex(id) {
+            return defaultData.links.findIndex(l => l.id === id);
+        }
+
+        function indexToLinkId(idx) {
+            return defaultData.links[idx]?.id;
+        }
+
+        function generateLayoutCode() {
+            // Get default (non-custom) links sorted by current ranking
+            const defaultLinks = links
+                .filter(l => !l.isCustom)
+                .sort((a, b) => {
+                    const aIsNew = a.isNew && a.clicks === 0;
+                    const bIsNew = b.isNew && b.clicks === 0;
+                    if (aIsNew && !bIsNew) return -1;
+                    if (!aIsNew && bIsNew) return 1;
+                    return b.clicks - a.clicks;
+                });
+
+            // Map top 8 link IDs to their index in defaultData.links
+            const top = defaultLinks.slice(0, LAYOUT_SLOTS);
+            const indices = top.map(l => linkIdToIndex(l.id)).filter(i => i !== -1);
+
+            if (indices.length === 0) {
+                alert('No default links to encode.');
+                return '';
+            }
+
+            // Pad to 8 slots if fewer (use first available unused indices)
+            const used = new Set(indices);
+            let filler = 0;
+            while (indices.length < LAYOUT_SLOTS && filler < defaultData.links.length) {
+                if (!used.has(filler)) {
+                    indices.push(filler);
+                    used.add(filler);
+                }
+                filler++;
+            }
+
+            const code = encodeLayout(indices);
+            if (!code) {
+                alert('Error generating layout code.');
+                return '';
+            }
+
+            document.getElementById('layoutCodeDisplay').value = code;
+            return code;
+        }
+
+        function getLayoutUrl() {
+            const code = document.getElementById('layoutCodeDisplay').value || generateLayoutCode();
+            return window.location.origin + window.location.pathname + '?layout=' + code;
+        }
+
+        function copyLayoutUrl() {
+            const code = document.getElementById('layoutCodeDisplay').value;
+            if (!code) generateLayoutCode();
+            const url = getLayoutUrl();
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target.closest('button');
+                const prev = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => { btn.textContent = prev; }, 1500);
+            });
+        }
+
+        function applyLayoutCode(code) {
+            if (!code || !code.trim()) {
+                alert('Please enter a layout code.');
                 return;
             }
 
+            code = code.trim();
+
+            if (code.length !== CODE_LENGTH) {
+                alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
+                return;
+            }
+
+            // Decode the factoradic base62 code into data.json indices
+            const indices = decodeLayout(code);
+
+            if (indices.length === 0) {
+                alert('Invalid layout code. Please check and try again.');
+                return;
+            }
+
+            // Convert indices to link IDs
+            const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
+
+            if (linkIds.length === 0) {
+                alert('Could not resolve any links from this code. The code may be from a different version.');
+                return;
+            }
+
+            // Build a name preview
+            const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
+                const dl = defaultData.links.find(l => l.id === id);
+                return dl ? dl.name : '(#' + id + ')';
+            });
+
+            const confirmed = confirm(
+                'Apply this layout?\n\n' +
+                'Your top tiles will become:\n' +
+                previewNames.map((n, i) => (i + 1) + '. ' + n).join('\n') +
+                '\n\nThis will override your current tile sorting for default links. Custom links are not affected.'
+            );
+
+            if (!confirmed) return;
+
+            // Apply: assign descending synthetic click counts
+            const baseClicks = linkIds.length * 100;
+
+            links.forEach(link => {
+                if (link.isCustom) return;
+
+                const rankIndex = linkIds.indexOf(link.id);
+                if (rankIndex !== -1) {
+                    link.clicks = baseClicks - (rankIndex * 100);
+                    link.isNew = false;
+                } else {
+                    link.clicks = 0;
+                }
+            });
+
+            saveUserData();
+            renderDashboard();
+            renderLinkManager();
+
+            // Clean the URL if we got here from a ?layout= param
+            if (window.location.search.includes('layout=')) {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+
+            alert('Layout applied!');
+        }
+
+        // Check for ?layout= URL parameter on load
+        function checkLayoutParam() {
+            const params = new URLSearchParams(window.location.search);
+            const layoutCode = params.get('layout');
+            if (layoutCode) {
+                setTimeout(() => applyLayoutCode(layoutCode), 300);
+            }
+        }
+
+        // Export data in data.json format (for GitHub comparison)
+        function exportData() {
+            const exportLinks = links.map(link => {
+                const clean = {
+                    id: link.id,
+                    name: link.name,
+                    url: link.url,
+                    icon: link.icon,
+                    color: link.color
+                };
+                if (link.aliases && link.aliases.length > 0) {
+                    clean.aliases = link.aliases;
+                }
+                if (link.isNew) {
+                    clean.isNew = true;
+                }
+                return clean;
+            });
+
+            const dataStr = JSON.stringify({ links: exportLinks }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import data from a File object (called from drag-and-drop)
+        function importDataFromFile(file) {
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (imported.links) {
-                        links = imported.links;
+                        if (!confirm('Import "' + file.name + '"?\n\nThis will replace your current links with the imported data.')) return;
+                        links = imported.links.map(l => ({
+                            ...l,
+                            clicks: l.clicks || 0,
+                            isCustom: l.isCustom || false
+                        }));
                         saveUserData();
                         renderDashboard();
                         renderLinkManager();
                         alert('Import successful!');
                     } else {
-                        alert('Invalid file format');
+                        alert('Invalid file format — expected a JSON file with a "links" array.');
                     }
                 } catch (error) {
                     alert('Error reading file: ' + error.message);
@@ -2292,7 +2662,8 @@
                 // Only show for external drags (not our own tile drags)
                 if (e.dataTransfer.types.includes('text/uri-list') ||
                     e.dataTransfer.types.includes('text/plain') ||
-                    e.dataTransfer.types.includes('text/html')) {
+                    e.dataTransfer.types.includes('text/html') ||
+                    e.dataTransfer.types.includes('Files')) {
                     // Ignore if the drag originated from our own tiles
                     if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
                     dragCounter++;
@@ -2324,6 +2695,15 @@
                 if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
 
                 e.preventDefault();
+
+                // Check for JSON file drops first
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.name.endsWith('.json') || file.type === 'application/json') {
+                        importDataFromFile(file);
+                        return;
+                    }
+                }
 
                 // Try to extract a URL first
                 const uriList = e.dataTransfer.getData('text/uri-list');
@@ -2395,6 +2775,37 @@
                 }, 100);
             });
         })();
+
+        // ── Context Menu for Tiles ────────────────────────────────
+        function showTileContextMenu(e, linkId) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const menu = document.getElementById('tileContextMenu');
+            const itemsEl = document.getElementById('ctxMenuItems');
+            const link = links.find(l => l.id === linkId);
+            if (!link) return;
+
+            let html = '';
+            html += `<div class="tile-context-menu-item" onclick="resetLinkClicks(${linkId}); closeTileContextMenu();">🔄 Reset clicks</div>`;
+            if (link.isCustom) {
+                html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">🗑️ Remove link</div>`;
+            }
+            itemsEl.innerHTML = html;
+
+            const x = Math.min(e.clientX, window.innerWidth - 200);
+            const y = Math.min(e.clientY, window.innerHeight - 100);
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            menu.classList.add('active');
+        }
+
+        function closeTileContextMenu() {
+            document.getElementById('tileContextMenu').classList.remove('active');
+        }
+
+        document.addEventListener('click', closeTileContextMenu);
+        document.addEventListener('scroll', closeTileContextMenu, true);
 
         // ── Drag & Drop: Drag tiles OUT to desktop as .url shortcut ──────
         // Uses drag events on tile buttons to set text/uri-list data
@@ -2481,6 +2892,7 @@
                 document.getElementById('manageTab').classList.add('active');
             } else if (tabName === 'import-export') {
                 document.getElementById('importExportTab').classList.add('active');
+                generateLayoutCode();
             } else if (tabName === 'changelog') {
                 document.getElementById('changelogTab').classList.add('active');
             }
