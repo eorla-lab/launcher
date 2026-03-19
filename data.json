@@ -5,7 +5,7 @@
       "name": "EORLA Portal",
       "url": "https://theottawahospital.sharepoint.com/sites/eorlaportal",
       "icon": "./icons/eorla.jpeg",
-      "color": "white"
+      "color": "#FFFFFF"
     },
     {
       "id": 2,
@@ -22,8 +22,8 @@
       "id": 3,
       "name": "TOHHUB",
       "url": "https://theottawahospital.sharepoint.com/sites/TOHHUB",
-      "icon": "./icons/TOH_HUB.ico",
-      "color": "white"
+      "icon": "./icons/TOH_HUB.png",
+      "color": "#FFFFFF"
     },
     {
       "id": 4,
@@ -80,16 +80,6 @@
       "url": "https://www.cap.org/protocols-and-guidelines/cancer-reporting-tools/cancer-protocol-templates",
       "icon": "./icons/cap.png",
       "color": "white"
-    },
-    {
-      "id": 11,
-      "name": "CAP Invasive Breast pT Category",
-      "url": "https://documents.cap.org/protocols/Breast.Invasive_4.10.0.0.REL.CAPCP.pdf#page=15",
-      "icon": "🔗",
-      "color": "blue",
-      "aliases": [
-        "staging"
-      ]
     },
     {
       "id": 12,
@@ -169,12 +159,13 @@
       "name": "EORLA Helpdesk",
       "url": "https://eorla-helpdesk.atlassian.net/servicedesk/customer/portal/2",
       "icon": "./icons/eorla.jpeg",
-      "color": "white",
+      "color": "#FFFFFF",
       "aliases": [
         "eorla",
         "ticket",
         "help",
-        "helpdesk"
+        "helpdesk",
+        "jira"
       ]
     },
     {
@@ -193,7 +184,7 @@
       "name": "SDS Lookup",
       "url": "https://chemmanagement.ehs.com/9/97a67b67-9675-44c3-a3b9-92ed1b124fd4/ebinder",
       "icon": "./icons/TOH_MSDSOnline.png",
-      "color": "white",
+      "color": "#FFFFFF",
       "aliases": [
         "Chemical",
         "MSDS",
@@ -330,7 +321,7 @@
       "name": "HRIS",
       "url": "https://ohhcmweb01.civic1.ottawahospital.on.ca:1443/HRPRD/signon.html",
       "icon": "./icons/TOH_HRIS.jpeg",
-      "color": "white",
+      "color": "#FFFFFF",
       "aliases": [
         "paystub",
         "HR",
@@ -344,7 +335,7 @@
       "name": "HRIS (external)",
       "url": "https://myhris.ottawahospital.on.ca/",
       "icon": "./icons/TOH_HRIS.jpeg",
-      "color": "white",
+      "color": "#FFFFFF",
       "aliases": [
         "paystub",
         "HR",
