@@ -2048,24 +2048,90 @@
                 linksSection.style.display = 'block';
                 searchResults.innerHTML = sortedLinks.map(link => {
                     const isNew = link.isNew && link.clicks === 0;
-                    const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
+
+                    const isImageIcon = link.icon && (
+                        link.icon.startsWith('http') ||
+                        link.icon.startsWith('/') ||
+                        link.icon.startsWith('.') ||
+                        link.icon.startsWith('data:image')
+                    );
+
+                    const isHexColor = link.color && link.color.startsWith('#');
+                    const presetColors = {
+                        blue: '#3b82f6',
+                        green: '#10b981',
+                        purple: '#8b5cf6',
+                        orange: '#f59e0b',
+                        red: '#ef4444',
+                        indigo: '#6366f1',
+                        pink: '#ec4899',
+                        teal: '#14b8a6',
+                        gray: '#9ca3af'
+                    };
+
+                    const bgColor = isHexColor
+                        ? link.color
+                        : (presetColors[link.color] || '#e5e7eb');
+
+                    const textColor = getContrastColor(link.color || 'gray');
+
                     let iconDisplay;
 
                     if (isImageIcon) {
-                        iconDisplay = `<img src="${link.icon}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;" onerror="this.style.display='none';">`;
+                        iconDisplay = `
+                <span style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:28px;
+                    height:28px;
+                    min-width:28px;
+                    border-radius:6px;
+                    background:${bgColor};
+                    margin-right:10px;
+                ">
+                    <img src="${link.icon}"
+                         style="width:20px;height:20px;object-fit:contain;"
+                         onerror="this.parentNode.style.display='none';">
+                </span>
+            `;
                     } else {
-                        iconDisplay = link.icon + ' ';
+                        iconDisplay = `
+                <span style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:28px;
+                    height:28px;
+                    min-width:28px;
+                    border-radius:6px;
+                    background:${bgColor};
+                    color:${textColor};
+                    font-size:14px;
+                    margin-right:10px;
+                ">
+                    ${link.icon || ''}
+                </span>
+            `;
                     }
 
                     return `
-                        <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
-                            <div class="policy-info">
-                                <div class="policy-title">${iconDisplay}${highlightText(link.name, searchTerm)} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
-                                <span class="policy-category">${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}</span>
-                            </div>
-                            <span class="external-icon">↗</span>
-                        </li>
-                    `;
+            <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                <div class="policy-info" style="display:flex;align-items:center;">
+                    ${iconDisplay}
+                    <div style="min-width:0;">
+                        <div class="policy-title">
+                            ${highlightText(link.name, searchTerm)}
+                            ${isNew ? '<span style="color:#ef4444;font-weight:700;font-size:0.7rem;margin-left:8px;">NEW</span>' : ''}
+                        </div>
+                        <span class="policy-category">
+                            ${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}
+                        </span>
+                    </div>
+                </div>
+                <span class="external-icon">↗</span>
+            </li>
+        `;
                 }).join('');
             } else {
                 linksSection.style.display = 'none';
