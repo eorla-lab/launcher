@@ -2788,127 +2788,126 @@
         }
 
         // ── Drag & Drop: Drop INTO the app to create a link ─────────────
-        (function() {
-            let dragCounter = 0; // track nested dragenter/dragleave
-            const overlay = document.getElementById('dropOverlay');
+    (function () {
+        let dragCounter = 0; // track nested dragenter/dragleave
+        const overlay = document.getElementById('dropOverlay');
 
-            document.addEventListener('dragenter', function(e) {
-                // Only show for external drags (not our own tile drags)
-                if (e.dataTransfer.types.includes('text/uri-list') ||
-                    e.dataTransfer.types.includes('text/plain') ||
-                    e.dataTransfer.types.includes('text/html') ||
-                    e.dataTransfer.types.includes('Files')) {
-                    // Ignore if the drag originated from our own tiles
-                    if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
-                    dragCounter++;
-                    if (dragCounter === 1) {
-                        overlay.classList.add('active');
-                    }
-                }
-            });
+        document.addEventListener('dragenter', function (e) {
+            if (e.dataTransfer.types.includes('text/uri-list') ||
+                e.dataTransfer.types.includes('text/plain') ||
+                e.dataTransfer.types.includes('text/html') ||
+                e.dataTransfer.types.includes('Files')) {
 
-            document.addEventListener('dragleave', function(e) {
-                dragCounter--;
-                if (dragCounter <= 0) {
-                    dragCounter = 0;
-                    overlay.classList.remove('active');
-                }
-            });
-
-            document.addEventListener('dragover', function(e) {
-                if (overlay.classList.contains('active')) {
-                    e.preventDefault(); // allow drop
-                }
-            });
-
-            document.addEventListener('drop', function(e) {
-                dragCounter = 0;
-                overlay.classList.remove('active');
-
-                // If a modal is already open for something else, skip
+                // Ignore if the drag originated from our own tiles
                 if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
 
-                e.preventDefault();
+                dragCounter++;
+                if (dragCounter === 1) overlay.classList.add('active');
+            }
+        });
 
-                // Check for JSON file drops first
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    const file = e.dataTransfer.files[0];
-                    if (file.name.endsWith('.json') || file.type === 'application/json') {
-                        importDataFromFile(file);
-                        return;
-                    }
+        document.addEventListener('dragleave', function (e) {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                overlay.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('dragover', function (e) {
+            if (overlay.classList.contains('active')) e.preventDefault(); // allow drop
+        });
+
+        document.addEventListener('drop', function (e) {
+            dragCounter = 0;
+            overlay.classList.remove('active');
+
+            if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
+            e.preventDefault();
+
+            const files = e.dataTransfer.files;
+            const plainText = (e.dataTransfer.getData('text/plain') || '').trim();
+            const uriList = e.dataTransfer.getData('text/uri-list');
+            const htmlData = e.dataTransfer.getData('text/html');
+
+            // --- 1. JSON file drop ---
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (file.name.endsWith('.json') || file.type === 'application/json') {
+                    importDataFromFile(file);
+                    return;
                 }
+            }
 
-                // Try to extract a URL first
-                const uriList = e.dataTransfer.getData('text/uri-list');
-                const plainText = (e.dataTransfer.getData('text/plain') || '').trim();
-                const htmlData = e.dataTransfer.getData('text/html');
+            // --- 2. Layout code drop ---
+            if (plainText && plainText.length === CODE_LENGTH && /^[A-Za-z0-9]+$/.test(plainText)) {
+                const apply = confirm('Apply this layout code from the dropped text?');
+                if (apply) applyLayoutCode(plainText);
+                return; // stop further handling
+            }
 
-                let droppedUrl = '';
-                let droppedName = '';
+            // --- 3. Regular link drop ---
+            let droppedUrl = '';
+            let droppedName = '';
 
-                // Check URI list (browsers set this when dragging links)
-                if (uriList) {
-                    const firstUri = uriList.split('\n').find(line => !line.startsWith('#') && line.trim());
-                    if (firstUri) droppedUrl = firstUri.trim();
+            // URI list
+            if (uriList) {
+                const firstUri = uriList.split('\n').find(line => !line.startsWith('#') && line.trim());
+                if (firstUri) droppedUrl = firstUri.trim();
+            }
+
+            // Plain text URL
+            if (!droppedUrl && plainText && /^https?:\/\//i.test(plainText)) droppedUrl = plainText;
+
+            // HTML anchor
+            if (htmlData) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlData;
+                const anchor = tempDiv.querySelector('a');
+                if (anchor) {
+                    if (!droppedUrl && anchor.href) droppedUrl = anchor.href;
+                    if (anchor.textContent.trim()) droppedName = anchor.textContent.trim();
                 }
+            }
 
-                // Check plain text for URL
-                if (!droppedUrl && plainText && /^https?:\/\//i.test(plainText)) {
-                    droppedUrl = plainText;
+            // Fallback: plain text as name
+            if (!droppedUrl && plainText) droppedName = plainText;
+
+            // Guess name from URL
+            if (droppedUrl && !droppedName) {
+                try {
+                    const urlObj = new URL(droppedUrl);
+                    droppedName = urlObj.hostname.replace(/^www\./, '');
+                } catch (err) {
+                    droppedName = '';
                 }
+            }
 
-                // Try to extract link text from HTML
-                if (htmlData) {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = htmlData;
-                    const anchor = tempDiv.querySelector('a');
-                    if (anchor) {
-                        if (!droppedUrl && anchor.href) droppedUrl = anchor.href;
-                        if (anchor.textContent.trim()) droppedName = anchor.textContent.trim();
-                    }
+            // Open add-link form
+            renderLinkManager();
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('active');
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('manageTab').classList.add('active');
+            document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
+
+            document.getElementById('addLinkForm').style.display = 'block';
+            document.getElementById('newLinkName').value = droppedName;
+            document.getElementById('newLinkUrl').value = droppedUrl;
+
+            // Focus
+            setTimeout(() => {
+                if (droppedUrl) {
+                    document.getElementById('newLinkName').focus();
+                    document.getElementById('newLinkName').select();
+                } else {
+                    document.getElementById('newLinkUrl').focus();
                 }
-
-                // If no URL found, treat plain text as a name
-                if (!droppedUrl && plainText) {
-                    droppedName = plainText;
-                }
-
-                // Try to guess a name from the URL if we don't have one
-                if (droppedUrl && !droppedName) {
-                    try {
-                        const urlObj = new URL(droppedUrl);
-                        droppedName = urlObj.hostname.replace(/^www\./, '');
-                    } catch (err) {
-                        droppedName = '';
-                    }
-                }
-
-                // Open the add-link form pre-filled
-                renderLinkManager();
-                document.getElementById('settingsModal').classList.add('active');
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                document.getElementById('manageTab').classList.add('active');
-                document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
-                document.getElementById('addLinkForm').style.display = 'block';
-
-                document.getElementById('newLinkName').value = droppedName;
-                document.getElementById('newLinkUrl').value = droppedUrl;
-
-                // Focus the right field
-                setTimeout(() => {
-                    if (droppedUrl) {
-                        // URL is filled, let them edit the name
-                        document.getElementById('newLinkName').focus();
-                        document.getElementById('newLinkName').select();
-                    } else {
-                        // No URL, focus the URL field
-                        document.getElementById('newLinkUrl').focus();
-                    }
-                }, 100);
-            });
-        })();
+            }, 100);
+        });
+    })();
 
         // ── Context Menu for Tiles ────────────────────────────────
         function showTileContextMenu(e, linkId) {
