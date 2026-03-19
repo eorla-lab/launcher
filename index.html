@@ -2360,41 +2360,40 @@
             });
         }
 
-        function applyLayoutCode(code) {
-            if (!code || !code.trim()) {
-                alert('Please enter a layout code.');
-                return;
-            }
+    function applyLayoutCode(code, skipConfirm = false) {
+        if (!code || !code.trim()) {
+            alert('Please enter a layout code.');
+            return;
+        }
 
-            code = code.trim();
+        code = code.trim();
 
-            if (code.length !== CODE_LENGTH) {
-                alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
-                return;
-            }
+        if (code.length !== CODE_LENGTH) {
+            alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
+            return;
+        }
 
-            // Decode the factoradic base62 code into data.json indices
-            const indices = decodeLayout(code);
+        const indices = decodeLayout(code);
 
-            if (indices.length === 0) {
-                alert('Invalid layout code. Please check and try again.');
-                return;
-            }
+        if (indices.length === 0) {
+            alert('Invalid layout code. Please check and try again.');
+            return;
+        }
 
-            // Convert indices to link IDs
-            const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
+        const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
 
-            if (linkIds.length === 0) {
-                alert('Could not resolve any links from this code. The code may be from a different version.');
-                return;
-            }
+        if (linkIds.length === 0) {
+            alert('Could not resolve any links from this code. The code may be from a different version.');
+            return;
+        }
 
-            // Build a name preview
-            const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
-                const dl = defaultData.links.find(l => l.id === id);
-                return dl ? dl.name : '(#' + id + ')';
-            });
+        const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
+            const dl = defaultData.links.find(l => l.id === id);
+            return dl ? dl.name : '(#' + id + ')';
+        });
 
+        // Only ask for confirmation if skipConfirm is false
+        if (!skipConfirm) {
             const confirmed = confirm(
                 'Apply this layout?\n\n' +
                 'Your top tiles will become:\n' +
@@ -2403,42 +2402,43 @@
             );
 
             if (!confirmed) return;
-
-            // Apply: assign descending synthetic click counts
-            const baseClicks = linkIds.length * 100;
-
-            links.forEach(link => {
-                if (link.isCustom) return;
-
-                const rankIndex = linkIds.indexOf(link.id);
-                if (rankIndex !== -1) {
-                    link.clicks = baseClicks - (rankIndex * 100);
-                    link.isNew = false;
-                } else {
-                    link.clicks = 0;
-                }
-            });
-
-            saveUserData();
-            renderDashboard();
-            renderLinkManager();
-
-            // Clean the URL if we got here from a ?layout= param
-            if (window.location.search.includes('layout=')) {
-                window.history.replaceState({}, '', window.location.pathname);
-            }
-
-            alert('Layout applied!');
         }
 
-        // Check for ?layout= URL parameter on load
-        function checkLayoutParam() {
-            const params = new URLSearchParams(window.location.search);
-            const layoutCode = params.get('layout');
-            if (layoutCode) {
-                setTimeout(() => applyLayoutCode(layoutCode), 300);
+        // Apply layout
+        const baseClicks = linkIds.length * 100;
+
+        links.forEach(link => {
+            if (link.isCustom) return;
+
+            const rankIndex = linkIds.indexOf(link.id);
+            if (rankIndex !== -1) {
+                link.clicks = baseClicks - (rankIndex * 100);
+                link.isNew = false;
+            } else {
+                link.clicks = 0;
             }
+        });
+
+        saveUserData();
+        renderDashboard();
+        renderLinkManager();
+
+        // Clean URL if ?layout= was present
+        if (window.location.search.includes('layout=')) {
+            window.history.replaceState({}, '', window.location.pathname);
         }
+
+        alert('Layout applied!');
+    }
+
+    // On page load, skip confirmation for URL parameter
+    function checkLayoutParam() {
+        const params = new URLSearchParams(window.location.search);
+        const layoutCode = params.get('layout');
+        if (layoutCode) {
+            setTimeout(() => applyLayoutCode(layoutCode, true), 300);
+        }
+    }
 
         // Export data in data.json format (for GitHub comparison)
         function exportData() {
