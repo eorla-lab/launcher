@@ -2428,7 +2428,9 @@
             window.history.replaceState({}, '', window.location.pathname);
         }
 
-        alert('Layout applied!');
+        if (!skipConfirm) {
+            alert('Layout applied!');
+        }
     }
 
     // On page load, skip confirmation for URL parameter
