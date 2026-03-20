@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,164 +14,167 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #69c9d0 0%, #12412f 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #69c9d0 0%, #12412f 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
 
-        .container {
-            max-width: 600px;
-            width: 100%;
-        }
+    .container {
+        max-width: 600px;
+        width: 100%;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: white;
-        }
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+    }
 
-        .header h1 { font-size: 1.8rem; margin-bottom: 8px; }
-        .header p { opacity: 0.85; font-size: 0.95rem; }
+    .header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    .header p { opacity: 0.85; font-size: 0.95rem; }
 
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+    .card {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
-        .card h2 {
-            font-size: 1.1rem;
-            color: #1f2937;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .card h2 {
+        font-size: 1.1rem;
+        color: #1f2937;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .card .desc {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
+    .card .desc {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 16px;
+        line-height: 1.5;
+    }
 
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
+    .status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
 
-        .status.checking { background: #fef3c7; color: #92400e; }
-        .status.survived { background: #d1fae5; color: #065f46; }
-        .status.cleared { background: #fee2e2; color: #991b1b; }
-        .status.error { background: #fef2f2; color: #991b1b; }
-        .status.fresh { background: #dbeafe; color: #1e40af; }
+    .status.checking { background: #fef3c7; color: #92400e; }
+    .status.survived { background: #d1fae5; color: #065f46; }
+    .status.cleared { background: #fee2e2; color: #991b1b; }
+    .status.error { background: #fef2f2; color: #991b1b; }
+    .status.fresh { background: #dbeafe; color: #1e40af; }
 
-        .status-icon { font-size: 1.2rem; }
+    .status-icon { font-size: 1.2rem; }
 
-        .detail {
-            font-size: 0.8rem;
-            color: #6b7280;
-            padding: 8px 16px;
-            background: #f9fafb;
-            border-radius: 8px;
-            font-family: monospace;
-            word-break: break-all;
-            margin-top: 6px;
-        }
+    .detail {
+        font-size: 0.8rem;
+        color: #6b7280;
+        padding: 8px 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        font-family: monospace;
+        word-break: break-all;
+        margin-top: 6px;
+    }
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-        }
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex: 1;
-            text-align: center;
-        }
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex: 1;
+        text-align: center;
+    }
 
-        .btn-write { background: #3b82f6; color: white; }
-        .btn-write:hover { background: #2563eb; }
-        .btn-clear { background: #ef4444; color: white; }
-        .btn-clear:hover { background: #dc2626; }
+    .btn-write { background: #3b82f6; color: white; }
+    .btn-write:hover { background: #2563eb; }
+    .btn-clear { background: #ef4444; color: white; }
+    .btn-clear:hover { background: #dc2626; }
 
-        .instructions {
-            background: rgba(255,255,255,0.15);
-            border-radius: 14px;
-            padding: 20px 24px;
-            color: white;
-            margin-bottom: 20px;
-        }
+    .instructions {
+        background: rgba(255,255,255,0.15);
+        border-radius: 14px;
+        padding: 20px 24px;
+        color: white;
+        margin-bottom: 20px;
+    }
 
-        .instructions h3 { margin-bottom: 10px; font-size: 1rem; }
-        .instructions ol { padding-left: 20px; line-height: 2; font-size: 0.9rem; }
+    .instructions h3 { margin-bottom: 10px; font-size: 1rem; }
+    .instructions ol { padding-left: 20px; line-height: 2; font-size: 0.9rem; }
 
-        .timestamp {
-            text-align: center;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.8rem;
-            margin-top: 20px;
-        }
+    .timestamp {
+        text-align: center;
+        color: rgba(255,255,255,0.6);
+        font-size: 0.8rem;
+        margin-top: 20px;
+    }
 
-        .summary-card {
-            background: #1f2937;
-            color: white;
-            border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+    .summary-card {
+        background: #1f2937;
+        color: white;
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
 
-        .summary-card h2 {
-            color: white;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-        }
+    .summary-card h2 {
+        color: white;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.9rem;
-        }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        font-size: 0.9rem;
+    }
 
-        .summary-row:last-child { border: none; }
-        .summary-row .label { opacity: 0.7; }
+    .summary-row:last-child { border: none; }
+    .summary-row .label { opacity: 0.7; }
 
-        .badge {
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
+    .badge {
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
 
-        .badge.green { background: #065f46; color: #d1fae5; }
-        .badge.red { background: #991b1b; color: #fee2e2; }
-        .badge.yellow { background: #92400e; color: #fef3c7; }
-        .badge.blue { background: #1e40af; color: #dbeafe; }
-    </style>
+    .badge.green { background: #065f46; color: #d1fae5; }
+    .badge.red { background: #991b1b; color: #fee2e2; }
+    .badge.yellow { background: #92400e; color: #fef3c7; }
+    .badge.blue { background: #1e40af; color: #dbeafe; }
+</style>
+```
+
 </head>
 <body>
     <div class="container">
@@ -179,366 +183,447 @@
             <p>Determines which storage mechanisms survive browser/Edge closure on managed PCs</p>
         </div>
 
-        <!-- PWA mode indicator -->
-        <div class="card" style="padding: 16px;">
-            <div id="modeIndicator" class="status checking">
-                <span class="status-icon">⏳</span> Detecting mode...
-            </div>
-            <div id="swRegStatus" class="detail" style="display:block; margin-top: 8px;">Service worker: checking...</div>
-            <button id="installBtn" class="btn btn-write" onclick="installPWA()" style="display:none; margin-top: 12px; width: 100%;">📲 Install as App to Test PWA Mode</button>
+```
+    <!-- PWA mode indicator -->
+    <div class="card" style="padding: 16px;">
+        <div id="modeIndicator" class="status checking">
+            <span class="status-icon">⏳</span> Detecting mode...
         </div>
-
-        <div class="instructions">
-            <h3>How to test:</h3>
-            <ol>
-                <li>If the <strong>"Install as App"</strong> button appears above, click it to install as a PWA</li>
-                <li>Click <strong>"Write Test Data"</strong> — verify all three show ✅ "Data written"</li>
-                <li><strong>Fully close Edge</strong> (all windows — check the system tray)</li>
-                <li>Reopen this page (or the installed app) and check which survived</li>
-                <li>Screenshot the results and share them</li>
-            </ol>
-        </div>
-
-        <div class="summary-card" id="summaryCard" style="display:none;">
-            <h2>📊 Results Summary</h2>
-            <div class="summary-row">
-                <span class="label">localStorage</span>
-                <span id="sumLS" class="badge yellow">checking...</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">IndexedDB</span>
-                <span id="sumIDB" class="badge yellow">checking...</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Service Worker + Cache API</span>
-                <span id="sumSW" class="badge yellow">checking...</span>
-            </div>
-        </div>
-
-        <!-- localStorage -->
-        <div class="card">
-            <h2>💾 localStorage</h2>
-            <div class="desc">Standard web storage. Most commonly cleared by enterprise policies.</div>
-            <div id="lsStatus" class="status checking">
-                <span class="status-icon">⏳</span> Checking...
-            </div>
-            <div id="lsDetail" class="detail" style="display:none;"></div>
-        </div>
-
-        <!-- IndexedDB -->
-        <div class="card">
-            <h2>🗄️ IndexedDB</h2>
-            <div class="desc">Database-style storage. Sometimes survives policies that clear localStorage.</div>
-            <div id="idbStatus" class="status checking">
-                <span class="status-icon">⏳</span> Checking...
-            </div>
-            <div id="idbDetail" class="detail" style="display:none;"></div>
-        </div>
-
-        <!-- Service Worker + Cache API -->
-        <div class="card">
-            <h2>⚙️ Service Worker + Cache API</h2>
-            <div class="desc">App infrastructure storage. Often exempt from browsing data cleanup policies.</div>
-            <div id="swStatus" class="status checking">
-                <span class="status-icon">⏳</span> Checking...
-            </div>
-            <div id="swDetail" class="detail" style="display:none;"></div>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-write" onclick="writeAll()">✏️ Write Test Data</button>
-            <button class="btn btn-clear" onclick="clearAll()">🗑️ Clear All Data</button>
-        </div>
-
-        <div class="timestamp" id="pageTimestamp"></div>
+        <div id="swRegStatus" class="detail" style="display:block; margin-top: 8px;">Service worker: checking...</div>
+        <button id="installBtn" class="btn btn-write" onclick="installPWA()" style="display:none; margin-top: 12px; width: 100%;">📲 Install as App to Test PWA Mode</button>
     </div>
 
-    <script>
-        const TEST_KEY = 'launcher_persistence_test';
-        const TEST_CACHE = 'launcher-persistence-test-v1';
-        const TEST_SW_PATH = 'sw-test.js';
+    <div class="instructions">
+        <h3>How to test:</h3>
+        <ol>
+            <li>If the <strong>"Install as App"</strong> button appears above, click it to install as a PWA</li>
+            <li>Click <strong>"Write Test Data"</strong> — verify all four show ✅ "Data written"</li>
+            <li><strong>Fully close Edge</strong> (all windows — check the system tray)</li>
+            <li>Reopen this page (or the installed app) and check which survived</li>
+            <li>Screenshot the results and share them</li>
+        </ol>
+    </div>
 
-        // Detect if running as installed PWA
-        const isPWA = window.matchMedia('(display-mode: standalone)').matches
-            || window.navigator.standalone === true;
+    <div class="summary-card" id="summaryCard" style="display:none;">
+        <h2>📊 Results Summary</h2>
+        <div class="summary-row">
+            <span class="label">localStorage</span>
+            <span id="sumLS" class="badge yellow">checking...</span>
+        </div>
+        <div class="summary-row">
+            <span class="label">IndexedDB</span>
+            <span id="sumIDB" class="badge yellow">checking...</span>
+        </div>
+        <div class="summary-row">
+            <span class="label">Service Worker + Cache API</span>
+            <span id="sumSW" class="badge yellow">checking...</span>
+        </div>
+        <div class="summary-row">
+            <span class="label">Cookies</span>
+            <span id="sumCK" class="badge yellow">checking...</span>
+        </div>
+    </div>
 
-        // Show mode indicator
-        document.getElementById('modeIndicator').textContent = isPWA
-            ? '✅ Running as installed PWA'
-            : '🌐 Running in browser tab';
-        document.getElementById('modeIndicator').className = 'status ' + (isPWA ? 'survived' : 'fresh');
+    <!-- localStorage -->
+    <div class="card">
+        <h2>💾 localStorage</h2>
+        <div class="desc">Standard web storage. Most commonly cleared by enterprise policies.</div>
+        <div id="lsStatus" class="status checking">
+            <span class="status-icon">⏳</span> Checking...
+        </div>
+        <div id="lsDetail" class="detail" style="display:none;"></div>
+    </div>
 
-        // Register service worker immediately on load
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(TEST_SW_PATH).then(reg => {
-                console.log('SW registered:', reg.scope);
-                document.getElementById('swRegStatus').textContent = 'SW registered (' + reg.scope + ')';
-            }).catch(err => {
-                console.warn('SW registration failed:', err.message);
-                document.getElementById('swRegStatus').textContent = 'SW registration failed: ' + err.message;
-            });
-        }
+    <!-- IndexedDB -->
+    <div class="card">
+        <h2>🗄️ IndexedDB</h2>
+        <div class="desc">Database-style storage. Sometimes survives policies that clear localStorage.</div>
+        <div id="idbStatus" class="status checking">
+            <span class="status-icon">⏳</span> Checking...
+        </div>
+        <div id="idbDetail" class="detail" style="display:none;"></div>
+    </div>
 
-        // Capture install prompt for PWA
-        let deferredInstallPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredInstallPrompt = e;
-            document.getElementById('installBtn').style.display = 'block';
+    <!-- Service Worker + Cache API -->
+    <div class="card">
+        <h2>⚙️ Service Worker + Cache API</h2>
+        <div class="desc">App infrastructure storage. Often exempt from browsing data cleanup policies.</div>
+        <div id="swStatus" class="status checking">
+            <span class="status-icon">⏳</span> Checking...
+        </div>
+        <div id="swDetail" class="detail" style="display:none;"></div>
+    </div>
+
+    <!-- Cookies -->
+    <div class="card">
+        <h2>🍪 Cookies</h2>
+        <div class="desc">Traditional browser cookies with a 1-year expiry. Edge strict mode may allow exceptions for specific sites.</div>
+        <div id="ckStatus" class="status checking">
+            <span class="status-icon">⏳</span> Checking...
+        </div>
+        <div id="ckDetail" class="detail" style="display:none;"></div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-write" onclick="writeAll()">✏️ Write Test Data</button>
+        <button class="btn btn-clear" onclick="clearAll()">🗑️ Clear All Data</button>
+    </div>
+
+    <div class="timestamp" id="pageTimestamp"></div>
+</div>
+
+<script>
+    const TEST_KEY = 'launcher_persistence_test';
+    const TEST_CACHE = 'launcher-persistence-test-v1';
+    const TEST_SW_PATH = 'sw-test.js';
+
+    // Detect if running as installed PWA
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+
+    // Show mode indicator
+    document.getElementById('modeIndicator').textContent = isPWA
+        ? '✅ Running as installed PWA'
+        : '🌐 Running in browser tab';
+    document.getElementById('modeIndicator').className = 'status ' + (isPWA ? 'survived' : 'fresh');
+
+    // Register service worker immediately on load
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(TEST_SW_PATH).then(reg => {
+            console.log('SW registered:', reg.scope);
+            document.getElementById('swRegStatus').textContent = 'SW registered (' + reg.scope + ')';
+        }).catch(err => {
+            console.warn('SW registration failed:', err.message);
+            document.getElementById('swRegStatus').textContent = 'SW registration failed: ' + err.message;
         });
+    }
 
-        function installPWA() {
-            if (deferredInstallPrompt) {
-                deferredInstallPrompt.prompt();
-                deferredInstallPrompt.userChoice.then(choice => {
-                    if (choice.outcome === 'accepted') {
-                        document.getElementById('installBtn').style.display = 'none';
-                    }
-                    deferredInstallPrompt = null;
-                });
-            }
-        }
+    // Capture install prompt for PWA
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        document.getElementById('installBtn').style.display = 'block';
+    });
 
-        function makeTestData() {
-            return {
-                written: new Date().toISOString(),
-                value: 'persistence_check_' + Math.random().toString(36).slice(2, 8)
-            };
-        }
-
-        function formatTime(iso) {
-            if (!iso) return 'unknown';
-            const d = new Date(iso);
-            return d.toLocaleString('en-CA', {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-        }
-
-        function setStatus(id, state, message, detail) {
-            const el = document.getElementById(id);
-            const detailEl = document.getElementById(id.replace('Status', 'Detail'));
-            el.className = 'status ' + state;
-            const icons = { checking: '⏳', survived: '✅', cleared: '❌', error: '⚠️', fresh: '📝' };
-            el.innerHTML = `<span class="status-icon">${icons[state] || '❓'}</span> ${message}`;
-            if (detail && detailEl) {
-                detailEl.textContent = detail;
-                detailEl.style.display = 'block';
-            } else if (detailEl) {
-                detailEl.style.display = 'none';
-            }
-        }
-
-        function setSummary(id, state, text) {
-            const el = document.getElementById(id);
-            const colors = { survived: 'green', cleared: 'red', error: 'red', fresh: 'blue', checking: 'yellow' };
-            el.className = 'badge ' + (colors[state] || 'yellow');
-            el.textContent = text;
-        }
-
-        // ── localStorage ──────────────────────────────
-        function checkLS() {
-            try {
-                const raw = localStorage.getItem(TEST_KEY);
-                if (raw) {
-                    const data = JSON.parse(raw);
-                    setStatus('lsStatus', 'survived',
-                        'Data survived! Written: ' + formatTime(data.written),
-                        JSON.stringify(data));
-                    setSummary('sumLS', 'survived', '✅ Survived');
-                } else {
-                    setStatus('lsStatus', 'cleared', 'No data found — was cleared or never written');
-                    setSummary('sumLS', 'cleared', '❌ Cleared');
+    function installPWA() {
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            deferredInstallPrompt.userChoice.then(choice => {
+                if (choice.outcome === 'accepted') {
+                    document.getElementById('installBtn').style.display = 'none';
                 }
-            } catch (e) {
-                setStatus('lsStatus', 'error', 'Error reading: ' + e.message);
-                setSummary('sumLS', 'error', '⚠️ Error');
-            }
-        }
-
-        function writeLS() {
-            try {
-                const data = makeTestData();
-                localStorage.setItem(TEST_KEY, JSON.stringify(data));
-                setStatus('lsStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
-                setSummary('sumLS', 'fresh', '📝 Written');
-            } catch (e) {
-                setStatus('lsStatus', 'error', 'Error writing: ' + e.message);
-                setSummary('sumLS', 'error', '⚠️ Error');
-            }
-        }
-
-        function clearLS() {
-            localStorage.removeItem(TEST_KEY);
-            setStatus('lsStatus', 'cleared', 'Cleared manually');
-            setSummary('sumLS', 'cleared', '🗑️ Cleared');
-        }
-
-        // ── IndexedDB ──────────────────────────────
-        function openIDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open('LauncherPersistenceTest', 1);
-                req.onupgradeneeded = (e) => {
-                    e.target.result.createObjectStore('data');
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
+                deferredInstallPrompt = null;
             });
         }
+    }
 
-        async function checkIDB() {
-            try {
-                const db = await openIDB();
-                return new Promise((resolve) => {
-                    const tx = db.transaction('data', 'readonly');
-                    const req = tx.objectStore('data').get(TEST_KEY);
-                    req.onsuccess = () => {
-                        if (req.result) {
-                            setStatus('idbStatus', 'survived',
-                                'Data survived! Written: ' + formatTime(req.result.written),
-                                JSON.stringify(req.result));
-                            setSummary('sumIDB', 'survived', '✅ Survived');
-                        } else {
-                            setStatus('idbStatus', 'cleared', 'No data found — was cleared or never written');
-                            setSummary('sumIDB', 'cleared', '❌ Cleared');
-                        }
-                        db.close();
-                        resolve();
-                    };
-                    req.onerror = () => {
-                        setStatus('idbStatus', 'error', 'Error reading: ' + req.error);
-                        setSummary('sumIDB', 'error', '⚠️ Error');
-                        db.close();
-                        resolve();
-                    };
-                });
-            } catch (e) {
-                setStatus('idbStatus', 'error', 'Error opening DB: ' + e.message);
-                setSummary('sumIDB', 'error', '⚠️ Error');
-            }
+    function makeTestData() {
+        return {
+            written: new Date().toISOString(),
+            value: 'persistence_check_' + Math.random().toString(36).slice(2, 8)
+        };
+    }
+
+    function formatTime(iso) {
+        if (!iso) return 'unknown';
+        const d = new Date(iso);
+        return d.toLocaleString('en-CA', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
+
+    function setStatus(id, state, message, detail) {
+        const el = document.getElementById(id);
+        const detailEl = document.getElementById(id.replace('Status', 'Detail'));
+        el.className = 'status ' + state;
+        const icons = { checking: '⏳', survived: '✅', cleared: '❌', error: '⚠️', fresh: '📝' };
+        el.innerHTML = `<span class="status-icon">${icons[state] || '❓'}</span> ${message}`;
+        if (detail && detailEl) {
+            detailEl.textContent = detail;
+            detailEl.style.display = 'block';
+        } else if (detailEl) {
+            detailEl.style.display = 'none';
         }
+    }
 
-        async function writeIDB() {
-            try {
-                const db = await openIDB();
-                const data = makeTestData();
-                const tx = db.transaction('data', 'readwrite');
-                tx.objectStore('data').put(data, TEST_KEY);
-                tx.oncomplete = () => {
-                    setStatus('idbStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
-                    setSummary('sumIDB', 'fresh', '📝 Written');
+    function setSummary(id, state, text) {
+        const el = document.getElementById(id);
+        const colors = { survived: 'green', cleared: 'red', error: 'red', fresh: 'blue', checking: 'yellow' };
+        el.className = 'badge ' + (colors[state] || 'yellow');
+        el.textContent = text;
+    }
+
+    // ── localStorage ──────────────────────────────
+    function checkLS() {
+        try {
+            const raw = localStorage.getItem(TEST_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                setStatus('lsStatus', 'survived',
+                    'Data survived! Written: ' + formatTime(data.written),
+                    JSON.stringify(data));
+                setSummary('sumLS', 'survived', '✅ Survived');
+            } else {
+                setStatus('lsStatus', 'cleared', 'No data found — was cleared or never written');
+                setSummary('sumLS', 'cleared', '❌ Cleared');
+            }
+        } catch (e) {
+            setStatus('lsStatus', 'error', 'Error reading: ' + e.message);
+            setSummary('sumLS', 'error', '⚠️ Error');
+        }
+    }
+
+    function writeLS() {
+        try {
+            const data = makeTestData();
+            localStorage.setItem(TEST_KEY, JSON.stringify(data));
+            setStatus('lsStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
+            setSummary('sumLS', 'fresh', '📝 Written');
+        } catch (e) {
+            setStatus('lsStatus', 'error', 'Error writing: ' + e.message);
+            setSummary('sumLS', 'error', '⚠️ Error');
+        }
+    }
+
+    function clearLS() {
+        localStorage.removeItem(TEST_KEY);
+        setStatus('lsStatus', 'cleared', 'Cleared manually');
+        setSummary('sumLS', 'cleared', '🗑️ Cleared');
+    }
+
+    // ── IndexedDB ──────────────────────────────
+    function openIDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('LauncherPersistenceTest', 1);
+            req.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore('data');
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function checkIDB() {
+        try {
+            const db = await openIDB();
+            return new Promise((resolve) => {
+                const tx = db.transaction('data', 'readonly');
+                const req = tx.objectStore('data').get(TEST_KEY);
+                req.onsuccess = () => {
+                    if (req.result) {
+                        setStatus('idbStatus', 'survived',
+                            'Data survived! Written: ' + formatTime(req.result.written),
+                            JSON.stringify(req.result));
+                        setSummary('sumIDB', 'survived', '✅ Survived');
+                    } else {
+                        setStatus('idbStatus', 'cleared', 'No data found — was cleared or never written');
+                        setSummary('sumIDB', 'cleared', '❌ Cleared');
+                    }
                     db.close();
+                    resolve();
                 };
-                tx.onerror = () => {
-                    setStatus('idbStatus', 'error', 'Error writing: ' + tx.error);
+                req.onerror = () => {
+                    setStatus('idbStatus', 'error', 'Error reading: ' + req.error);
                     setSummary('sumIDB', 'error', '⚠️ Error');
                     db.close();
+                    resolve();
                 };
-            } catch (e) {
-                setStatus('idbStatus', 'error', 'Error opening DB: ' + e.message);
+            });
+        } catch (e) {
+            setStatus('idbStatus', 'error', 'Error opening DB: ' + e.message);
+            setSummary('sumIDB', 'error', '⚠️ Error');
+        }
+    }
+
+    async function writeIDB() {
+        try {
+            const db = await openIDB();
+            const data = makeTestData();
+            const tx = db.transaction('data', 'readwrite');
+            tx.objectStore('data').put(data, TEST_KEY);
+            tx.oncomplete = () => {
+                setStatus('idbStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
+                setSummary('sumIDB', 'fresh', '📝 Written');
+                db.close();
+            };
+            tx.onerror = () => {
+                setStatus('idbStatus', 'error', 'Error writing: ' + tx.error);
                 setSummary('sumIDB', 'error', '⚠️ Error');
+                db.close();
+            };
+        } catch (e) {
+            setStatus('idbStatus', 'error', 'Error opening DB: ' + e.message);
+            setSummary('sumIDB', 'error', '⚠️ Error');
+        }
+    }
+
+    async function clearIDB() {
+        try {
+            const db = await openIDB();
+            const tx = db.transaction('data', 'readwrite');
+            tx.objectStore('data').delete(TEST_KEY);
+            tx.oncomplete = () => {
+                setStatus('idbStatus', 'cleared', 'Cleared manually');
+                setSummary('sumIDB', 'cleared', '🗑️ Cleared');
+                db.close();
+            };
+        } catch (e) {
+            setStatus('idbStatus', 'error', 'Error clearing: ' + e.message);
+        }
+    }
+
+    // ── Service Worker + Cache API ──────────────────
+    async function checkSW() {
+        if (!('serviceWorker' in navigator) || !('caches' in window)) {
+            setStatus('swStatus', 'error', 'Service Workers or Cache API not supported in this browser');
+            setSummary('sumSW', 'error', '⚠️ Not Supported');
+            return;
+        }
+
+        try {
+            const cache = await caches.open(TEST_CACHE);
+            const response = await cache.match(TEST_KEY);
+            if (response) {
+                const data = await response.json();
+                setStatus('swStatus', 'survived',
+                    'Data survived! Written: ' + formatTime(data.written),
+                    JSON.stringify(data));
+                setSummary('sumSW', 'survived', '✅ Survived');
+            } else {
+                setStatus('swStatus', 'cleared', 'No data found — was cleared or never written');
+                setSummary('sumSW', 'cleared', '❌ Cleared');
             }
+        } catch (e) {
+            setStatus('swStatus', 'error', 'Error reading cache: ' + e.message);
+            setSummary('sumSW', 'error', '⚠️ Error');
+        }
+    }
+
+    async function writeSW() {
+        if (!('caches' in window)) {
+            setStatus('swStatus', 'error', 'Cache API not supported');
+            setSummary('sumSW', 'error', '⚠️ Not Supported');
+            return;
         }
 
-        async function clearIDB() {
-            try {
-                const db = await openIDB();
-                const tx = db.transaction('data', 'readwrite');
-                tx.objectStore('data').delete(TEST_KEY);
-                tx.oncomplete = () => {
-                    setStatus('idbStatus', 'cleared', 'Cleared manually');
-                    setSummary('sumIDB', 'cleared', '🗑️ Cleared');
-                    db.close();
-                };
-            } catch (e) {
-                setStatus('idbStatus', 'error', 'Error clearing: ' + e.message);
+        try {
+            const data = makeTestData();
+            const cache = await caches.open(TEST_CACHE);
+            await cache.put(TEST_KEY, new Response(JSON.stringify(data), {
+                headers: { 'Content-Type': 'application/json' }
+            }));
+            setStatus('swStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
+            setSummary('sumSW', 'fresh', '📝 Written');
+        } catch (e) {
+            setStatus('swStatus', 'error', 'Error writing cache: ' + e.message);
+            setSummary('sumSW', 'error', '⚠️ Error');
+        }
+    }
+
+    async function clearSW() {
+        try {
+            await caches.delete(TEST_CACHE);
+            setStatus('swStatus', 'cleared', 'Cleared manually');
+            setSummary('sumSW', 'cleared', '🗑️ Cleared');
+        } catch (e) {
+            setStatus('swStatus', 'error', 'Error clearing: ' + e.message);
+        }
+    }
+
+    // ── Cookies ──────────────────────────────
+    const COOKIE_NAME = 'launcher_persistence_test';
+
+    function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+    }
+
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
+    }
+
+    function checkCK() {
+        try {
+            const raw = getCookie(COOKIE_NAME);
+            if (raw) {
+                const data = JSON.parse(raw);
+                setStatus('ckStatus', 'survived',
+                    'Data survived! Written: ' + formatTime(data.written),
+                    JSON.stringify(data));
+                setSummary('sumCK', 'survived', '✅ Survived');
+            } else {
+                setStatus('ckStatus', 'cleared', 'No cookie found — was cleared or never written');
+                setSummary('sumCK', 'cleared', '❌ Cleared');
             }
+        } catch (e) {
+            setStatus('ckStatus', 'error', 'Error reading cookie: ' + e.message);
+            setSummary('sumCK', 'error', '⚠️ Error');
         }
+    }
 
-        // ── Service Worker + Cache API ──────────────────
-        async function checkSW() {
-            if (!('serviceWorker' in navigator) || !('caches' in window)) {
-                setStatus('swStatus', 'error', 'Service Workers or Cache API not supported in this browser');
-                setSummary('sumSW', 'error', '⚠️ Not Supported');
-                return;
+    function writeCK() {
+        try {
+            const data = makeTestData();
+            setCookie(COOKIE_NAME, JSON.stringify(data), 365);
+            // Verify it was actually set
+            const verify = getCookie(COOKIE_NAME);
+            if (verify) {
+                setStatus('ckStatus', 'fresh', 'Cookie written at ' + formatTime(data.written) + ' (expires in 1 year)', JSON.stringify(data));
+                setSummary('sumCK', 'fresh', '📝 Written');
+            } else {
+                setStatus('ckStatus', 'error', 'Cookie was set but could not be read back — cookies may be blocked');
+                setSummary('sumCK', 'error', '⚠️ Blocked');
             }
-
-            try {
-                const cache = await caches.open(TEST_CACHE);
-                const response = await cache.match(TEST_KEY);
-                if (response) {
-                    const data = await response.json();
-                    setStatus('swStatus', 'survived',
-                        'Data survived! Written: ' + formatTime(data.written),
-                        JSON.stringify(data));
-                    setSummary('sumSW', 'survived', '✅ Survived');
-                } else {
-                    setStatus('swStatus', 'cleared', 'No data found — was cleared or never written');
-                    setSummary('sumSW', 'cleared', '❌ Cleared');
-                }
-            } catch (e) {
-                setStatus('swStatus', 'error', 'Error reading cache: ' + e.message);
-                setSummary('sumSW', 'error', '⚠️ Error');
-            }
+        } catch (e) {
+            setStatus('ckStatus', 'error', 'Error writing cookie: ' + e.message);
+            setSummary('sumCK', 'error', '⚠️ Error');
         }
+    }
 
-        async function writeSW() {
-            if (!('caches' in window)) {
-                setStatus('swStatus', 'error', 'Cache API not supported');
-                setSummary('sumSW', 'error', '⚠️ Not Supported');
-                return;
-            }
+    function clearCK() {
+        deleteCookie(COOKIE_NAME);
+        setStatus('ckStatus', 'cleared', 'Cleared manually');
+        setSummary('sumCK', 'cleared', '🗑️ Cleared');
+    }
 
-            try {
-                const data = makeTestData();
-                const cache = await caches.open(TEST_CACHE);
-                await cache.put(TEST_KEY, new Response(JSON.stringify(data), {
-                    headers: { 'Content-Type': 'application/json' }
-                }));
-                setStatus('swStatus', 'fresh', 'Data written at ' + formatTime(data.written), JSON.stringify(data));
-                setSummary('sumSW', 'fresh', '📝 Written');
-            } catch (e) {
-                setStatus('swStatus', 'error', 'Error writing cache: ' + e.message);
-                setSummary('sumSW', 'error', '⚠️ Error');
-            }
-        }
+    // ── Combined actions ──────────────────────────
+    async function writeAll() {
+        document.getElementById('summaryCard').style.display = 'block';
+        writeLS();
+        await writeIDB();
+        await writeSW();
+        writeCK();
+    }
 
-        async function clearSW() {
-            try {
-                await caches.delete(TEST_CACHE);
-                setStatus('swStatus', 'cleared', 'Cleared manually');
-                setSummary('sumSW', 'cleared', '🗑️ Cleared');
-            } catch (e) {
-                setStatus('swStatus', 'error', 'Error clearing: ' + e.message);
-            }
-        }
+    async function clearAll() {
+        clearLS();
+        await clearIDB();
+        await clearSW();
+        clearCK();
+    }
 
-        // ── Combined actions ──────────────────────────
-        async function writeAll() {
-            document.getElementById('summaryCard').style.display = 'block';
-            writeLS();
-            await writeIDB();
-            await writeSW();
-        }
+    // ── On load: check all storage ──────────────
+    async function checkAll() {
+        document.getElementById('summaryCard').style.display = 'block';
+        checkLS();
+        await checkIDB();
+        await checkSW();
+        checkCK();
+    }
 
-        async function clearAll() {
-            clearLS();
-            await clearIDB();
-            await clearSW();
-        }
+    document.getElementById('pageTimestamp').textContent =
+        'Page loaded: ' + new Date().toLocaleString('en-CA');
 
-        // ── On load: check all storage ──────────────
-        async function checkAll() {
-            document.getElementById('summaryCard').style.display = 'block';
-            checkLS();
-            await checkIDB();
-            await checkSW();
-        }
+    checkAll();
+</script>
+```
 
-        document.getElementById('pageTimestamp').textContent =
-            'Page loaded: ' + new Date().toLocaleString('en-CA');
-
-        checkAll();
-    </script>
 </body>
 </html>
