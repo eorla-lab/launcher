@@ -1,0 +1,22 @@
+{
+    "name": "Launcher - Surgical Pathology",
+    "short_name": "SurgPath",
+    "description": "EORLA Launcher configured for the Surgical Pathology department",
+    "start_url": "../?dept=surgpath",
+    "scope": "../",
+    "display": "standalone",
+    "background_color": "#12412f",
+    "theme_color": "#69c9d0",
+    "icons": [
+        {
+            "src": "../apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "../favicon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        }
+    ]
+}
