@@ -110,7 +110,7 @@
         }
 
         .search-btn {
-            right: 120px;
+            right: 70px;
         }
 
         .settings-btn:hover,
@@ -232,62 +232,6 @@
             50% { opacity: 0.7; }
         }
 
-        /* Add link button */
-        .add-btn {
-            position: fixed;
-            top: 20px;
-            right: 170px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.6rem;
-            font-weight: 300;
-            line-height: 1;
-            transition: background 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .add-btn .plus {
-    position: relative;
-    top: -1px; /* move the + up inside the button */
-}
-        
-
-        .add-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Notepad corner button */
-        .notepad-btn {
-            position: fixed;
-            top: 20px;
-            right: 70px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: background 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notepad-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         /* Copyable doc number */
         .doc-num-copy {
             cursor: pointer;
@@ -299,103 +243,6 @@
         .doc-num-copy:hover {
             color: #3b82f6;
             border-bottom-color: #3b82f6;
-        }
-
-        /* Sticky Notes */
-        .sticky-note {
-            background: #fef9c3;
-            border-radius: 2px 2px 6px 2px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            position: relative;
-            box-shadow: 2px 3px 10px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(0,0,0,0.06);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 46px;
-            transition: box-shadow 0.2s, transform 0.15s;
-            border-left: 3px solid #fbbf24;
-        }
-
-        .sticky-note:hover {
-            box-shadow: 3px 5px 14px rgba(0,0,0,0.2);
-            transform: translateY(-1px);
-        }
-
-        .sticky-note:hover .sticky-delete {
-            opacity: 1;
-        }
-
-        .sticky-preview {
-            flex: 1;
-            font-size: 0.88rem;
-            color: #374151;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sticky-meta {
-            font-size: 0.7rem;
-            color: #a16207;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .sticky-delete {
-            opacity: 0;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #9ca3af;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            line-height: 1;
-        }
-
-        .sticky-delete:hover {
-            background: rgba(239, 68, 68, 0.12);
-            color: #ef4444;
-        }
-
-        .sticky-note--expanded {
-            flex-direction: column;
-            align-items: stretch;
-            cursor: default;
-            background: #fef3c7;
-            box-shadow: 3px 6px 18px rgba(0,0,0,0.2);
-            transform: none !important;
-        }
-
-        .sticky-textarea {
-            width: 100%;
-            min-height: 90px;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 0.88rem;
-            font-family: inherit;
-            color: #1f2937;
-            resize: vertical;
-            line-height: 1.7;
-            padding: 0;
-        }
-
-        .sticky-meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid rgba(180,140,0,0.15);
-        }
-
-        .sticky-meta-row .sticky-delete {
-            opacity: 1;
         }
 
         /* Modal */
@@ -995,22 +842,6 @@
                 right: 50px;
             }
 
-            .add-btn {
-                right: 90px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.3rem;
-                top: 10px;
-            }
-
-            .notepad-btn {
-                right: 132px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.1rem;
-                top: 10px;
-            }
-
             .dashboard {
                 gap: 8px;
             }
@@ -1081,10 +912,7 @@
     </div>
 
     <div class="container">
-        
-        <button class="add-btn" onclick="openQuickAdd()" title="Add new link"><span class="plus">+</span></button>
         <button class="search-btn" onclick="openSearch()" title="Search Links">🔍</button>
-        <button class="notepad-btn" onclick="openNotepad()" title="Notes">📝</button>
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
@@ -1204,23 +1032,6 @@
 
                 <!-- Empty state when nothing found -->
                 <div id="searchEmptyState" style="display: none;" class="empty-state">No results found</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notepad Modal -->
-    <div id="notepadModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📝 Notes</h2>
-                <button class="close-btn" onclick="closeModal('notepadModal')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                    <button class="btn btn-primary" onclick="addNote()" style="padding: 8px 16px;">+ New Note</button>
-                    <span style="font-size: 0.8rem; color: #9ca3af;">Saved automatically</span>
-                </div>
-                <div id="notepadNotesContainer"></div>
             </div>
         </div>
     </div>
@@ -1362,8 +1173,6 @@
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
         let docNumberClicks = {}; // Track policy clicks by Doc #
-        let notepadNotes = []; // Array of sticky note objects
-        let condenseTimer = null; // Debounce timer for collapsing expanded notes
 
         // Paginated policy rendering
         const POLICY_PAGE_SIZE = 50;
@@ -1466,7 +1275,7 @@
                 html += `<span class="hint-tag required-tag" title="Required: results must contain this">&quot;${term}&quot;</span>`;
             }
             for (const term of query.optional) {
-                html += `<span class="hint-tag optional-tag" title="Optional: matches prioritized">${term}</span>`;
+                html += `<span class="hint-tag optional-tag" title="Include any match">${term}</span>`;
             }
             for (const term of query.excluded) {
                 html += `<span class="hint-tag excluded-tag" title="Excluded: results with this are hidden">${term}</span>`;
@@ -2090,7 +1899,7 @@
 
             // Sort using shared comparator (only when no search query - search has its own ranking)
             if (!hasQuery) {
-                filtered.sort(policySort);
+            filtered.sort(policySort);
             }
 
             // Cache for pagination
@@ -2234,7 +2043,7 @@
             if (hasQuery) {
                 for (const link of links) {
                     const fields = [link.name, link.url];
-                    if (link.aliases && Array.isArray(link.aliases)) {
+                if (link.aliases && Array.isArray(link.aliases)) {
                         fields.push(...link.aliases);
                     }
                     const score = scoreItem(fields, query);
@@ -2907,165 +2716,6 @@
             }
         }
 
-        // ── Notepad ──────────────────────────────────────────────
-
-        // Load notepad notes from localStorage (with migration from old single-note format)
-        function loadNotepadNotes() {
-            const saved = localStorage.getItem('notepadNotes');
-            try {
-                notepadNotes = saved ? JSON.parse(saved) : [];
-            } catch (e) {
-                notepadNotes = [];
-            }
-            // Migrate legacy single textarea note
-            const legacy = localStorage.getItem('notepadContent');
-            if (legacy && legacy.trim() && notepadNotes.length === 0) {
-                const now = new Date().toISOString();
-                notepadNotes = [{ id: Date.now(), content: legacy, createdAt: now, modifiedAt: now }];
-                saveNotepadNotes();
-                localStorage.removeItem('notepadContent');
-            }
-        }
-
-        function saveNotepadNotes() {
-            localStorage.setItem('notepadNotes', JSON.stringify(notepadNotes));
-        }
-
-        // Open the notepad modal (called from corner button or anywhere)
-        function openNotepad() {
-            // Close search modal if it was open
-            if (document.getElementById('searchModal').classList.contains('active')) {
-                document.getElementById('searchModal').classList.remove('active');
-                document.getElementById('linkSearch').value = '';
-            }
-            loadNotepadNotes();
-            renderNotepadNotes();
-            document.getElementById('notepadModal').classList.add('active');
-        }
-
-        // Render all notes in condensed state
-        function renderNotepadNotes() {
-            const container = document.getElementById('notepadNotesContainer');
-            if (notepadNotes.length === 0) {
-                container.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 32px 20px; font-size: 0.9rem;">No notes yet. Click <strong>+ New Note</strong> to start.</p>';
-                return;
-            }
-            const showDelete = notepadNotes.length > 1;
-            container.innerHTML = notepadNotes.map(note => {
-                const firstLine = note.content
-                    ? note.content.split('\n')[0].trim()
-                    : '';
-                const preview = firstLine || '<em style="color:#9ca3af">Empty note</em>';
-                const metaText = formatNoteDate(note.modifiedAt || note.createdAt);
-                return `
-                    <div class="sticky-note" data-note-id="${note.id}" onclick="expandNote(${note.id})">
-                        <div class="sticky-preview">${firstLine ? htmlEsc(firstLine) : '<em style="color:#9ca3af">Empty note</em>'}</div>
-                        <div class="sticky-meta">${metaText}</div>
-                        ${showDelete ? `<button class="sticky-delete" onclick="event.stopPropagation(); deleteNote(${note.id})" title="Delete note">✕</button>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Expand a note into a textarea
-        function expandNote(noteId) {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-
-            const note = notepadNotes.find(n => n.id === noteId);
-            if (!note) return;
-            const noteEl = document.querySelector(`.sticky-note[data-note-id="${noteId}"]`);
-            if (!noteEl) return;
-
-            // Already expanded?
-            if (noteEl.classList.contains('sticky-note--expanded')) return;
-
-            noteEl.classList.add('sticky-note--expanded');
-            noteEl.onclick = null;
-
-            // Build DOM to safely set values (avoids HTML-injection in textarea)
-            noteEl.innerHTML = '';
-            const textarea = document.createElement('textarea');
-            textarea.className = 'sticky-textarea';
-            textarea.value = note.content || '';
-            textarea.placeholder = 'Write your note…';
-            textarea.addEventListener('blur', () => condenseNote(noteId));
-            textarea.addEventListener('input', () => {
-                note.content = textarea.value;
-                note.modifiedAt = new Date().toISOString();
-                saveNotepadNotes();
-            });
-
-            const metaRow = document.createElement('div');
-            metaRow.className = 'sticky-meta-row';
-
-            const metaSpan = document.createElement('span');
-            metaSpan.className = 'sticky-meta';
-            metaSpan.textContent = `Created ${formatNoteDate(note.createdAt)}`;
-            metaRow.appendChild(metaSpan);
-
-            if (notepadNotes.length > 1) {
-                const delBtn = document.createElement('button');
-                delBtn.className = 'sticky-delete';
-                delBtn.title = 'Delete note';
-                delBtn.textContent = '✕';
-                delBtn.addEventListener('mousedown', e => e.preventDefault()); // keep focus on textarea
-                delBtn.addEventListener('click', () => deleteNote(noteId));
-                metaRow.appendChild(delBtn);
-            }
-
-            noteEl.appendChild(textarea);
-            noteEl.appendChild(metaRow);
-
-            textarea.focus();
-            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-        }
-
-        // Collapse an expanded note back to a bar (delayed so clicks can fire first)
-        function condenseNote(noteId) {
-            condenseTimer = setTimeout(() => {
-                condenseTimer = null;
-                renderNotepadNotes();
-            }, 160);
-        }
-
-        // Add a new blank note at the top and immediately expand it
-        function addNote() {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-            const now = new Date().toISOString();
-            const newNote = { id: Date.now(), content: '', createdAt: now, modifiedAt: now };
-            notepadNotes.unshift(newNote);
-            saveNotepadNotes();
-            renderNotepadNotes();
-            expandNote(newNote.id);
-        }
-
-        // Delete a note (only shown when there are 2+ notes)
-        function deleteNote(noteId) {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-            if (!confirm('Delete this note?')) return;
-            notepadNotes = notepadNotes.filter(n => n.id !== noteId);
-            saveNotepadNotes();
-            renderNotepadNotes();
-        }
-
-        // Format a date for note metadata
-        function formatNoteDate(iso) {
-            if (!iso) return '';
-            const d = new Date(iso);
-            const now = new Date();
-            if (d.toDateString() === now.toDateString()) {
-                return d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' });
-            }
-            const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
-            if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-            return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
-        }
-
-        // Safe HTML escaping for note previews
-        function htmlEsc(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-
         // ── Drag & Drop: Drop INTO the app to create a link ─────────────
     (function () {
         let dragCounter = 0; // track nested dragenter/dragleave
@@ -3261,20 +2911,6 @@
 
         // ─────────────────────────────────────────────────────────
 
-        // Open quick-add: opens settings on Manage tab with the add form expanded
-        function openQuickAdd() {
-            renderLinkManager();
-            document.getElementById('settingsModal').classList.add('active');
-            // Activate manage tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('manageTab').classList.add('active');
-            document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
-            // Show add form immediately
-            document.getElementById('addLinkForm').style.display = 'block';
-            setTimeout(() => document.getElementById('newLinkName').focus(), 100);
-        }
-
         // Close modal
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
@@ -3286,7 +2922,6 @@
             } else if (modalId === 'policiesModal') {
                 document.getElementById('policySearch').value = '';
                 toggleClearButton('policySearch', 'policySearchClear');
-                // Clear subfolder (not sticky) but keep folder (sticky, saved to localStorage)
                 document.getElementById('subfolderFilter').value = '';
                 toggleFilterClearButtons();
             }

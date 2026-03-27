@@ -1,7 +1,7 @@
 {
     "name": "Launcher - Histology",
     "short_name": "Histo",
-    "description": "EORLA Launcher configured for the Histology department",
+    "description": "EORLA Launcher configured for Histology",
     "start_url": "../?dept=histo",
     "scope": "../",
     "display": "standalone",

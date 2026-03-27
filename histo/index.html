@@ -74,13 +74,24 @@
         }
         .steps strong { color: #1f2937; }
         .hidden { display: none; }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            margin: 0 auto 14px;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="icon">🔬</div>
-        <h1>EORLA Launcher</h1>
-        <p><span class="dept">Histology</span> Department</p>
+            <img src="../icons/eorla.jpeg" alt="EORLA" class="header-logo">
+            <h1>Launcher</h1>
+        <p><span class="dept">Histology</span></p>
 
         <div id="installSection">
             <div class="steps">
@@ -89,7 +100,7 @@
                 2. The app will appear on your desktop/taskbar<br>
                 3. Your tiles will be pre-configured for Histology
             </div>
-            <button class="btn" id="installBtn" onclick="installPWA()">📲 Install App</button>
+            <button class="btn" id="installBtn" onclick="installPWA()">Install App</button>
             <button class="btn-secondary" onclick="window.location.href='../?dept=histo'">or open without installing →</button>
         </div>
 
