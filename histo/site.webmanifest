@@ -2,7 +2,7 @@
     "name": "Launcher - Histology",
     "short_name": "Histo",
     "description": "EORLA Launcher configured for Histology",
-    "start_url": "../?dept=histo",
+    "start_url": "../?layout=0005fy1rO0",
     "scope": "../",
     "display": "standalone",
     "background_color": "#12412f",
