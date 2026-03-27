@@ -459,6 +459,108 @@
             font-weight: inherit;
         }
 
+        .search-hint {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            min-height: 0;
+        }
+
+        .search-hint:empty {
+            display: none;
+        }
+
+        .search-hint .hint-tag {
+            padding: 1px 7px;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .search-hint .required-tag {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .search-hint .excluded-tag {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            text-decoration: line-through;
+        }
+
+        .search-hint .optional-tag {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .search-hint .hint-label {
+            color: #9ca3af;
+            font-size: 0.7rem;
+            margin-right: 2px;
+        }
+
+        .search-syntax-help {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .search-syntax-help:hover .syntax-tooltip {
+            display: block;
+        }
+
+        .syntax-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 400;
+            text-align: left;
+        }
+
+        .syntax-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 12px;
+            border: 5px solid transparent;
+            border-top-color: #1f2937;
+        }
+
+        .syntax-tooltip code {
+            background: rgba(255,255,255,0.15);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.72rem;
+        }
+
         .policy-details {
             display: none;
             margin-top: 6px;
@@ -854,6 +956,9 @@
                             onmouseover="this.style.background='#f3f4f6'"
                             onmouseout="this.style.background='none'">✕</button>
                     </div>
+                    <div class="search-hint" id="policySearchHints" style="display: flex; align-items: center;">
+                        <span class="search-syntax-help">?<span class="syntax-tooltip"><code>word</code> optional match (OR)<br><code>"word"</code> required match (AND)<br><code>-word</code> exclude matches</span></span>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; min-width: 0;">
@@ -901,6 +1006,9 @@
                             style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
                             onmouseover="this.style.background='#f3f4f6'"
                             onmouseout="this.style.background='none'">✕</button>
+                    </div>
+                    <div class="search-hint" id="linkSearchHints" style="display: flex; align-items: center;">
+                        <span class="search-syntax-help">?<span class="syntax-tooltip"><code>word</code> optional match (OR)<br><code>"word"</code> required match (AND)<br><code>-word</code> exclude matches</span></span>
                     </div>
                 </div>
 
@@ -1072,10 +1180,108 @@
         let policiesRenderedCount = 0; // how many are currently in the DOM
 
         // Highlight search term occurrences in text (returns HTML string)
-        function highlightText(text, term) {
-            if (!term || !text) return text || '';
-            const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="search-hl">$1</mark>');
+        // Accepts a single string or an array of terms
+        function highlightText(text, terms) {
+            if (!text) return '';
+            if (!terms) return text;
+            const termList = Array.isArray(terms) ? terms : [terms];
+            const validTerms = termList.filter(Boolean);
+            if (validTerms.length === 0) return text;
+            const escaped = validTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            const pattern = escaped.join('|');
+            return text.replace(new RegExp(`(${pattern})`, 'gi'), '<mark class="search-hl">$1</mark>');
+        }
+
+        // Parse search input into structured boolean query
+        // "required term" optional -excluded => { required: ["required term"], optional: ["optional"], excluded: ["excluded"] }
+        function parseSearchQuery(input) {
+            const required = [];
+            const excluded = [];
+            const optional = [];
+
+            if (!input || !input.trim()) return { required, excluded, optional };
+
+            // Extract quoted phrases first
+            const quoteRegex = /"([^"]+)"/g;
+            let match;
+            let remaining = input;
+            while ((match = quoteRegex.exec(input)) !== null) {
+                required.push(match[1].toLowerCase());
+                remaining = remaining.replace(match[0], ' ');
+            }
+
+            // Split remaining by whitespace, process -terms and plain terms
+            remaining.trim().split(/\s+/).filter(Boolean).forEach(token => {
+                if (token.startsWith('-') && token.length > 1) {
+                    excluded.push(token.slice(1).toLowerCase());
+                } else if (token !== '-') {
+                    optional.push(token.toLowerCase());
+                }
+            });
+
+            return { required, excluded, optional };
+        }
+
+        // Score an item's text fields against a parsed query
+        // Returns -1 if excluded or missing required terms (filter out)
+        // Returns 0+ for matches (higher = more terms matched)
+        function scoreItem(textFields, query) {
+            const combined = textFields.filter(Boolean).join(' ').toLowerCase();
+
+            // Check exclusions first - any excluded term present = reject
+            for (const term of query.excluded) {
+                if (combined.includes(term)) return -1;
+            }
+
+            // Check required terms - ALL must be present
+            for (const term of query.required) {
+                if (!combined.includes(term)) return -1;
+            }
+
+            // Score optional terms - count how many match
+            if (query.optional.length === 0) {
+                return query.required.length > 0 ? 1 : 0;
+            }
+
+            let score = 0;
+            for (const term of query.optional) {
+                if (combined.includes(term)) score++;
+            }
+
+            // If no required terms and no optional matches, exclude this item
+            if (score === 0 && query.required.length === 0) return -1;
+
+            return score;
+        }
+
+        // Get highlight terms from a parsed query (required + optional, not excluded)
+        function getHighlightTerms(query) {
+            return query.required.concat(query.optional);
+        }
+
+        // Render search hint tags showing how the query is being parsed
+        function renderSearchHints(containerId, query) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const hasTerms = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
+            if (!hasTerms) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (const term of query.required) {
+                html += `<span class="hint-tag required-tag" title="Required: results must contain this">&quot;${term}&quot;</span>`;
+            }
+            for (const term of query.optional) {
+                html += `<span class="hint-tag optional-tag" title="Include any match">${term}</span>`;
+            }
+            for (const term of query.excluded) {
+                html += `<span class="hint-tag excluded-tag" title="Excluded: results with this are hidden">${term}</span>`;
+            }
+
+            container.innerHTML = html;
         }
 
         // Toggle policy details section open/closed
@@ -1615,10 +1821,12 @@
             const sentinel = document.getElementById('policyLoadMore');
             if (sentinel) sentinel.remove();
 
-            const searchTerm = (document.getElementById('policySearch')?.value || '').toLowerCase();
+            const rawSearch = (document.getElementById('policySearch')?.value || '');
+            const query = parseSearchQuery(rawSearch);
+            const hlTerms = getHighlightTerms(query);
             const fragment = document.createDocumentFragment();
             const temp = document.createElement('div');
-            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, searchTerm)).join('');
+            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, hlTerms)).join('');
             while (temp.firstChild) fragment.appendChild(temp.firstChild);
 
             policiesRenderedCount += nextBatch.length;
@@ -1655,20 +1863,30 @@
             populateFilters();
 
             // Get current filter values
-            const searchTerm = document.getElementById('policySearch').value.toLowerCase();
+            const rawSearch = document.getElementById('policySearch').value;
+            const query = parseSearchQuery(rawSearch);
             const folderFilter = document.getElementById('folderFilter').value;
             const subfolderFilter = document.getElementById('subfolderFilter').value;
 
-            // Filter policies
-            let filtered = policies;
+            // Render search hints
+            renderSearchHints('policySearchHints', query);
 
-            if (searchTerm) {
-                filtered = filtered.filter(policy =>
-                    (policy.title && policy.title.toLowerCase().includes(searchTerm)) ||
-                    (policy.category && policy.category.toLowerCase().includes(searchTerm)) ||
-                    (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) ||
-                    (policy.owner && policy.owner.toLowerCase().includes(searchTerm))
-                );
+            // Filter policies using boolean search
+            let filtered = policies;
+            const hasQuery = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
+
+            if (hasQuery) {
+                const scored = [];
+                for (const policy of filtered) {
+                    const score = scoreItem([policy.title, policy.category, policy.subfolder, policy.owner], query);
+                    if (score >= 0) scored.push({ policy, score });
+                }
+                // Sort by score descending, then by existing policySort
+                scored.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return policySort(a.policy, b.policy);
+                });
+                filtered = scored.map(s => s.policy);
             }
 
             if (folderFilter) {
@@ -1679,8 +1897,10 @@
                 filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
             }
 
-            // Sort using shared comparator
+            // Sort using shared comparator (only when no search query - search has its own ranking)
+            if (!hasQuery) {
             filtered.sort(policySort);
+            }
 
             // Cache for pagination
             currentFilteredPolicies = filtered;
@@ -1805,49 +2025,65 @@
 
         // Combined search for links and policies
         function filterLinksAndPolicies() {
-            const searchTerm = document.getElementById('linkSearch').value.toLowerCase();
+            const rawSearch = document.getElementById('linkSearch').value;
+            const query = parseSearchQuery(rawSearch);
+            const hlTerms = getHighlightTerms(query);
             const searchResults = document.getElementById('searchResults');
             const policySearchResults = document.getElementById('policySearchResults');
             const linksSection = document.getElementById('linksSection');
             const policiesSection = document.getElementById('policiesSection');
             const emptyState = document.getElementById('searchEmptyState');
+            const hasQuery = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
 
-            // Filter links
-            const filteredLinks = links.filter(link => {
-                if (link.name.toLowerCase().includes(searchTerm)) return true;
-                if (link.url.toLowerCase().includes(searchTerm)) return true;
+            // Render search hints
+            renderSearchHints('linkSearchHints', query);
+
+            // Filter and score links
+            let scoredLinks = [];
+            if (hasQuery) {
+                for (const link of links) {
+                    const fields = [link.name, link.url];
                 if (link.aliases && Array.isArray(link.aliases)) {
-                    return link.aliases.some(alias => alias.toLowerCase().includes(searchTerm));
+                        fields.push(...link.aliases);
+                    }
+                    const score = scoreItem(fields, query);
+                    if (score >= 0) scoredLinks.push({ item: link, score });
                 }
-                return false;
-            });
+            }
 
-            // Filter policies
-            const filteredPolicies = policies.filter(policy => {
-                if (policy.title && policy.title.toLowerCase().includes(searchTerm)) return true;
-                if (policy.category && policy.category.toLowerCase().includes(searchTerm)) return true;
-                if (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) return true;
-                if (policy.owner && policy.owner.toLowerCase().includes(searchTerm)) return true;
-                return false;
-            });
+            // Filter and score policies
+            let scoredPolicies = [];
+            if (hasQuery) {
+                for (const policy of policies) {
+                    const score = scoreItem([policy.title, policy.category, policy.subfolder, policy.owner], query);
+                    if (score >= 0) scoredPolicies.push({ item: policy, score });
+                }
+            }
 
-            // Sort links by NEW status, then clicks
-            const sortedLinks = [...filteredLinks].sort((a, b) => {
-                const aIsNew = a.isNew && a.clicks === 0;
-                const bIsNew = b.isNew && b.clicks === 0;
+            // Sort links by score, then NEW status, then clicks
+            scoredLinks.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                const aIsNew = a.item.isNew && a.item.clicks === 0;
+                const bIsNew = b.item.isNew && b.item.clicks === 0;
                 if (aIsNew && !bIsNew) return -1;
                 if (!aIsNew && bIsNew) return 1;
-                return b.clicks - a.clicks;
+                return b.item.clicks - a.item.clicks;
             });
 
-            // Sort policies: Clicked first (by clicks), then unclicked by date
-            const sortedPolicies = [...filteredPolicies].sort(policySort);
+            // Sort policies by score, then existing policySort
+            scoredPolicies.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return policySort(a.item, b.item);
+            });
+
+            const sortedLinks = scoredLinks.map(s => s.item);
+            const sortedPolicies = scoredPolicies.map(s => s.item);
 
             // Show/hide sections based on results
             if (sortedLinks.length === 0 && sortedPolicies.length === 0) {
                 linksSection.style.display = 'none';
                 policiesSection.style.display = 'none';
-                emptyState.style.display = 'block';
+                emptyState.style.display = hasQuery ? 'block' : 'none';
                 return;
             }
 
@@ -1931,7 +2167,7 @@
                     ${iconDisplay}
                     <div style="min-width:0;">
                         <div class="policy-title">
-                            ${highlightText(link.name, searchTerm)}
+                            ${highlightText(link.name, hlTerms)}
                             ${isNew ? '<span style="color:#ef4444;font-weight:700;font-size:0.7rem;margin-left:8px;">NEW</span>' : ''}
                         </div>
                         <span class="policy-category">
@@ -1953,9 +2189,9 @@
                 policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
                     <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                         <div class="policy-info">
-                            <div class="policy-title">${highlightText(policy.title, searchTerm)}</div>
-                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${highlightText(policy.category, searchTerm)}</div>` : ''}
-                            ${policy.subfolder ? `<span class="policy-category">${highlightText(policy.subfolder, searchTerm)}</span>` : ''}
+                            <div class="policy-title">${highlightText(policy.title, hlTerms)}</div>
+                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${highlightText(policy.category, hlTerms)}</div>` : ''}
+                            ${policy.subfolder ? `<span class="policy-category">${highlightText(policy.subfolder, hlTerms)}</span>` : ''}
                         </div>
                         <span class="external-icon">↗</span>
                     </li>
