@@ -110,7 +110,7 @@
         }
 
         .search-btn {
-            right: 120px;
+            right: 70px;
         }
 
         .settings-btn:hover,
@@ -232,62 +232,6 @@
             50% { opacity: 0.7; }
         }
 
-        /* Add link button */
-        .add-btn {
-            position: fixed;
-            top: 20px;
-            right: 170px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.6rem;
-            font-weight: 300;
-            line-height: 1;
-            transition: background 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .add-btn .plus {
-    position: relative;
-    top: -1px; /* move the + up inside the button */
-}
-        
-
-        .add-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Notepad corner button */
-        .notepad-btn {
-            position: fixed;
-            top: 20px;
-            right: 70px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: background 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notepad-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         /* Copyable doc number */
         .doc-num-copy {
             cursor: pointer;
@@ -299,103 +243,6 @@
         .doc-num-copy:hover {
             color: #3b82f6;
             border-bottom-color: #3b82f6;
-        }
-
-        /* Sticky Notes */
-        .sticky-note {
-            background: #fef9c3;
-            border-radius: 2px 2px 6px 2px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            position: relative;
-            box-shadow: 2px 3px 10px rgba(0,0,0,0.14), inset 0 -1px 0 rgba(0,0,0,0.06);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 46px;
-            transition: box-shadow 0.2s, transform 0.15s;
-            border-left: 3px solid #fbbf24;
-        }
-
-        .sticky-note:hover {
-            box-shadow: 3px 5px 14px rgba(0,0,0,0.2);
-            transform: translateY(-1px);
-        }
-
-        .sticky-note:hover .sticky-delete {
-            opacity: 1;
-        }
-
-        .sticky-preview {
-            flex: 1;
-            font-size: 0.88rem;
-            color: #374151;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sticky-meta {
-            font-size: 0.7rem;
-            color: #a16207;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .sticky-delete {
-            opacity: 0;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #9ca3af;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            line-height: 1;
-        }
-
-        .sticky-delete:hover {
-            background: rgba(239, 68, 68, 0.12);
-            color: #ef4444;
-        }
-
-        .sticky-note--expanded {
-            flex-direction: column;
-            align-items: stretch;
-            cursor: default;
-            background: #fef3c7;
-            box-shadow: 3px 6px 18px rgba(0,0,0,0.2);
-            transform: none !important;
-        }
-
-        .sticky-textarea {
-            width: 100%;
-            min-height: 90px;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 0.88rem;
-            font-family: inherit;
-            color: #1f2937;
-            resize: vertical;
-            line-height: 1.7;
-            padding: 0;
-        }
-
-        .sticky-meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid rgba(180,140,0,0.15);
-        }
-
-        .sticky-meta-row .sticky-delete {
-            opacity: 1;
         }
 
         /* Modal */
@@ -602,6 +449,149 @@
         .external-icon {
             margin-left: 12px;
             color: #6b7280;
+        }
+
+        mark.search-hl {
+            background: #fef08a;
+            color: inherit;
+            border-radius: 2px;
+            padding: 0 1px;
+            font-weight: inherit;
+        }
+
+        .search-hint {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            min-height: 0;
+        }
+
+        .search-hint:empty {
+            display: none;
+        }
+
+        .search-hint .hint-tag {
+            padding: 1px 7px;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .search-hint .required-tag {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .search-hint .excluded-tag {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            text-decoration: line-through;
+        }
+
+        .search-hint .optional-tag {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .search-hint .hint-label {
+            color: #9ca3af;
+            font-size: 0.7rem;
+            margin-right: 2px;
+        }
+
+        .search-syntax-help {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .search-syntax-help:hover .syntax-tooltip {
+            display: block;
+        }
+
+        .syntax-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 400;
+            text-align: left;
+        }
+
+        .syntax-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 12px;
+            border: 5px solid transparent;
+            border-top-color: #1f2937;
+        }
+
+        .syntax-tooltip code {
+            background: rgba(255,255,255,0.15);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.72rem;
+        }
+
+        .policy-details {
+            display: none;
+            margin-top: 6px;
+        }
+
+        .policy-details.policy-details--open {
+            display: block;
+        }
+
+        .policy-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .policy-expand-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            line-height: 1;
+        }
+
+        .policy-expand-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
         }
 
         /* Link Management */
@@ -852,22 +842,6 @@
                 right: 50px;
             }
 
-            .add-btn {
-                right: 90px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.3rem;
-                top: 10px;
-            }
-
-            .notepad-btn {
-                right: 132px;
-                width: 35px;
-                height: 35px;
-                font-size: 1.1rem;
-                top: 10px;
-            }
-
             .dashboard {
                 gap: 8px;
             }
@@ -938,10 +912,7 @@
     </div>
 
     <div class="container">
-        
-        <button class="add-btn" onclick="openQuickAdd()" title="Add new link"><span class="plus">+</span></button>
         <button class="search-btn" onclick="openSearch()" title="Search Links">🔍</button>
-        <button class="notepad-btn" onclick="openNotepad()" title="Notes">📝</button>
         <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
         <div class="header">
@@ -984,6 +955,9 @@
                             style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
                             onmouseover="this.style.background='#f3f4f6'"
                             onmouseout="this.style.background='none'">✕</button>
+                    </div>
+                    <div class="search-hint" id="policySearchHints" style="display: flex; align-items: center;">
+                        <span class="search-syntax-help">?<span class="syntax-tooltip"><code>word</code> optional match (OR)<br><code>"word"</code> required match (AND)<br><code>-word</code> exclude matches</span></span>
                     </div>
                 </div>
 
@@ -1033,6 +1007,9 @@
                             onmouseover="this.style.background='#f3f4f6'"
                             onmouseout="this.style.background='none'">✕</button>
                     </div>
+                    <div class="search-hint" id="linkSearchHints" style="display: flex; align-items: center;">
+                        <span class="search-syntax-help">?<span class="syntax-tooltip"><code>word</code> optional match (OR)<br><code>"word"</code> required match (AND)<br><code>-word</code> exclude matches</span></span>
+                    </div>
                 </div>
 
                 <!-- Links Section -->
@@ -1055,23 +1032,6 @@
 
                 <!-- Empty state when nothing found -->
                 <div id="searchEmptyState" style="display: none;" class="empty-state">No results found</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notepad Modal -->
-    <div id="notepadModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📝 Notes</h2>
-                <button class="close-btn" onclick="closeModal('notepadModal')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                    <button class="btn btn-primary" onclick="addNote()" style="padding: 8px 16px;">+ New Note</button>
-                    <span style="font-size: 0.8rem; color: #9ca3af;">Saved automatically</span>
-                </div>
-                <div id="notepadNotesContainer"></div>
             </div>
         </div>
     </div>
@@ -1182,10 +1142,10 @@
                             <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-                                <li>Drag and drop URLs or text into the app to create links</li>
-                                <li>Drag tiles out of the app to bookmarks, desktop, or other apps</li>
-                                <li>Right-click context menu on tiles to reset clicks or remove custom links</li>
-                                <li>Layout codes: save and apply your tile arrangement between different workstations</li>
+                                <li>Drag and drop URLs into the app to quickly add custom links</li>
+                                <li>Drag a tile out of the app to quickly export a link</li>
+                                <li>Right-click on tiles to reset clicks or remove custom links</li>
+                                <li>Layout codes: save and apply your tile arrangement to other workstations</li>
                             </ul>
                         </div>
                         <div style="margin-bottom: 24px;">
@@ -1194,8 +1154,8 @@
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
                                 <li>Initial release</li>
                                 <li>3x3 grid dashboard with auto-sorting by clicks</li>
-                                <li>NEW badge for unclicked links</li>
-                                <li>Search functionality for all links</li>
+                                <li>NEW badge for unclicked links and policies</li>
+                                <li>Search functionality for all links and policies</li>
                                 <li>Custom link creation</li>
                                 <li>Import/export configuration</li>
                                 <li>Policy & procedures directory</li>
@@ -1213,13 +1173,123 @@
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
         let docNumberClicks = {}; // Track policy clicks by Doc #
-        let notepadNotes = []; // Array of sticky note objects
-        let condenseTimer = null; // Debounce timer for collapsing expanded notes
 
         // Paginated policy rendering
         const POLICY_PAGE_SIZE = 50;
         let currentFilteredPolicies = []; // cached sorted/filtered list
         let policiesRenderedCount = 0; // how many are currently in the DOM
+
+        // Highlight search term occurrences in text (returns HTML string)
+        // Accepts a single string or an array of terms
+        function highlightText(text, terms) {
+            if (!text) return '';
+            if (!terms) return text;
+            const termList = Array.isArray(terms) ? terms : [terms];
+            const validTerms = termList.filter(Boolean);
+            if (validTerms.length === 0) return text;
+            const escaped = validTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            const pattern = escaped.join('|');
+            return text.replace(new RegExp(`(${pattern})`, 'gi'), '<mark class="search-hl">$1</mark>');
+        }
+
+        // Parse search input into structured boolean query
+        // "required term" optional -excluded => { required: ["required term"], optional: ["optional"], excluded: ["excluded"] }
+        function parseSearchQuery(input) {
+            const required = [];
+            const excluded = [];
+            const optional = [];
+
+            if (!input || !input.trim()) return { required, excluded, optional };
+
+            // Extract quoted phrases first
+            const quoteRegex = /"([^"]+)"/g;
+            let match;
+            let remaining = input;
+            while ((match = quoteRegex.exec(input)) !== null) {
+                required.push(match[1].toLowerCase());
+                remaining = remaining.replace(match[0], ' ');
+            }
+
+            // Split remaining by whitespace, process -terms and plain terms
+            remaining.trim().split(/\s+/).filter(Boolean).forEach(token => {
+                if (token.startsWith('-') && token.length > 1) {
+                    excluded.push(token.slice(1).toLowerCase());
+                } else if (token !== '-') {
+                    optional.push(token.toLowerCase());
+                }
+            });
+
+            return { required, excluded, optional };
+        }
+
+        // Score an item's text fields against a parsed query
+        // Returns -1 if excluded or missing required terms (filter out)
+        // Returns 0+ for matches (higher = more terms matched)
+        function scoreItem(textFields, query) {
+            const combined = textFields.filter(Boolean).join(' ').toLowerCase();
+
+            // Check exclusions first - any excluded term present = reject
+            for (const term of query.excluded) {
+                if (combined.includes(term)) return -1;
+            }
+
+            // Check required terms - ALL must be present
+            for (const term of query.required) {
+                if (!combined.includes(term)) return -1;
+            }
+
+            // Score optional terms - count how many match
+            if (query.optional.length === 0) {
+                return query.required.length > 0 ? 1 : 0;
+            }
+
+            let score = 0;
+            for (const term of query.optional) {
+                if (combined.includes(term)) score++;
+            }
+
+            // If no required terms and no optional matches, exclude this item
+            if (score === 0 && query.required.length === 0) return -1;
+
+            return score;
+        }
+
+        // Get highlight terms from a parsed query (required + optional, not excluded)
+        function getHighlightTerms(query) {
+            return query.required.concat(query.optional);
+        }
+
+        // Render search hint tags showing how the query is being parsed
+        function renderSearchHints(containerId, query) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const hasTerms = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
+            if (!hasTerms) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (const term of query.required) {
+                html += `<span class="hint-tag required-tag" title="Required: results must contain this">&quot;${term}&quot;</span>`;
+            }
+            for (const term of query.optional) {
+                html += `<span class="hint-tag optional-tag" title="Include any match">${term}</span>`;
+            }
+            for (const term of query.excluded) {
+                html += `<span class="hint-tag excluded-tag" title="Excluded: results with this are hidden">${term}</span>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Toggle policy details section open/closed
+        function togglePolicyDetails(btn) {
+            const details = btn.closest('.policy-item').querySelector('.policy-details');
+            const expanded = details.classList.toggle('policy-details--open');
+            btn.textContent = expanded ? '▴' : '▾';
+        }
 
         // Calculate if background color is light or dark
         function getContrastColor(color) {
@@ -1261,6 +1331,7 @@
             loadPolicyClicks(); // Load policy click data FIRST
             await loadDefaultData();
             loadUserData();
+            checkDeptParam(); // Apply department layout for first-time users
             renderDashboard();
             renderPolicies();
             checkLayoutParam(); // Check for ?layout= URL parameter
@@ -1690,42 +1761,52 @@
         }
 
         // Build HTML for a single policy item
-        function buildPolicyItemHTML(policy) {
+        function buildPolicyItemHTML(policy, searchTerm = '') {
             const isNew = policy.isNew && policy.clicks === 0;
             const safeGuid = policy.guid.replace(/'/g, "\\'");
             const safeDocNum = policy.docNum.replace(/'/g, "\\'");
             const safeUrl = policy.url.replace(/'/g, "\\'");
+            const titleHtml = highlightText(policy.title, searchTerm);
+            const categoryHtml = policy.category ? highlightText(policy.category, searchTerm) : '';
+            const hasDetails = policy.docNum || policy.version || policy.docType ||
+                               policy.lastRevision || policy.revisedBy || policy.modificationType ||
+                               policy.writtenBy || policy.owner || policy.clicks;
             return `
                 <li class="policy-item" onclick="handlePolicyClick('${safeGuid}', '${safeDocNum}', '${safeUrl}')">
                     <div class="policy-info">
                         <div class="policy-title">
-                            ${policy.title}
+                            ${titleHtml}
                             ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
                         </div>
-                        ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${safeDocNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
-                            ${policy.docNum && policy.version ? ' • ' : ''}
-                            ${policy.version ? `${policy.version}` : ''}
-                            ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
-                            ${policy.docType ? `${policy.docType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
-                            ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
-                            ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
-                            ${policy.modificationType ? `${policy.modificationType}` : ''}
-                        </div>
-                        <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
-                            ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
-                            ${policy.writtenBy && policy.owner ? ' • ' : ''}
-                            ${policy.owner ? `Owner: ${policy.owner}` : ''}
-                            ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
-                            ${policy.clicks ? `${policy.clicks} ${policy.clicks === 1 ? 'click' : 'clicks'}` : ''}
-                        </div>
-                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${policy.subfolder}</span>` : ''}
+                        ${categoryHtml ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${categoryHtml}</div>` : ''}
+                        ${policy.subfolder ? `<span class="policy-category" onclick="event.stopPropagation(); filterBySubfolder('${policy.subfolder.replace(/'/g, "\\'")}');" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='#dbeafe'; this.style.color='#1e40af';" title="Filter by: ${policy.subfolder}">📁 ${highlightText(policy.subfolder, searchTerm)}</span>` : ''}
+                        ${hasDetails ? `<div class="policy-details">
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.docNum ? `Doc #<span class="doc-num-copy" onclick="event.stopPropagation(); copyDocNum('${safeDocNum}', this)" title="Click to copy Doc #${policy.docNum}">${policy.docNum}</span>` : ''}
+                                ${policy.docNum && policy.version ? ' • ' : ''}
+                                ${policy.version ? `${policy.version}` : ''}
+                                ${(policy.docNum || policy.version) && policy.docType ? ' • ' : ''}
+                                ${policy.docType ? `${policy.docType}` : ''}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.lastRevision ? `Revised: ${policy.lastRevision}` : ''}
+                                ${policy.lastRevision && policy.revisedBy ? ` by ${policy.revisedBy}` : ''}
+                                ${(policy.lastRevision || policy.revisedBy) && policy.modificationType ? ' • ' : ''}
+                                ${policy.modificationType ? `${policy.modificationType}` : ''}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 4px;">
+                                ${policy.writtenBy ? `Written by: ${policy.writtenBy}` : ''}
+                                ${policy.writtenBy && policy.owner ? ' • ' : ''}
+                                ${policy.owner ? `Owner: ${policy.owner}` : ''}
+                                ${(policy.writtenBy || policy.owner) && policy.clicks ? ' • ' : ''}
+                                ${policy.clicks ? `${policy.clicks} ${policy.clicks === 1 ? 'click' : 'clicks'}` : ''}
+                            </div>
+                        </div>` : ''}
                     </div>
-                    <span class="external-icon">↗</span>
+                    <div class="policy-actions">
+                        ${hasDetails ? `<button class="policy-expand-btn" onclick="event.stopPropagation(); togglePolicyDetails(this)" title="Show details">▾</button>` : ''}
+                        <span class="external-icon"></span>
+                    </div>
                 </li>
             `;
         }
@@ -1740,9 +1821,12 @@
             const sentinel = document.getElementById('policyLoadMore');
             if (sentinel) sentinel.remove();
 
+            const rawSearch = (document.getElementById('policySearch')?.value || '');
+            const query = parseSearchQuery(rawSearch);
+            const hlTerms = getHighlightTerms(query);
             const fragment = document.createDocumentFragment();
             const temp = document.createElement('div');
-            temp.innerHTML = nextBatch.map(buildPolicyItemHTML).join('');
+            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, hlTerms)).join('');
             while (temp.firstChild) fragment.appendChild(temp.firstChild);
 
             policiesRenderedCount += nextBatch.length;
@@ -1779,20 +1863,30 @@
             populateFilters();
 
             // Get current filter values
-            const searchTerm = document.getElementById('policySearch').value.toLowerCase();
+            const rawSearch = document.getElementById('policySearch').value;
+            const query = parseSearchQuery(rawSearch);
             const folderFilter = document.getElementById('folderFilter').value;
             const subfolderFilter = document.getElementById('subfolderFilter').value;
 
-            // Filter policies
-            let filtered = policies;
+            // Render search hints
+            renderSearchHints('policySearchHints', query);
 
-            if (searchTerm) {
-                filtered = filtered.filter(policy =>
-                    (policy.title && policy.title.toLowerCase().includes(searchTerm)) ||
-                    (policy.category && policy.category.toLowerCase().includes(searchTerm)) ||
-                    (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) ||
-                    (policy.owner && policy.owner.toLowerCase().includes(searchTerm))
-                );
+            // Filter policies using boolean search
+            let filtered = policies;
+            const hasQuery = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
+
+            if (hasQuery) {
+                const scored = [];
+                for (const policy of filtered) {
+                    const score = scoreItem([policy.title, policy.category, policy.subfolder, policy.owner], query);
+                    if (score >= 0) scored.push({ policy, score });
+                }
+                // Sort by score descending, then by existing policySort
+                scored.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return policySort(a.policy, b.policy);
+                });
+                filtered = scored.map(s => s.policy);
             }
 
             if (folderFilter) {
@@ -1803,8 +1897,10 @@
                 filtered = filtered.filter(policy => policy.subfolder === subfolderFilter);
             }
 
-            // Sort using shared comparator
+            // Sort using shared comparator (only when no search query - search has its own ranking)
+            if (!hasQuery) {
             filtered.sort(policySort);
+            }
 
             // Cache for pagination
             currentFilteredPolicies = filtered;
@@ -1929,49 +2025,65 @@
 
         // Combined search for links and policies
         function filterLinksAndPolicies() {
-            const searchTerm = document.getElementById('linkSearch').value.toLowerCase();
+            const rawSearch = document.getElementById('linkSearch').value;
+            const query = parseSearchQuery(rawSearch);
+            const hlTerms = getHighlightTerms(query);
             const searchResults = document.getElementById('searchResults');
             const policySearchResults = document.getElementById('policySearchResults');
             const linksSection = document.getElementById('linksSection');
             const policiesSection = document.getElementById('policiesSection');
             const emptyState = document.getElementById('searchEmptyState');
+            const hasQuery = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
 
-            // Filter links
-            const filteredLinks = links.filter(link => {
-                if (link.name.toLowerCase().includes(searchTerm)) return true;
-                if (link.url.toLowerCase().includes(searchTerm)) return true;
+            // Render search hints
+            renderSearchHints('linkSearchHints', query);
+
+            // Filter and score links
+            let scoredLinks = [];
+            if (hasQuery) {
+                for (const link of links) {
+                    const fields = [link.name, link.url];
                 if (link.aliases && Array.isArray(link.aliases)) {
-                    return link.aliases.some(alias => alias.toLowerCase().includes(searchTerm));
+                        fields.push(...link.aliases);
+                    }
+                    const score = scoreItem(fields, query);
+                    if (score >= 0) scoredLinks.push({ item: link, score });
                 }
-                return false;
-            });
+            }
 
-            // Filter policies
-            const filteredPolicies = policies.filter(policy => {
-                if (policy.title && policy.title.toLowerCase().includes(searchTerm)) return true;
-                if (policy.category && policy.category.toLowerCase().includes(searchTerm)) return true;
-                if (policy.subfolder && policy.subfolder.toLowerCase().includes(searchTerm)) return true;
-                if (policy.owner && policy.owner.toLowerCase().includes(searchTerm)) return true;
-                return false;
-            });
+            // Filter and score policies
+            let scoredPolicies = [];
+            if (hasQuery) {
+                for (const policy of policies) {
+                    const score = scoreItem([policy.title, policy.category, policy.subfolder, policy.owner], query);
+                    if (score >= 0) scoredPolicies.push({ item: policy, score });
+                }
+            }
 
-            // Sort links by NEW status, then clicks
-            const sortedLinks = [...filteredLinks].sort((a, b) => {
-                const aIsNew = a.isNew && a.clicks === 0;
-                const bIsNew = b.isNew && b.clicks === 0;
+            // Sort links by score, then NEW status, then clicks
+            scoredLinks.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                const aIsNew = a.item.isNew && a.item.clicks === 0;
+                const bIsNew = b.item.isNew && b.item.clicks === 0;
                 if (aIsNew && !bIsNew) return -1;
                 if (!aIsNew && bIsNew) return 1;
-                return b.clicks - a.clicks;
+                return b.item.clicks - a.item.clicks;
             });
 
-            // Sort policies: Clicked first (by clicks), then unclicked by date
-            const sortedPolicies = [...filteredPolicies].sort(policySort);
+            // Sort policies by score, then existing policySort
+            scoredPolicies.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return policySort(a.item, b.item);
+            });
+
+            const sortedLinks = scoredLinks.map(s => s.item);
+            const sortedPolicies = scoredPolicies.map(s => s.item);
 
             // Show/hide sections based on results
             if (sortedLinks.length === 0 && sortedPolicies.length === 0) {
                 linksSection.style.display = 'none';
                 policiesSection.style.display = 'none';
-                emptyState.style.display = 'block';
+                emptyState.style.display = hasQuery ? 'block' : 'none';
                 return;
             }
 
@@ -1982,24 +2094,90 @@
                 linksSection.style.display = 'block';
                 searchResults.innerHTML = sortedLinks.map(link => {
                     const isNew = link.isNew && link.clicks === 0;
-                    const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
+
+                    const isImageIcon = link.icon && (
+                        link.icon.startsWith('http') ||
+                        link.icon.startsWith('/') ||
+                        link.icon.startsWith('.') ||
+                        link.icon.startsWith('data:image')
+                    );
+
+                    const isHexColor = link.color && link.color.startsWith('#');
+                    const presetColors = {
+                        blue: '#3b82f6',
+                        green: '#10b981',
+                        purple: '#8b5cf6',
+                        orange: '#f59e0b',
+                        red: '#ef4444',
+                        indigo: '#6366f1',
+                        pink: '#ec4899',
+                        teal: '#14b8a6',
+                        gray: '#9ca3af'
+                    };
+
+                    const bgColor = isHexColor
+                        ? link.color
+                        : (presetColors[link.color] || '#e5e7eb');
+
+                    const textColor = getContrastColor(link.color || 'gray');
+
                     let iconDisplay;
 
                     if (isImageIcon) {
-                        iconDisplay = `<img src="${link.icon}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;" onerror="this.style.display='none';">`;
+                        iconDisplay = `
+                <span style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:28px;
+                    height:28px;
+                    min-width:28px;
+                    border-radius:6px;
+                    background:${bgColor};
+                    margin-right:10px;
+                ">
+                    <img src="${link.icon}"
+                         style="width:20px;height:20px;object-fit:contain;"
+                         onerror="this.parentNode.style.display='none';">
+                </span>
+            `;
                     } else {
-                        iconDisplay = link.icon + ' ';
+                        iconDisplay = `
+                <span style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:28px;
+                    height:28px;
+                    min-width:28px;
+                    border-radius:6px;
+                    background:${bgColor};
+                    color:${textColor};
+                    font-size:14px;
+                    margin-right:10px;
+                ">
+                    ${link.icon || ''}
+                </span>
+            `;
                     }
 
                     return `
-                        <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
-                            <div class="policy-info">
-                                <div class="policy-title">${iconDisplay}${link.name} ${isNew ? '<span style="color: #ef4444; font-weight: 700; font-size: 0.7rem; margin-left: 8px;">NEW</span>' : ''}</div>
-                                <span class="policy-category">${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}</span>
-                            </div>
-                            <span class="external-icon">↗</span>
-                        </li>
-                    `;
+            <li class="policy-item search-result-item" onclick="handleLinkClick(${link.id}, '${link.url}')">
+                <div class="policy-info" style="display:flex;align-items:center;">
+                    ${iconDisplay}
+                    <div style="min-width:0;">
+                        <div class="policy-title">
+                            ${highlightText(link.name, hlTerms)}
+                            ${isNew ? '<span style="color:#ef4444;font-weight:700;font-size:0.7rem;margin-left:8px;">NEW</span>' : ''}
+                        </div>
+                        <span class="policy-category">
+                            ${link.clicks} ${link.clicks === 1 ? 'click' : 'clicks'}
+                        </span>
+                    </div>
+                </div>
+                <span class="external-icon">↗</span>
+            </li>
+        `;
                 }).join('');
             } else {
                 linksSection.style.display = 'none';
@@ -2011,9 +2189,9 @@
                 policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
                     <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                         <div class="policy-info">
-                            <div class="policy-title">${policy.title}</div>
-                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${policy.category}</div>` : ''}
-                            ${policy.subfolder ? `<span class="policy-category">${policy.subfolder}</span>` : ''}
+                            <div class="policy-title">${highlightText(policy.title, hlTerms)}</div>
+                            ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${highlightText(policy.category, hlTerms)}</div>` : ''}
+                            ${policy.subfolder ? `<span class="policy-category">${highlightText(policy.subfolder, hlTerms)}</span>` : ''}
                         </div>
                         <span class="external-icon">↗</span>
                     </li>
@@ -2294,41 +2472,40 @@
             });
         }
 
-        function applyLayoutCode(code) {
-            if (!code || !code.trim()) {
-                alert('Please enter a layout code.');
-                return;
-            }
+    function applyLayoutCode(code, skipConfirm = false) {
+        if (!code || !code.trim()) {
+            alert('Please enter a layout code.');
+            return;
+        }
 
-            code = code.trim();
+        code = code.trim();
 
-            if (code.length !== CODE_LENGTH) {
-                alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
-                return;
-            }
+        if (code.length !== CODE_LENGTH) {
+            alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');
+            return;
+        }
 
-            // Decode the factoradic base62 code into data.json indices
-            const indices = decodeLayout(code);
+        const indices = decodeLayout(code);
 
-            if (indices.length === 0) {
-                alert('Invalid layout code. Please check and try again.');
-                return;
-            }
+        if (indices.length === 0) {
+            alert('Invalid layout code. Please check and try again.');
+            return;
+        }
 
-            // Convert indices to link IDs
-            const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
+        const linkIds = indices.map(indexToLinkId).filter(id => id !== undefined);
 
-            if (linkIds.length === 0) {
-                alert('Could not resolve any links from this code. The code may be from a different version.');
-                return;
-            }
+        if (linkIds.length === 0) {
+            alert('Could not resolve any links from this code. The code may be from a different version.');
+            return;
+        }
 
-            // Build a name preview
-            const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
-                const dl = defaultData.links.find(l => l.id === id);
-                return dl ? dl.name : '(#' + id + ')';
-            });
+        const previewNames = linkIds.slice(0, LAYOUT_SLOTS).map(id => {
+            const dl = defaultData.links.find(l => l.id === id);
+            return dl ? dl.name : '(#' + id + ')';
+        });
 
+        // Only ask for confirmation if skipConfirm is false
+        if (!skipConfirm) {
             const confirmed = confirm(
                 'Apply this layout?\n\n' +
                 'Your top tiles will become:\n' +
@@ -2337,42 +2514,87 @@
             );
 
             if (!confirmed) return;
+        }
 
-            // Apply: assign descending synthetic click counts
-            const baseClicks = linkIds.length * 100;
+        // Apply layout
+        const baseClicks = linkIds.length * 100;
 
-            links.forEach(link => {
-                if (link.isCustom) return;
+        links.forEach(link => {
+            if (link.isCustom) return;
 
-                const rankIndex = linkIds.indexOf(link.id);
-                if (rankIndex !== -1) {
-                    link.clicks = baseClicks - (rankIndex * 100);
-                    link.isNew = false;
-                } else {
-                    link.clicks = 0;
-                }
-            });
-
-            saveUserData();
-            renderDashboard();
-            renderLinkManager();
-
-            // Clean the URL if we got here from a ?layout= param
-            if (window.location.search.includes('layout=')) {
-                window.history.replaceState({}, '', window.location.pathname);
+            const rankIndex = linkIds.indexOf(link.id);
+            if (rankIndex !== -1) {
+                link.clicks = baseClicks - (rankIndex * 100);
+                link.isNew = false;
+            } else {
+                link.clicks = 0;
             }
+        });
 
+        saveUserData();
+        renderDashboard();
+        renderLinkManager();
+
+        // Clean URL if ?layout= was present
+        if (window.location.search.includes('layout=')) {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+
+        if (!skipConfirm) {
             alert('Layout applied!');
         }
+    }
 
-        // Check for ?layout= URL parameter on load
-        function checkLayoutParam() {
-            const params = new URLSearchParams(window.location.search);
-            const layoutCode = params.get('layout');
-            if (layoutCode) {
-                setTimeout(() => applyLayoutCode(layoutCode), 300);
-            }
+    // On page load, skip confirmation for URL parameter
+    function checkLayoutParam() {
+        const params = new URLSearchParams(window.location.search);
+        const layoutCode = params.get('layout');
+        if (layoutCode) {
+            setTimeout(() => applyLayoutCode(layoutCode, true), 300);
         }
+    }
+
+    // ── Department-specific default layouts ───────────────
+    // Maps dept URL param to an ordered list of link IDs for the top 8 tiles.
+    // Add new departments here — the rest of the app picks them up automatically.
+    const DEPT_LAYOUTS = {
+        histo: [13, 27, 22, 29, 1, 8, 6, 4],    // Histology Portal, Huddle Notes, Teams, QC Charts, EORLA, Omni, UKG, AP Portal
+        surgpath: [4, 12, 9, 1, 6, 7, 19, 30],   // SURGPATH, Huddle Minutes, Schedule, EORLA, Omni, UKG, AP Portal, CAP Protocols
+    };
+
+    // On first visit (no saved data), if ?dept= is set, reorder links
+    // so the department-relevant tiles appear first on the dashboard.
+    function checkDeptParam() {
+        // Only apply for first-time users (no existing personalisation)
+        if (localStorage.getItem('workspaceData')) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const dept = params.get('dept');
+        if (!dept || !DEPT_LAYOUTS[dept]) return;
+
+        const priorityIds = DEPT_LAYOUTS[dept];
+
+        // Partition links into priority (in order) and the rest
+        const priority = [];
+        const rest = [];
+        for (const id of priorityIds) {
+            const link = links.find(l => l.id === id);
+            if (link) priority.push(link);
+        }
+        for (const link of links) {
+            if (!priorityIds.includes(link.id)) rest.push(link);
+        }
+
+        links = [...priority, ...rest];
+        saveUserData();
+
+        // Clean the dept param from the URL so bookmarks stay neutral
+        if (window.location.search.includes('dept=')) {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+
+        console.log('Applied department layout:', dept);
+    }
 
         // Export data in data.json format (for GitHub comparison)
         function exportData() {
@@ -2494,287 +2716,127 @@
             }
         }
 
-        // ── Notepad ──────────────────────────────────────────────
-
-        // Load notepad notes from localStorage (with migration from old single-note format)
-        function loadNotepadNotes() {
-            const saved = localStorage.getItem('notepadNotes');
-            try {
-                notepadNotes = saved ? JSON.parse(saved) : [];
-            } catch (e) {
-                notepadNotes = [];
-            }
-            // Migrate legacy single textarea note
-            const legacy = localStorage.getItem('notepadContent');
-            if (legacy && legacy.trim() && notepadNotes.length === 0) {
-                const now = new Date().toISOString();
-                notepadNotes = [{ id: Date.now(), content: legacy, createdAt: now, modifiedAt: now }];
-                saveNotepadNotes();
-                localStorage.removeItem('notepadContent');
-            }
-        }
-
-        function saveNotepadNotes() {
-            localStorage.setItem('notepadNotes', JSON.stringify(notepadNotes));
-        }
-
-        // Open the notepad modal (called from corner button or anywhere)
-        function openNotepad() {
-            // Close search modal if it was open
-            if (document.getElementById('searchModal').classList.contains('active')) {
-                document.getElementById('searchModal').classList.remove('active');
-                document.getElementById('linkSearch').value = '';
-            }
-            loadNotepadNotes();
-            renderNotepadNotes();
-            document.getElementById('notepadModal').classList.add('active');
-        }
-
-        // Render all notes in condensed state
-        function renderNotepadNotes() {
-            const container = document.getElementById('notepadNotesContainer');
-            if (notepadNotes.length === 0) {
-                container.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 32px 20px; font-size: 0.9rem;">No notes yet. Click <strong>+ New Note</strong> to start.</p>';
-                return;
-            }
-            const showDelete = notepadNotes.length > 1;
-            container.innerHTML = notepadNotes.map(note => {
-                const firstLine = note.content
-                    ? note.content.split('\n')[0].trim()
-                    : '';
-                const preview = firstLine || '<em style="color:#9ca3af">Empty note</em>';
-                const metaText = formatNoteDate(note.modifiedAt || note.createdAt);
-                return `
-                    <div class="sticky-note" data-note-id="${note.id}" onclick="expandNote(${note.id})">
-                        <div class="sticky-preview">${firstLine ? htmlEsc(firstLine) : '<em style="color:#9ca3af">Empty note</em>'}</div>
-                        <div class="sticky-meta">${metaText}</div>
-                        ${showDelete ? `<button class="sticky-delete" onclick="event.stopPropagation(); deleteNote(${note.id})" title="Delete note">✕</button>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Expand a note into a textarea
-        function expandNote(noteId) {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-
-            const note = notepadNotes.find(n => n.id === noteId);
-            if (!note) return;
-            const noteEl = document.querySelector(`.sticky-note[data-note-id="${noteId}"]`);
-            if (!noteEl) return;
-
-            // Already expanded?
-            if (noteEl.classList.contains('sticky-note--expanded')) return;
-
-            noteEl.classList.add('sticky-note--expanded');
-            noteEl.onclick = null;
-
-            // Build DOM to safely set values (avoids HTML-injection in textarea)
-            noteEl.innerHTML = '';
-            const textarea = document.createElement('textarea');
-            textarea.className = 'sticky-textarea';
-            textarea.value = note.content || '';
-            textarea.placeholder = 'Write your note…';
-            textarea.addEventListener('blur', () => condenseNote(noteId));
-            textarea.addEventListener('input', () => {
-                note.content = textarea.value;
-                note.modifiedAt = new Date().toISOString();
-                saveNotepadNotes();
-            });
-
-            const metaRow = document.createElement('div');
-            metaRow.className = 'sticky-meta-row';
-
-            const metaSpan = document.createElement('span');
-            metaSpan.className = 'sticky-meta';
-            metaSpan.textContent = `Created ${formatNoteDate(note.createdAt)}`;
-            metaRow.appendChild(metaSpan);
-
-            if (notepadNotes.length > 1) {
-                const delBtn = document.createElement('button');
-                delBtn.className = 'sticky-delete';
-                delBtn.title = 'Delete note';
-                delBtn.textContent = '✕';
-                delBtn.addEventListener('mousedown', e => e.preventDefault()); // keep focus on textarea
-                delBtn.addEventListener('click', () => deleteNote(noteId));
-                metaRow.appendChild(delBtn);
-            }
-
-            noteEl.appendChild(textarea);
-            noteEl.appendChild(metaRow);
-
-            textarea.focus();
-            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-        }
-
-        // Collapse an expanded note back to a bar (delayed so clicks can fire first)
-        function condenseNote(noteId) {
-            condenseTimer = setTimeout(() => {
-                condenseTimer = null;
-                renderNotepadNotes();
-            }, 160);
-        }
-
-        // Add a new blank note at the top and immediately expand it
-        function addNote() {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-            const now = new Date().toISOString();
-            const newNote = { id: Date.now(), content: '', createdAt: now, modifiedAt: now };
-            notepadNotes.unshift(newNote);
-            saveNotepadNotes();
-            renderNotepadNotes();
-            expandNote(newNote.id);
-        }
-
-        // Delete a note (only shown when there are 2+ notes)
-        function deleteNote(noteId) {
-            if (condenseTimer) { clearTimeout(condenseTimer); condenseTimer = null; }
-            if (!confirm('Delete this note?')) return;
-            notepadNotes = notepadNotes.filter(n => n.id !== noteId);
-            saveNotepadNotes();
-            renderNotepadNotes();
-        }
-
-        // Format a date for note metadata
-        function formatNoteDate(iso) {
-            if (!iso) return '';
-            const d = new Date(iso);
-            const now = new Date();
-            if (d.toDateString() === now.toDateString()) {
-                return d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' });
-            }
-            const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
-            if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-            return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
-        }
-
-        // Safe HTML escaping for note previews
-        function htmlEsc(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-
         // ── Drag & Drop: Drop INTO the app to create a link ─────────────
-        (function() {
-            let dragCounter = 0; // track nested dragenter/dragleave
-            const overlay = document.getElementById('dropOverlay');
+    (function () {
+        let dragCounter = 0; // track nested dragenter/dragleave
+        const overlay = document.getElementById('dropOverlay');
 
-            document.addEventListener('dragenter', function(e) {
-                // Only show for external drags (not our own tile drags)
-                if (e.dataTransfer.types.includes('text/uri-list') ||
-                    e.dataTransfer.types.includes('text/plain') ||
-                    e.dataTransfer.types.includes('text/html') ||
-                    e.dataTransfer.types.includes('Files')) {
-                    // Ignore if the drag originated from our own tiles
-                    if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
-                    dragCounter++;
-                    if (dragCounter === 1) {
-                        overlay.classList.add('active');
-                    }
-                }
-            });
+        document.addEventListener('dragenter', function (e) {
+            if (e.dataTransfer.types.includes('text/uri-list') ||
+                e.dataTransfer.types.includes('text/plain') ||
+                e.dataTransfer.types.includes('text/html') ||
+                e.dataTransfer.types.includes('Files')) {
 
-            document.addEventListener('dragleave', function(e) {
-                dragCounter--;
-                if (dragCounter <= 0) {
-                    dragCounter = 0;
-                    overlay.classList.remove('active');
-                }
-            });
-
-            document.addEventListener('dragover', function(e) {
-                if (overlay.classList.contains('active')) {
-                    e.preventDefault(); // allow drop
-                }
-            });
-
-            document.addEventListener('drop', function(e) {
-                dragCounter = 0;
-                overlay.classList.remove('active');
-
-                // If a modal is already open for something else, skip
+                // Ignore if the drag originated from our own tiles
                 if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
 
-                e.preventDefault();
+                dragCounter++;
+                if (dragCounter === 1) overlay.classList.add('active');
+            }
+        });
 
-                // Check for JSON file drops first
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    const file = e.dataTransfer.files[0];
-                    if (file.name.endsWith('.json') || file.type === 'application/json') {
-                        importDataFromFile(file);
-                        return;
-                    }
+        document.addEventListener('dragleave', function (e) {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                overlay.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('dragover', function (e) {
+            if (overlay.classList.contains('active')) e.preventDefault(); // allow drop
+        });
+
+        document.addEventListener('drop', function (e) {
+            dragCounter = 0;
+            overlay.classList.remove('active');
+
+            if (e.dataTransfer.types.includes('application/x-launcher-tile')) return;
+            e.preventDefault();
+
+            const files = e.dataTransfer.files;
+            const plainText = (e.dataTransfer.getData('text/plain') || '').trim();
+            const uriList = e.dataTransfer.getData('text/uri-list');
+            const htmlData = e.dataTransfer.getData('text/html');
+
+            // --- 1. JSON file drop ---
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (file.name.endsWith('.json') || file.type === 'application/json') {
+                    importDataFromFile(file);
+                    return;
                 }
+            }
 
-                // Try to extract a URL first
-                const uriList = e.dataTransfer.getData('text/uri-list');
-                const plainText = (e.dataTransfer.getData('text/plain') || '').trim();
-                const htmlData = e.dataTransfer.getData('text/html');
+            // --- 2. Layout code drop ---
+            if (plainText && plainText.length === CODE_LENGTH && /^[A-Za-z0-9]+$/.test(plainText)) {
+                const apply = confirm('Apply this layout code from the dropped text?');
+                if (apply) applyLayoutCode(plainText);
+                return; // stop further handling
+            }
 
-                let droppedUrl = '';
-                let droppedName = '';
+            // --- 3. Regular link drop ---
+            let droppedUrl = '';
+            let droppedName = '';
 
-                // Check URI list (browsers set this when dragging links)
-                if (uriList) {
-                    const firstUri = uriList.split('\n').find(line => !line.startsWith('#') && line.trim());
-                    if (firstUri) droppedUrl = firstUri.trim();
+            // URI list
+            if (uriList) {
+                const firstUri = uriList.split('\n').find(line => !line.startsWith('#') && line.trim());
+                if (firstUri) droppedUrl = firstUri.trim();
+            }
+
+            // Plain text URL
+            if (!droppedUrl && plainText && /^https?:\/\//i.test(plainText)) droppedUrl = plainText;
+
+            // HTML anchor
+            if (htmlData) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlData;
+                const anchor = tempDiv.querySelector('a');
+                if (anchor) {
+                    if (!droppedUrl && anchor.href) droppedUrl = anchor.href;
+                    if (anchor.textContent.trim()) droppedName = anchor.textContent.trim();
                 }
+            }
 
-                // Check plain text for URL
-                if (!droppedUrl && plainText && /^https?:\/\//i.test(plainText)) {
-                    droppedUrl = plainText;
+            // Fallback: plain text as name
+            if (!droppedUrl && plainText) droppedName = plainText;
+
+            // Guess name from URL
+            if (droppedUrl && !droppedName) {
+                try {
+                    const urlObj = new URL(droppedUrl);
+                    droppedName = urlObj.hostname.replace(/^www\./, '');
+                } catch (err) {
+                    droppedName = '';
                 }
+            }
 
-                // Try to extract link text from HTML
-                if (htmlData) {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = htmlData;
-                    const anchor = tempDiv.querySelector('a');
-                    if (anchor) {
-                        if (!droppedUrl && anchor.href) droppedUrl = anchor.href;
-                        if (anchor.textContent.trim()) droppedName = anchor.textContent.trim();
-                    }
+            // Open add-link form
+            renderLinkManager();
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('active');
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('manageTab').classList.add('active');
+            document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
+
+            document.getElementById('addLinkForm').style.display = 'block';
+            document.getElementById('newLinkName').value = droppedName;
+            document.getElementById('newLinkUrl').value = droppedUrl;
+
+            // Focus
+            setTimeout(() => {
+                if (droppedUrl) {
+                    document.getElementById('newLinkName').focus();
+                    document.getElementById('newLinkName').select();
+                } else {
+                    document.getElementById('newLinkUrl').focus();
                 }
-
-                // If no URL found, treat plain text as a name
-                if (!droppedUrl && plainText) {
-                    droppedName = plainText;
-                }
-
-                // Try to guess a name from the URL if we don't have one
-                if (droppedUrl && !droppedName) {
-                    try {
-                        const urlObj = new URL(droppedUrl);
-                        droppedName = urlObj.hostname.replace(/^www\./, '');
-                    } catch (err) {
-                        droppedName = '';
-                    }
-                }
-
-                // Open the add-link form pre-filled
-                renderLinkManager();
-                document.getElementById('settingsModal').classList.add('active');
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                document.getElementById('manageTab').classList.add('active');
-                document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
-                document.getElementById('addLinkForm').style.display = 'block';
-
-                document.getElementById('newLinkName').value = droppedName;
-                document.getElementById('newLinkUrl').value = droppedUrl;
-
-                // Focus the right field
-                setTimeout(() => {
-                    if (droppedUrl) {
-                        // URL is filled, let them edit the name
-                        document.getElementById('newLinkName').focus();
-                        document.getElementById('newLinkName').select();
-                    } else {
-                        // No URL, focus the URL field
-                        document.getElementById('newLinkUrl').focus();
-                    }
-                }, 100);
-            });
-        })();
+            }, 100);
+        });
+    })();
 
         // ── Context Menu for Tiles ────────────────────────────────
         function showTileContextMenu(e, linkId) {
@@ -2849,20 +2911,6 @@
 
         // ─────────────────────────────────────────────────────────
 
-        // Open quick-add: opens settings on Manage tab with the add form expanded
-        function openQuickAdd() {
-            renderLinkManager();
-            document.getElementById('settingsModal').classList.add('active');
-            // Activate manage tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('manageTab').classList.add('active');
-            document.querySelector('.tab[onclick="switchTab(\'manage\')"]').classList.add('active');
-            // Show add form immediately
-            document.getElementById('addLinkForm').style.display = 'block';
-            setTimeout(() => document.getElementById('newLinkName').focus(), 100);
-        }
-
         // Close modal
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
@@ -2874,7 +2922,6 @@
             } else if (modalId === 'policiesModal') {
                 document.getElementById('policySearch').value = '';
                 toggleClearButton('policySearch', 'policySearchClear');
-                // Clear subfolder (not sticky) but keep folder (sticky, saved to localStorage)
                 document.getElementById('subfolderFilter').value = '';
                 toggleFilterClearButtons();
             }
@@ -2898,10 +2945,14 @@
             }
         }
 
-        // Close modal on background click
+        // Close modal on background click (but not when user is selecting text)
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function (e) {
-                if (e.target === this) {
+            let mousedownOnBackdrop = false;
+            modal.addEventListener('mousedown', function(e) {
+                mousedownOnBackdrop = e.target === this;
+            });
+            modal.addEventListener('click', function(e) {
+                if (e.target === this && mousedownOnBackdrop) {
                     this.classList.remove('active');
                 }
             });

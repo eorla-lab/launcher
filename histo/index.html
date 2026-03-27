@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#69c9d0">
+    <meta name="apple-mobile-web-app-title" content="Histo Launcher">
+    <link rel="manifest" href="./site.webmanifest">
+    <link rel="icon" type="image/png" href="../favicon-96x96.png" sizes="96x96">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+    <title>Install Launcher - Histology</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #69c9d0 0%, #12412f 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .icon { font-size: 3.5rem; margin-bottom: 16px; }
+        h1 { font-size: 1.5rem; color: #1f2937; margin-bottom: 8px; }
+        .dept { color: #3b82f6; font-weight: 700; }
+        p { color: #6b7280; margin-bottom: 24px; line-height: 1.6; font-size: 0.95rem; }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn-secondary {
+            background: none;
+            color: #6b7280;
+            font-size: 0.9rem;
+            padding: 10px;
+            text-decoration: underline;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+        }
+        .btn-secondary:hover { color: #374151; }
+        .steps {
+            text-align: left;
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.8;
+        }
+        .steps strong { color: #1f2937; }
+        .hidden { display: none; }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            margin: 0 auto 14px;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+            <img src="../icons/eorla.jpeg" alt="EORLA" class="header-logo">
+            <h1>Launcher</h1>
+        <p><span class="dept">Histology</span></p>
+
+        <div id="installSection">
+            <div class="steps">
+                <strong>To install:</strong><br>
+                1. Click "Install App" below (or use your browser's install option)<br>
+                2. The app will appear on your desktop/taskbar<br>
+                3. Your tiles will be pre-configured for Histology
+            </div>
+            <button class="btn" id="installBtn" onclick="installPWA()">Install App</button>
+            <button class="btn-secondary" onclick="window.location.href='../?dept=histo'">or open without installing →</button>
+        </div>
+
+        <div id="installedSection" class="hidden">
+            <p>The app is installed. You can close this window and open <strong>Launcher - Histology</strong> from your desktop or taskbar.</p>
+            <button class="btn" onclick="window.location.href='../?dept=histo'">Open Launcher →</button>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installSection').classList.add('hidden');
+            document.getElementById('installedSection').classList.remove('hidden');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') {
+                        document.getElementById('installSection').classList.add('hidden');
+                        document.getElementById('installedSection').classList.remove('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // Fallback: browser may not support the prompt, direct them
+                alert('To install: look for the install icon (⊕) in your browser\'s address bar, or use the browser menu → "Install this site as an app".');
+            }
+        }
+
+        // If already running as PWA, redirect straight to the app
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            window.location.href = '../?dept=histo';
+        }
+    </script>
+</body>
+</html>
