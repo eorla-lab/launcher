@@ -1353,8 +1353,8 @@
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
                                 <li>Community links: browse and add links shared by others via "Get More Links"</li>
-                                <li>Submit your own links for the community to discover</li>
-                                <li>Upvote/downvote community links to help surface the best ones</li>
+                                <li>Submit your custom links to the community via right-click or Settings</li>
+                                <li>Upvote/downvote community links directly in the app</li>
                             </ul>
                         </div>
                         <div style="margin-bottom: 24px;">
@@ -1405,62 +1405,7 @@
                     <div id="sharedLinksList"></div>
                     <div id="sharedLinksStatus" class="shared-links-status"></div>
                 </div>
-                <div style="flex-shrink: 0; padding-top: 12px; border-top: 1px solid #e5e7eb; margin-top: 12px;">
-                    <button class="btn btn-primary" onclick="openSubmitLinkForm()" style="width: 100%;">📤 Submit a Link</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Submit Link Modal -->
-    <div id="submitLinkModal" class="modal" style="z-index: 1001;">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2>Submit a Link</h2>
-                <button class="close-btn" onclick="closeModal('submitLinkModal')">✕</button>
-            </div>
-            <div class="modal-body">
-                <p style="color: #6b7280; margin-bottom: 16px;">Share a useful link with the community. Others will be able to vote on it and add it to their launcher.</p>
-                <div class="form-group">
-                    <label>Name *</label>
-                    <input type="text" id="submitLinkName" placeholder="e.g., Epic Hyperspace">
-                </div>
-                <div class="form-group">
-                    <label>URL *</label>
-                    <input type="text" id="submitLinkUrl" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>Icon (emoji or 1-3 characters)</label>
-                    <input type="text" id="submitLinkIcon" placeholder="e.g., 🏥 or EP">
-                </div>
-                <div class="form-group">
-                    <label>Color</label>
-                    <select id="submitLinkColor">
-                        <option value="blue">Blue</option>
-                        <option value="green">Green</option>
-                        <option value="purple">Purple</option>
-                        <option value="orange">Orange</option>
-                        <option value="red">Red</option>
-                        <option value="indigo">Indigo</option>
-                        <option value="pink">Pink</option>
-                        <option value="teal">Teal</option>
-                        <option value="gray">Gray</option>
-                        <option value="white" selected>White</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Search Aliases (comma-separated)</label>
-                    <input type="text" id="submitLinkAliases" placeholder="e.g., hospital, patient, chart">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="submitLinkDesc" placeholder="A useful tool for...">
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="submitLinkToGitHub()" style="flex: 1;">Submit Link</button>
-                    <button class="btn btn-secondary" onclick="closeModal('submitLinkModal')">Cancel</button>
-                </div>
-                <p id="submitLinkStatus" style="color: #9ca3af; font-size: 0.8rem; margin-top: 12px;"></p>
+                <div id="sharedLinksSubmitStatus" style="flex-shrink: 0; padding-top: 8px; text-align: center; font-size: 0.8rem; color: #9ca3af;"></div>
             </div>
         </div>
     </div>
@@ -2033,10 +1978,11 @@
                     <li class="link-manager-item" style="display:flex;align-items:center;">
                         ${iconDisplay}
                         <div class="link-manager-info" style="flex:1;min-width:0;">
-                            <div class="link-manager-name">${link.name} ${link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
+                            <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Community) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
                             <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
                         <div class="link-manager-actions">
+                            ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Submit to Community">🌐</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>` : ''}
                             <button class="icon-btn" onclick="resetLinkClicks(${link.id})" title="Reset clicks">🔄</button>
                         </div>
@@ -3361,41 +3307,46 @@
             renderSharedLinks();
         }
 
-        function openSubmitLinkForm() {
-            document.getElementById('submitLinkStatus').textContent = '';
-            document.getElementById('submitLinkModal').classList.add('active');
+        // --- Submit existing link to community ---
+
+        function getSubmittedUrls() {
+            try { return JSON.parse(localStorage.getItem('sharedLinksSubmitted') || '[]'); }
+            catch { return []; }
         }
 
-        async function submitLinkToGitHub() {
-            const name = document.getElementById('submitLinkName').value.trim();
-            const url = document.getElementById('submitLinkUrl').value.trim();
-            const statusEl = document.getElementById('submitLinkStatus');
+        function canSubmitToCommunity(link) {
+            // Not eligible: links from the community repo, or already submitted, or default (non-custom) links
+            if (link.fromShared) return false;
+            if (!link.isCustom) return false;
+            if (getSubmittedUrls().includes(link.url)) return false;
+            // Also check if this URL already exists in the shared links cache
+            if (sharedLinksData.some(s => s.url === link.url)) return false;
+            return true;
+        }
 
-            if (!name || !url) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = 'Please fill in name and URL.';
-                return;
-            }
+        async function submitLinkToCommunity(linkId) {
+            const link = links.find(l => l.id === linkId);
+            if (!link) return;
 
             // Rate limiting
             const check = canSubmit();
             if (!check.ok) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = check.reason;
+                alert(check.reason);
                 return;
             }
 
-            const icon = document.getElementById('submitLinkIcon').value.trim() || '🔗';
-            const color = document.getElementById('submitLinkColor').value;
-            const aliases = document.getElementById('submitLinkAliases').value.trim();
-            const desc = document.getElementById('submitLinkDesc').value.trim();
+            const name = link.name;
+            const url = link.url;
+            const icon = link.icon || '🔗';
+            const color = link.color || 'white';
+            const aliases = (link.aliases || []).join(', ');
 
             // Build issue body
             let body = `### Name\n\n${name}\n\n### URL\n\n${url}\n\n### Icon\n\n${icon}\n\n### Color\n\n${color}`;
             body += `\n\n### Search Aliases\n\n${aliases || '_No response_'}`;
-            body += `\n\n### Description\n\n${desc || '_No response_'}`;
+            body += `\n\n### Description\n\n_No response_`;
 
-            // Append anonymous fingerprint for tracking
+            // Append anonymous fingerprint
             const fp = getUserFingerprint();
             body += `\n\n---\n<details><summary>Submission metadata</summary>\n\n`;
             body += `- **Anonymous ID:** \`${fp.anonId}\`\n`;
@@ -3410,15 +3361,10 @@
                 // Fallback: open pre-filled GitHub Issue URL
                 const issueUrl = `https://github.com/${SHARED_LINKS_REPO}/issues/new?labels=${SHARED_LINKS_LABEL}&title=${encodeURIComponent(name)}&body=${encodeURIComponent(body)}`;
                 window.open(issueUrl, '_blank');
-                recordSubmission();
-                closeModal('submitLinkModal');
-                clearSubmitForm();
+                markAsSubmitted(url);
+                renderLinkManager();
                 return;
             }
-
-            // Submit via API
-            statusEl.style.color = '#6b7280';
-            statusEl.textContent = 'Submitting...';
 
             try {
                 const resp = await fetch(`https://api.github.com/repos/${SHARED_LINKS_REPO}/issues`, {
@@ -3432,32 +3378,32 @@
                 });
 
                 if (resp.ok || resp.status === 201) {
-                    recordSubmission();
-                    // Invalidate cache so the new link appears
+                    markAsSubmitted(url);
                     localStorage.removeItem(SHARED_LINKS_CACHE_KEY);
-                    closeModal('submitLinkModal');
-                    clearSubmitForm();
-                    // Refresh the shared links list
-                    loadSharedLinks();
+                    renderLinkManager();
+                    // Show brief confirmation
+                    const statusEl = document.getElementById('sharedLinksSubmitStatus');
+                    if (statusEl) {
+                        statusEl.style.color = '#10b981';
+                        statusEl.textContent = `"${name}" submitted to community!`;
+                        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+                    }
                 } else {
                     const err = await resp.json().catch(() => ({}));
-                    statusEl.style.color = '#ef4444';
-                    statusEl.textContent = `Submission failed: ${err.message || resp.status}`;
+                    alert(`Submission failed: ${err.message || resp.status}`);
                 }
             } catch (err) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = 'Network error. Please try again.';
+                alert('Network error. Please try again.');
             }
         }
 
-        function clearSubmitForm() {
-            document.getElementById('submitLinkName').value = '';
-            document.getElementById('submitLinkUrl').value = '';
-            document.getElementById('submitLinkIcon').value = '';
-            document.getElementById('submitLinkColor').value = 'white';
-            document.getElementById('submitLinkAliases').value = '';
-            document.getElementById('submitLinkDesc').value = '';
-            document.getElementById('submitLinkStatus').textContent = '';
+        function markAsSubmitted(url) {
+            const submitted = getSubmittedUrls();
+            if (!submitted.includes(url)) {
+                submitted.push(url);
+                localStorage.setItem('sharedLinksSubmitted', JSON.stringify(submitted));
+            }
+            recordSubmission();
         }
 
         // ==================== End Shared Links ====================
@@ -3642,6 +3588,9 @@
             html += `<div class="tile-context-menu-item" onclick="resetLinkClicks(${linkId}); closeTileContextMenu();">🔄 Reset clicks</div>`;
             if (link.isCustom) {
                 html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">🗑️ Remove link</div>`;
+            }
+            if (canSubmitToCommunity(link)) {
+                html += `<div class="tile-context-menu-item" onclick="submitLinkToCommunity(${linkId}); closeTileContextMenu();">🌐 Submit to Community</div>`;
             }
             itemsEl.innerHTML = html;
 
