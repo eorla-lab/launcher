@@ -892,6 +892,214 @@
             .link-manager-url {
                 max-width: 200px;
             }
+
+            .shared-link-card {
+                padding: 12px;
+            }
+
+            .shared-link-card-header {
+                gap: 8px;
+            }
+
+            .shared-link-votes {
+                gap: 6px;
+                font-size: 0.8rem;
+            }
+
+            .shared-link-vote-btn {
+                padding: 3px 6px;
+                font-size: 0.75rem;
+            }
+
+            .shared-link-desc {
+                font-size: 0.8rem;
+            }
+
+            .shared-link-meta {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Shared Links Modal */
+        .shared-link-card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: background 0.2s;
+        }
+
+        .shared-link-card:hover {
+            background: #f3f4f6;
+        }
+
+        .shared-link-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .shared-link-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .shared-link-icon img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .shared-link-title {
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+        }
+
+        .shared-link-votes {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .shared-link-vote-btn {
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .shared-link-vote-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .shared-link-vote-btn.upvote {
+            color: #16a34a;
+        }
+
+        .shared-link-vote-btn.downvote {
+            color: #dc2626;
+        }
+
+        .shared-link-desc {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .shared-link-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .shared-link-add-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .shared-link-add-btn:hover {
+            background: #2563eb;
+        }
+
+        .shared-link-add-btn.added {
+            background: #10b981;
+            cursor: default;
+        }
+
+        .shared-link-add-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .shared-links-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .shared-links-toolbar input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .shared-links-toolbar input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .shared-links-toolbar select {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .shared-links-status {
+            text-align: center;
+            padding: 12px;
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .shared-links-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .shared-links-error {
+            text-align: center;
+            padding: 20px;
+            color: #ef4444;
+            background: #fef2f2;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        #sharedLinksModal .modal-body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: 80vh;
+        }
+
+        #sharedLinksModal .shared-links-toolbar {
+            flex-shrink: 0;
+        }
+
+        #sharedLinksModal .shared-links-list-wrapper {
+            flex: 1;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -1054,8 +1262,10 @@
                 <div id="manageTab" class="tab-content active">
                     <div id="manageTabContent" style="height: 620px;">
 
-                    <button class="btn btn-primary" onclick="showAddLinkForm()" style="margin-bottom: 20px;">+ Add
-                        Custom Link</button>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="showAddLinkForm()" style="flex: 1;">+ Add Custom Link</button>
+                        <button class="btn btn-secondary" onclick="openSharedLinks()" style="flex: 1;">🌐 Get More Links</button>
+                    </div>
 
                     <div id="addLinkForm"
                         style="display: none; background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
@@ -1139,6 +1349,15 @@
                 <div id="changelogTab" class="tab-content">
                     <div id="changelogContent" style="height: 620px;">
                         <div style="margin-bottom: 24px;">
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.2</h3>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
+                            <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
+                                <li>Community links: browse and add links shared by others via "Get More Links"</li>
+                                <li>Submit your own links for the community to discover</li>
+                                <li>Upvote/downvote community links to help surface the best ones</li>
+                            </ul>
+                        </div>
+                        <div style="margin-bottom: 24px;">
                             <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
@@ -1163,6 +1382,85 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Links Modal -->
+    <div id="sharedLinksModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Community Links</h2>
+                <button class="close-btn" onclick="closeModal('sharedLinksModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="shared-links-toolbar">
+                    <input type="text" id="sharedLinksSearch" placeholder="Search community links..." oninput="renderSharedLinks()">
+                    <select id="sharedLinksSort" onchange="renderSharedLinks()">
+                        <option value="top">Top</option>
+                        <option value="new">New</option>
+                    </select>
+                </div>
+                <div class="shared-links-list-wrapper">
+                    <div id="sharedLinksList"></div>
+                    <div id="sharedLinksStatus" class="shared-links-status"></div>
+                </div>
+                <div style="flex-shrink: 0; padding-top: 12px; border-top: 1px solid #e5e7eb; margin-top: 12px;">
+                    <button class="btn btn-primary" onclick="openSubmitLinkForm()" style="width: 100%;">📤 Submit a Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Link Modal -->
+    <div id="submitLinkModal" class="modal" style="z-index: 1001;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Submit a Link</h2>
+                <button class="close-btn" onclick="closeModal('submitLinkModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #6b7280; margin-bottom: 16px;">Share a useful link with the community. Your submission will open on GitHub where others can vote on it.</p>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="submitLinkName" placeholder="e.g., Epic Hyperspace">
+                </div>
+                <div class="form-group">
+                    <label>URL *</label>
+                    <input type="text" id="submitLinkUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Icon (emoji or 1-3 characters)</label>
+                    <input type="text" id="submitLinkIcon" placeholder="e.g., 🏥 or EP">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <select id="submitLinkColor">
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                        <option value="red">Red</option>
+                        <option value="indigo">Indigo</option>
+                        <option value="pink">Pink</option>
+                        <option value="teal">Teal</option>
+                        <option value="gray">Gray</option>
+                        <option value="white" selected>White</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Search Aliases (comma-separated)</label>
+                    <input type="text" id="submitLinkAliases" placeholder="e.g., hospital, patient, chart">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="submitLinkDesc" placeholder="A useful tool for...">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="submitLinkToGitHub()" style="flex: 1;">Open on GitHub to Submit</button>
+                    <button class="btn btn-secondary" onclick="closeModal('submitLinkModal')">Cancel</button>
+                </div>
+                <p style="color: #9ca3af; font-size: 0.8rem; margin-top: 12px;">Requires a GitHub account. Don't have one? Ask a colleague to submit for you.</p>
             </div>
         </div>
     </div>
@@ -2672,6 +2970,313 @@
             });
         }
 
+        // ==================== Shared Links (Community Repo) ====================
+
+        const SHARED_LINKS_REPO = 'jessepelley/launcher';
+        const SHARED_LINKS_LABEL = 'shared-link';
+        const SHARED_LINKS_CACHE_KEY = 'sharedLinksCache';
+        const SHARED_LINKS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+        let sharedLinksData = [];
+
+        function openSharedLinks() {
+            document.getElementById('sharedLinksModal').classList.add('active');
+            loadSharedLinks();
+        }
+
+        async function loadSharedLinks() {
+            const listEl = document.getElementById('sharedLinksList');
+            const statusEl = document.getElementById('sharedLinksStatus');
+
+            // Check cache first
+            const cached = localStorage.getItem(SHARED_LINKS_CACHE_KEY);
+            if (cached) {
+                try {
+                    const { data, timestamp } = JSON.parse(cached);
+                    if (Date.now() - timestamp < SHARED_LINKS_CACHE_TTL) {
+                        sharedLinksData = data;
+                        renderSharedLinks();
+                        statusEl.textContent = `Updated ${Math.round((Date.now() - timestamp) / 60000)}m ago`;
+                        return;
+                    }
+                } catch (e) { /* cache corrupt, refetch */ }
+            }
+
+            // Show loading
+            listEl.innerHTML = '<div class="shared-links-loading">Loading community links...</div>';
+            statusEl.textContent = '';
+
+            try {
+                sharedLinksData = await fetchSharedLinks();
+                localStorage.setItem(SHARED_LINKS_CACHE_KEY, JSON.stringify({
+                    data: sharedLinksData,
+                    timestamp: Date.now()
+                }));
+                renderSharedLinks();
+                statusEl.textContent = 'Just updated';
+            } catch (err) {
+                // If fetch fails, try to show stale cache
+                if (cached) {
+                    try {
+                        const { data, timestamp } = JSON.parse(cached);
+                        sharedLinksData = data;
+                        renderSharedLinks();
+                        listEl.insertAdjacentHTML('afterbegin',
+                            '<div class="shared-links-error">Could not refresh. Showing cached data.</div>');
+                        statusEl.textContent = `Cached from ${new Date(timestamp).toLocaleTimeString()}`;
+                        return;
+                    } catch (e) { /* fall through */ }
+                }
+                listEl.innerHTML = `<div class="shared-links-error">
+                    ${err.message.includes('rate limit') ? 'GitHub API rate limit reached. Try again in a few minutes.' : 'Could not load community links. Check your connection.'}
+                </div>`;
+            }
+        }
+
+        async function fetchSharedLinks() {
+            const issuesUrl = `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues?labels=${SHARED_LINKS_LABEL}&state=open&per_page=100`;
+            const resp = await fetch(issuesUrl);
+            if (!resp.ok) {
+                if (resp.status === 403) throw new Error('rate limit');
+                throw new Error(`GitHub API error: ${resp.status}`);
+            }
+            const issues = await resp.json();
+
+            // Fetch reactions for all issues in parallel
+            const withReactions = await Promise.all(issues.map(async (issue) => {
+                try {
+                    const reactResp = await fetch(
+                        `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issue.number}/reactions`,
+                        { headers: { 'Accept': 'application/vnd.github+json' } }
+                    );
+                    const reactions = reactResp.ok ? await reactResp.json() : [];
+                    return parseSharedLinkIssue(issue, reactions);
+                } catch {
+                    return parseSharedLinkIssue(issue, []);
+                }
+            }));
+
+            return withReactions.filter(link => link !== null);
+        }
+
+        function parseSharedLinkIssue(issue, reactions) {
+            const body = issue.body || '';
+
+            // Parse structured fields from issue body
+            // Supports both GitHub Issue form YAML output and manual markdown format
+            const getField = (label) => {
+                // Issue forms use "### Label\n\nValue" format
+                const formMatch = body.match(new RegExp(`### ${label}\\s*\\n+([^\\n#]+)`, 'i'));
+                if (formMatch) {
+                    const val = formMatch[1].trim();
+                    return val === '_No response_' ? '' : val;
+                }
+                // Fallback: **Label:** Value format
+                const mdMatch = body.match(new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+)`, 'i'));
+                return mdMatch ? mdMatch[1].trim() : '';
+            };
+
+            const name = getField('Name') || issue.title;
+            const url = getField('URL');
+            if (!url) return null; // Skip issues without a URL
+
+            const icon = getField('Icon') || '🔗';
+            const color = getField('Color') || 'white';
+            const aliasesRaw = getField('Search Aliases') || getField('Aliases');
+            const description = getField('Description');
+
+            // Count reactions
+            let upvotes = 0, downvotes = 0;
+            for (const r of reactions) {
+                if (r.content === '+1' || r.content === 'heart' || r.content === 'rocket' || r.content === 'hooray') upvotes++;
+                else if (r.content === '-1' || r.content === 'confused') downvotes++;
+            }
+
+            const totalVotes = upvotes + downvotes;
+            const score = upvotes - downvotes;
+            const ratio = totalVotes > 0 ? upvotes / totalVotes : 1;
+
+            return {
+                issueNumber: issue.number,
+                issueUrl: issue.html_url,
+                name,
+                url,
+                icon,
+                color: color.toLowerCase(),
+                aliases: aliasesRaw ? aliasesRaw.split(',').map(a => a.trim()).filter(Boolean) : [],
+                description,
+                author: issue.user ? issue.user.login : 'unknown',
+                upvotes,
+                downvotes,
+                score,
+                ratio,
+                createdAt: issue.created_at
+            };
+        }
+
+        function renderSharedLinks() {
+            const listEl = document.getElementById('sharedLinksList');
+            const searchVal = (document.getElementById('sharedLinksSearch').value || '').toLowerCase().trim();
+            const sortMode = document.getElementById('sharedLinksSort').value;
+
+            let filtered = sharedLinksData.filter(link => {
+                // Hide ratio'd / negative links
+                if (link.score < 0 || (link.ratio < 0.5 && (link.upvotes + link.downvotes) >= 3)) return false;
+
+                // Search filter
+                if (searchVal) {
+                    const haystack = [link.name, link.description, link.url, ...link.aliases].join(' ').toLowerCase();
+                    return haystack.includes(searchVal);
+                }
+                return true;
+            });
+
+            // Sort
+            if (sortMode === 'top') {
+                filtered.sort((a, b) => b.score - a.score || new Date(b.createdAt) - new Date(a.createdAt));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">No community links found</div>';
+                return;
+            }
+
+            const presetColors = { blue:'#3b82f6', green:'#10b981', purple:'#8b5cf6', orange:'#f59e0b', red:'#ef4444', indigo:'#6366f1', pink:'#ec4899', teal:'#14b8a6', gray:'#9ca3af', white:'#f9fafb' };
+            const addedUrls = new Set(links.map(l => l.url));
+
+            listEl.innerHTML = filtered.map(link => {
+                const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
+                const isHexColor = link.color && link.color.startsWith('#');
+                const bgColor = isHexColor ? link.color : (presetColors[link.color] || '#e5e7eb');
+                const textColor = getContrastColor(link.color || 'gray');
+                const alreadyAdded = addedUrls.has(link.url);
+
+                let iconHtml;
+                if (isImageIcon) {
+                    iconHtml = `<span class="shared-link-icon" style="background:${bgColor};"><img src="${link.icon}" onerror="this.style.display='none';this.parentElement.textContent='🔗';"></span>`;
+                } else {
+                    iconHtml = `<span class="shared-link-icon" style="background:${bgColor};color:${textColor};">${link.icon}</span>`;
+                }
+
+                const timeAgo = getTimeAgo(link.createdAt);
+
+                return `
+                    <div class="shared-link-card">
+                        <div class="shared-link-card-header">
+                            ${iconHtml}
+                            <div class="shared-link-title">${escapeHtml(link.name)}</div>
+                            <div class="shared-link-votes">
+                                <a href="${link.issueUrl}" target="_blank" rel="noopener" class="shared-link-vote-btn upvote" title="Vote on GitHub">👍 ${link.upvotes}</a>
+                                <a href="${link.issueUrl}" target="_blank" rel="noopener" class="shared-link-vote-btn downvote" title="Vote on GitHub">👎 ${link.downvotes}</a>
+                            </div>
+                        </div>
+                        ${link.description ? `<div class="shared-link-desc">${escapeHtml(link.description)}</div>` : ''}
+                        <div class="shared-link-meta">
+                            <span>by ${escapeHtml(link.author)} · ${timeAgo}</span>
+                            <button class="shared-link-add-btn ${alreadyAdded ? 'added' : ''}"
+                                onclick="${alreadyAdded ? '' : `addSharedLink(${link.issueNumber})`}"
+                                ${alreadyAdded ? 'disabled' : ''}>
+                                ${alreadyAdded ? '✓ Added' : '+ Add'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function getTimeAgo(dateStr) {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const mins = Math.floor(diff / 60000);
+            if (mins < 60) return `${mins}m ago`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 30) return `${days}d ago`;
+            const months = Math.floor(days / 30);
+            return `${months}mo ago`;
+        }
+
+        function addSharedLink(issueNumber) {
+            const shared = sharedLinksData.find(l => l.issueNumber === issueNumber);
+            if (!shared) return;
+
+            // Check for duplicate URL
+            if (links.some(l => l.url === shared.url)) {
+                renderSharedLinks(); // Re-render to show "Added" state
+                return;
+            }
+
+            const newLink = {
+                id: Date.now(),
+                name: shared.name,
+                url: shared.url,
+                icon: shared.icon,
+                color: shared.color,
+                clicks: 0,
+                isCustom: true,
+                isNew: true,
+                fromShared: true
+            };
+
+            if (shared.aliases && shared.aliases.length > 0) {
+                newLink.aliases = shared.aliases;
+            }
+
+            links.push(newLink);
+            saveUserData();
+            renderDashboard();
+            renderLinkManager();
+            renderSharedLinks(); // Update "Added" state
+        }
+
+        function openSubmitLinkForm() {
+            document.getElementById('submitLinkModal').classList.add('active');
+        }
+
+        function submitLinkToGitHub() {
+            const name = document.getElementById('submitLinkName').value.trim();
+            const url = document.getElementById('submitLinkUrl').value.trim();
+
+            if (!name || !url) {
+                alert('Please fill in name and URL');
+                return;
+            }
+
+            const icon = document.getElementById('submitLinkIcon').value.trim() || '🔗';
+            const color = document.getElementById('submitLinkColor').value;
+            const aliases = document.getElementById('submitLinkAliases').value.trim();
+            const desc = document.getElementById('submitLinkDesc').value.trim();
+
+            // Build issue body matching the issue form template output
+            let body = `### Name\n\n${name}\n\n### URL\n\n${url}\n\n### Icon\n\n${icon}\n\n### Color\n\n${color}`;
+            if (aliases) body += `\n\n### Search Aliases\n\n${aliases}`;
+            else body += `\n\n### Search Aliases\n\n_No response_`;
+            if (desc) body += `\n\n### Description\n\n${desc}`;
+            else body += `\n\n### Description\n\n_No response_`;
+
+            const issueUrl = `https://github.com/${SHARED_LINKS_REPO}/issues/new?labels=${SHARED_LINKS_LABEL}&title=${encodeURIComponent(name)}&body=${encodeURIComponent(body)}`;
+
+            window.open(issueUrl, '_blank');
+            closeModal('submitLinkModal');
+
+            // Clear form
+            document.getElementById('submitLinkName').value = '';
+            document.getElementById('submitLinkUrl').value = '';
+            document.getElementById('submitLinkIcon').value = '';
+            document.getElementById('submitLinkColor').value = 'white';
+            document.getElementById('submitLinkAliases').value = '';
+            document.getElementById('submitLinkDesc').value = '';
+        }
+
+        // ==================== End Shared Links ====================
+
         // Open settings
         function openSettings() {
             renderLinkManager();
@@ -2924,6 +3529,8 @@
                 toggleClearButton('policySearch', 'policySearchClear');
                 document.getElementById('subfolderFilter').value = '';
                 toggleFilterClearButtons();
+            } else if (modalId === 'sharedLinksModal') {
+                document.getElementById('sharedLinksSearch').value = '';
             }
         }
 
