@@ -1589,7 +1589,6 @@
             loadPolicyClicks(); // Load policy click data FIRST
             await loadDefaultData();
             loadUserData();
-            checkDeptParam(); // Apply department layout for first-time users
             renderDashboard();
             renderPolicies();
             checkLayoutParam(); // Check for ?layout= URL parameter
@@ -2856,49 +2855,6 @@
             setTimeout(() => applyLayoutCode(layoutCode, true), 300);
         }
     }
-
-    // ── Department-specific default layouts ───────────────
-    // Maps dept URL param to an ordered list of link IDs for the top 8 tiles.
-    // Add new departments here — the rest of the app picks them up automatically.
-    const DEPT_LAYOUTS = {
-        histo: [13, 27, 22, 29, 1, 8, 6, 4],    // Histology Portal, Huddle Notes, Teams, QC Charts, EORLA, Omni, UKG, AP Portal
-        surgpath: [4, 12, 9, 1, 6, 7, 19, 30],   // SURGPATH, Huddle Minutes, Schedule, EORLA, Omni, UKG, AP Portal, CAP Protocols
-    };
-
-    // On first visit (no saved data), if ?dept= is set, reorder links
-    // so the department-relevant tiles appear first on the dashboard.
-    function checkDeptParam() {
-        // Only apply for first-time users (no existing personalisation)
-        if (localStorage.getItem('workspaceData')) return;
-
-        const params = new URLSearchParams(window.location.search);
-        const dept = params.get('dept');
-        if (!dept || !DEPT_LAYOUTS[dept]) return;
-
-        const priorityIds = DEPT_LAYOUTS[dept];
-
-        // Partition links into priority (in order) and the rest
-        const priority = [];
-        const rest = [];
-        for (const id of priorityIds) {
-            const link = links.find(l => l.id === id);
-            if (link) priority.push(link);
-        }
-        for (const link of links) {
-            if (!priorityIds.includes(link.id)) rest.push(link);
-        }
-
-        links = [...priority, ...rest];
-        saveUserData();
-
-        // Clean the dept param from the URL so bookmarks stay neutral
-        if (window.location.search.includes('dept=')) {
-            window.history.replaceState({}, '', window.location.pathname);
-        }
-
-        console.log('Applied department layout:', dept);
-    }
-
         // Export data in data.json format (for GitHub comparison)
         function exportData() {
             const exportLinks = links.map(link => {
