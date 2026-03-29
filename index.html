@@ -1996,6 +1996,7 @@
                             <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
                         <div class="link-manager-actions">
+                            ${link.isCustom ? `<button class="icon-btn" onclick="editLink(${link.id})" title="Edit">✏️</button>` : ''}
                             ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Share to Repo">📤</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">❌</button>` : ''}
                             <button class="icon-btn" onclick="resetLinkClicks(${link.id})" title="Reset clicks">🔄</button>
@@ -2506,14 +2507,21 @@
         function hideAddLinkForm() {
             document.getElementById('addLinkForm').style.display = 'none';
             document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkDescription').value = '';
             document.getElementById('newLinkUrl').value = '';
             document.getElementById('newLinkIcon').value = '';
             document.getElementById('newLinkAliases').value = '';
+            editingLinkId = null;
+            document.querySelector('#addLinkForm h3').textContent = 'Add New Link';
+            document.querySelector('#addLinkForm .btn-primary').textContent = 'Add Link';
         }
 
-        // Add custom link
+        // Add or update custom link
+        let editingLinkId = null;
+
         function addCustomLink() {
             const name = document.getElementById('newLinkName').value.trim();
+            const description = document.getElementById('newLinkDescription').value.trim();
             const url = document.getElementById('newLinkUrl').value.trim();
             const icon = document.getElementById('newLinkIcon').value.trim() || '🔗';
             const color = document.getElementById('newLinkColor').value;
@@ -2524,27 +2532,63 @@
                 return;
             }
 
-            const newLink = {
-                id: Date.now(), // Use timestamp as unique ID
-                name,
-                url,
-                icon,
-                color,
-                clicks: 0,
-                isCustom: true,
-                isNew: true // Mark as new
-            };
+            const aliases = aliasesInput ? aliasesInput.split(',').map(a => a.trim()).filter(a => a.length > 0) : [];
 
-            // Parse aliases if provided
-            if (aliasesInput) {
-                newLink.aliases = aliasesInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+            if (editingLinkId) {
+                // Update existing link
+                const link = links.find(l => l.id === editingLinkId);
+                if (link) {
+                    link.name = name;
+                    link.url = url;
+                    link.icon = icon;
+                    link.color = color;
+                    link.aliases = aliases.length > 0 ? aliases : undefined;
+                    link.description = description || undefined;
+                }
+            } else {
+                // Create new link
+                const newLink = {
+                    id: Date.now(),
+                    name,
+                    url,
+                    icon,
+                    color,
+                    clicks: 0,
+                    isCustom: true,
+                    isNew: true
+                };
+                if (aliases.length > 0) newLink.aliases = aliases;
+                if (description) newLink.description = description;
+                links.push(newLink);
             }
 
-            links.push(newLink);
             saveUserData();
             renderDashboard();
             renderLinkManager();
             hideAddLinkForm();
+        }
+
+        function editLink(linkId) {
+            const link = links.find(l => l.id === linkId);
+            if (!link || !link.isCustom) return;
+
+            editingLinkId = linkId;
+
+            // Populate the form with existing values
+            document.getElementById('newLinkName').value = link.name || '';
+            document.getElementById('newLinkDescription').value = link.description || '';
+            document.getElementById('newLinkUrl').value = link.url || '';
+            document.getElementById('newLinkIcon').value = (link.icon && !link.icon.startsWith('http') && !link.icon.startsWith('/') && !link.icon.startsWith('.')) ? link.icon : '';
+            document.getElementById('newLinkColor').value = link.color || 'blue';
+            document.getElementById('newLinkAliases').value = (link.aliases || []).join(', ');
+
+            // Update form title and button
+            document.querySelector('#addLinkForm h3').textContent = 'Edit Link';
+            document.querySelector('#addLinkForm .btn-primary').textContent = 'Save Changes';
+
+            // Show the form and scroll to it
+            document.getElementById('addLinkForm').style.display = 'block';
+            document.getElementById('addLinkForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         // Delete link
@@ -3410,11 +3454,12 @@
             const icon = link.icon || '🔗';
             const color = link.color || 'white';
             const aliases = (link.aliases || []).join(', ');
+            const desc = link.description || '';
 
             // Build issue body
             let body = `### Name\n\n${name}\n\n### URL\n\n${url}\n\n### Icon\n\n${icon}\n\n### Color\n\n${color}`;
             body += `\n\n### Search Aliases\n\n${aliases || '_No response_'}`;
-            body += `\n\n### Description\n\n_No response_`;
+            body += `\n\n### Description\n\n${desc || '_No response_'}`;
 
             // Append anonymous fingerprint
             const fp = getUserFingerprint();
@@ -3655,6 +3700,9 @@
             if (!link) return;
 
             let html = '';
+            if (link.isCustom) {
+                html += `<div class="tile-context-menu-item" onclick="closeTileContextMenu(); openSettings(); editLink(${linkId});">✏️ Edit</div>`;
+            }
             html += `<div class="tile-context-menu-item" onclick="resetLinkClicks(${linkId}); closeTileContextMenu();">🔄 Reset clicks</div>`;
             if (link.isCustom) {
                 html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">❌ Delete</div>`;
