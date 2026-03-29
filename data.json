@@ -329,7 +329,7 @@
         "pay",
         "peoplesoft"
       ]
-    },    
+    },
     {
       "id": 31,
       "name": "HRIS (external)",
@@ -406,6 +406,46 @@
         "credits",
         "calendar"
       ]
+    },
+    {
+      "id": 1774806056059,
+      "name": "Tip Sheets <br>(Histo)",
+      "url": "https://theottawahospital.sharepoint.com/:f:/r/sites/EORLAAPModernization/Shared%20Documents/Epic%20Beaker%20AP%20Information/Beaker%20AP%20Tip%20Sheets/Histology%20Tip%20Sheets%20PDF/PDF%20TOH%20Histology%20Specific%20TIP%20SHEETS",
+      "icon": "H",
+      "color": "blue",
+      "aliases": [
+        "epic",
+        "cheatsheet",
+        "cheat",
+        "help"
+      ]
+    },
+    {
+      "id": 1774806138753,
+      "name": "Tip Sheets <br>(Gross Room)",
+      "url": "https://theottawahospital-my.sharepoint.com/personal/mmaitland_eorla_ca/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fmmaitland%5Feorla%5Fca%2FDocuments%2FBeaker%20Resources",
+      "icon": "S",
+      "color": "blue",
+      "aliases": [
+        "epic",
+        "cheatsheet",
+        "cheat",
+        "help"
+      ]
+    },
+    {
+      "id": 1774806416362,
+      "name": "AP Tip Sheets",
+      "url": "https://theottawahospital.sharepoint.com/:f:/r/sites/EORLAAPModernization/Shared%20Documents/Epic%20Beaker%20AP%20Information/Beaker%20AP%20Tip%20Sheets?csf=1&web=1&e=9pz9ua",
+      "icon": "AP",
+      "color": "red",
+      "aliases": [
+        "epic",
+        "cheatsheet",
+        "cheat",
+        "help"
+      ],
+      "isNew": true
     }
   ]
 }
