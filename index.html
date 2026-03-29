@@ -2939,9 +2939,10 @@
         let sharedLinksData = [];
 
         // GitHub PAT for authenticated API calls (fine-grained, scoped to this repo, issues only)
-        // Generate at: https://github.com/settings/personal-access-tokens/new
-        // Scope: jessepelley/launcher -> Permissions -> Issues: Read and Write
-        const GITHUB_PAT = ''; // <-- Paste your fine-grained PAT here
+        // This value is injected at deploy time by GitHub Actions from the SHARED_LINKS_PAT secret.
+        // Do NOT paste a real token here — it will be revoked by GitHub's secret scanner.
+        // See: Settings → Secrets → Actions → SHARED_LINKS_PAT
+        const GITHUB_PAT = '';
 
         function ghHeaders() {
             const h = { 'Accept': 'application/vnd.github+json' };
