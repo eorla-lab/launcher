@@ -3071,23 +3071,67 @@
             }
             const issues = await resp.json();
 
-            const withReactions = await Promise.all(issues.map(async (issue) => {
+            // Fetch comments (votes) for all issues in parallel
+            const withVotes = await Promise.all(issues.map(async (issue) => {
                 try {
-                    const reactResp = await fetch(
-                        `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issue.number}/reactions`,
-                        { headers: ghHeaders() }
-                    );
-                    const reactions = reactResp.ok ? await reactResp.json() : [];
-                    return parseSharedLinkIssue(issue, reactions);
+                    const comments = await fetchAllComments(issue.number);
+                    return parseSharedLinkIssue(issue, comments);
                 } catch {
                     return parseSharedLinkIssue(issue, []);
                 }
             }));
 
-            return withReactions.filter(link => link !== null);
+            return withVotes.filter(link => link !== null);
         }
 
-        function parseSharedLinkIssue(issue, reactions) {
+        async function fetchAllComments(issueNumber) {
+            // Fetch all comment pages (100 per page)
+            let allComments = [];
+            let page = 1;
+            while (true) {
+                const resp = await fetch(
+                    `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issueNumber}/comments?per_page=100&page=${page}`,
+                    { headers: ghHeaders() }
+                );
+                if (!resp.ok) break;
+                const comments = await resp.json();
+                if (comments.length === 0) break;
+                allComments = allComments.concat(comments);
+                if (comments.length < 100) break;
+                page++;
+            }
+            return allComments;
+        }
+
+        const VOTE_COMMENT_PREFIX = '<!-- VOTE:';
+        const VOTE_COMMENT_SUFFIX = ' -->';
+
+        function parseVoteComment(commentBody) {
+            if (!commentBody || !commentBody.startsWith(VOTE_COMMENT_PREFIX)) return null;
+            try {
+                const jsonStr = commentBody.slice(VOTE_COMMENT_PREFIX.length, commentBody.indexOf(VOTE_COMMENT_SUFFIX));
+                return JSON.parse(jsonStr);
+            } catch { return null; }
+        }
+
+        function countVotes(comments) {
+            // Parse vote comments and deduplicate by anonId (last vote wins)
+            const votesByUser = {};
+            for (const c of comments) {
+                const vote = parseVoteComment(c.body);
+                if (!vote || !vote.anonId || !vote.vote) continue;
+                votesByUser[vote.anonId] = vote.vote;
+            }
+
+            let upvotes = 0, downvotes = 0;
+            for (const v of Object.values(votesByUser)) {
+                if (v === '+1') upvotes++;
+                else if (v === '-1') downvotes++;
+            }
+            return { upvotes, downvotes, votesByUser };
+        }
+
+        function parseSharedLinkIssue(issue, comments) {
             const body = issue.body || '';
 
             const getField = (label) => {
@@ -3109,12 +3153,7 @@
             const aliasesRaw = getField('Search Aliases') || getField('Aliases');
             const description = getField('Description');
 
-            let upvotes = 0, downvotes = 0;
-            for (const r of reactions) {
-                if (r.content === '+1' || r.content === 'heart' || r.content === 'rocket' || r.content === 'hooray') upvotes++;
-                else if (r.content === '-1' || r.content === 'confused') downvotes++;
-            }
-
+            const { upvotes, downvotes, votesByUser } = countVotes(comments);
             const totalVotes = upvotes + downvotes;
             const score = upvotes - downvotes;
             const ratio = totalVotes > 0 ? upvotes / totalVotes : 1;
@@ -3133,6 +3172,7 @@
                 downvotes,
                 score,
                 ratio,
+                votesByUser,
                 createdAt: issue.created_at
             };
         }
@@ -3164,7 +3204,7 @@
 
             const presetColors = { blue:'#3b82f6', green:'#10b981', purple:'#8b5cf6', orange:'#f59e0b', red:'#ef4444', indigo:'#6366f1', pink:'#ec4899', teal:'#14b8a6', gray:'#9ca3af', white:'#f9fafb' };
             const addedUrls = new Set(links.map(l => l.url));
-            const voteLog = getVoteLog();
+            const anonId = getAnonymousId();
 
             listEl.innerHTML = filtered.map(link => {
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
@@ -3172,7 +3212,9 @@
                 const bgColor = isHexColor ? link.color : (presetColors[link.color] || '#e5e7eb');
                 const textColor = getContrastColor(link.color || 'gray');
                 const alreadyAdded = addedUrls.has(link.url);
-                const userVote = voteLog[link.issueNumber] || null;
+                // Check user's vote from server data (votesByUser) with local fallback
+                const serverVote = link.votesByUser ? link.votesByUser[anonId] : null;
+                const userVote = serverVote || getVoteLog()[link.issueNumber] || null;
 
                 let iconHtml;
                 if (isImageIcon) {
@@ -3212,55 +3254,65 @@
             }).join('');
         }
 
-        async function voteOnSharedLink(issueNumber, reaction, btnEl) {
+        async function voteOnSharedLink(issueNumber, vote, btnEl) {
             if (!GITHUB_PAT) {
-                // Fallback: open the issue on GitHub so user can react there
                 const link = sharedLinksData.find(l => l.issueNumber === issueNumber);
                 if (link) window.open(link.issueUrl, '_blank');
                 return;
             }
 
-            const voteLog = getVoteLog();
-            const existingVote = voteLog[issueNumber];
+            const anonId = getAnonymousId();
+            const link = sharedLinksData.find(l => l.issueNumber === issueNumber);
+            const existingVote = link && link.votesByUser ? link.votesByUser[anonId] : null;
 
             // Already voted the same way — do nothing
-            if (existingVote === reaction) return;
+            if (existingVote === vote) return;
 
             // Disable button while working
             btnEl.disabled = true;
             btnEl.style.opacity = '0.5';
 
             try {
-                // Create the reaction via API
+                // Post a hidden comment as the vote
+                const voteData = {
+                    anonId,
+                    vote,
+                    ua: navigator.userAgent,
+                    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    ts: new Date().toISOString()
+                };
+                const commentBody = `${VOTE_COMMENT_PREFIX}${JSON.stringify(voteData)}${VOTE_COMMENT_SUFFIX}`;
+
                 const resp = await fetch(
-                    `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issueNumber}/reactions`,
+                    `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issueNumber}/comments`,
                     {
                         method: 'POST',
                         headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: reaction })
+                        body: JSON.stringify({ body: commentBody })
                     }
                 );
 
-                if (resp.ok || resp.status === 200 || resp.status === 201) {
-                    // Record vote locally
-                    voteLog[issueNumber] = reaction;
+                if (resp.ok || resp.status === 201) {
+                    // Record vote locally for immediate feedback
+                    const voteLog = getVoteLog();
+                    voteLog[issueNumber] = vote;
                     saveVoteLog(voteLog);
 
                     // Update local data optimistically
-                    const link = sharedLinksData.find(l => l.issueNumber === issueNumber);
                     if (link) {
-                        // Undo previous vote if changing vote
+                        if (!link.votesByUser) link.votesByUser = {};
+                        // Undo previous vote if changing
                         if (existingVote === '+1') link.upvotes = Math.max(0, link.upvotes - 1);
                         if (existingVote === '-1') link.downvotes = Math.max(0, link.downvotes - 1);
                         // Apply new vote
-                        if (reaction === '+1') link.upvotes++;
-                        if (reaction === '-1') link.downvotes++;
+                        if (vote === '+1') link.upvotes++;
+                        if (vote === '-1') link.downvotes++;
+                        link.votesByUser[anonId] = vote;
                         link.score = link.upvotes - link.downvotes;
                         const total = link.upvotes + link.downvotes;
                         link.ratio = total > 0 ? link.upvotes / total : 1;
                     }
 
-                    // Invalidate cache so next open refetches
                     localStorage.removeItem(SHARED_LINKS_CACHE_KEY);
                     renderSharedLinks();
                 } else {
