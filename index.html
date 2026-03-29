@@ -1263,43 +1263,52 @@
                     <div id="manageTabContent" style="height: 620px;">
 
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <button class="btn btn-primary" onclick="showAddLinkForm()" style="flex: 1;">+ Add Custom Link</button>
-                        <button class="btn btn-secondary" onclick="openSharedLinks()" style="flex: 1;">🌐 Get More Links</button>
+                        <button class="btn btn-primary" onclick="showAddLinkForm()" style="flex: 1;">Add Custom Link</button>
+                        <button class="btn btn-secondary" onclick="openSharedLinks()" style="flex: 1;">Shared Link Repo</button>
                     </div>
 
                     <div id="addLinkForm"
                         style="display: none; background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                         <h3 style="margin-bottom: 12px;">Add New Link</h3>
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" id="newLinkName" placeholder="e.g., Schedule">
+                        <div class="form-group" style="display: flex; gap: 12px; align-items: flex-end;">
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <label>Name</label>
+                                <input type="text" id="newLinkName" placeholder="e.g., Schedule">
+                            </div>
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <label>Description</label>
+                                <input type="text" id="newLinkDescription" placeholder="optional, for Shared Link Repo">
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>URL</label>
                             <input type="text" id="newLinkUrl" placeholder="https://...">
                         </div>
-                        <div class="form-group">
-                            <label>Icon (emoji)</label>
-                            <input type="text" id="newLinkIcon" placeholder="🚀" maxlength="2">
+                        <div class="form-group" style="display: flex; gap: 12px; align-items: flex-end;">
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <label>Icon (emoji)</label>
+                                <input type="text" id="newLinkIcon" placeholder="🚀" maxlength="2"
+                                    style="height: 32px; padding: 4px 8px; font-size: 14px;">
+                            </div>
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <label>Colour</label>
+                                <select id="newLinkColor" style="height: 32px; padding: 4px 8px; font-size: 14px;">
+                                    <option value="blue">Blue</option>
+                                    <option value="green">Green</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="orange">Orange</option>
+                                    <option value="red">Red</option>
+                                    <option value="indigo">Indigo</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="teal">Teal</option>
+                                </select>
+                            </div>                  
                         </div>
                         <div class="form-group">
                             <label>Aliases (optional search keywords)</label>
                             <input type="text" id="newLinkAliases" placeholder="e.g., mail, email (comma separated)">
                             <small style="color: #6b7280; margin-top: 4px; display: block;">Separate multiple aliases
                                 with commas</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Colour</label>
-                            <select id="newLinkColor">
-                                <option value="blue">Blue</option>
-                                <option value="green">Green</option>
-                                <option value="purple">Purple</option>
-                                <option value="orange">Orange</option>
-                                <option value="red">Red</option>
-                                <option value="indigo">Indigo</option>
-                                <option value="pink">Pink</option>
-                                <option value="teal">Teal</option>
-                            </select>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-primary" onclick="addCustomLink()">Add Link</button>
@@ -1350,21 +1359,26 @@
                     <div id="changelogContent" style="height: 620px;">
                         <div style="margin-bottom: 24px;">
                             <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.2</h3>
-                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">April 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-                                <li>Community links: browse and add links shared by others via "Get More Links"</li>
-                                <li>Submit your custom links to the community via right-click or Settings</li>
-                                <li>Upvote/downvote community links directly in the app</li>
+                                <li>Shared Link Repo: browse and add links shared by others</li>
+                                <li>
+                                    Improved search:
+                                    <ul style="margin-top:4px; padding-left: 20px; list-style-type: disc;">
+                                        <li>Prefix a word with - to exclude results containing that word</li>
+                                        <li>Use quotation marks to require an exact phrase match</li>
+                                    </ul>
+                                </li>
                             </ul>
                         </div>
                         <div style="margin-bottom: 24px;">
                             <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.1</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">March 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-                                <li>Drag and drop URLs into the app to quickly add custom links</li>
-                                <li>Drag a tile out of the app to quickly export a link</li>
-                                <li>Right-click on tiles to reset clicks or remove custom links</li>
-                                <li>Layout codes: save and apply your tile arrangement to other workstations</li>
+                                <li>Drag and drop URLs into the app to add custom links</li>
+                                <li>Drag a tile out of the app to export a link</li>
+                                <li>Right-click on tiles to remove custom links or reset clicks</li>
+                                <li>Layout codes: transfer your tile layout to other workstations</li>
                             </ul>
                         </div>
                         <div style="margin-bottom: 24px;">
@@ -1390,12 +1404,12 @@
     <div id="sharedLinksModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Community Links</h2>
+                <h2>Shared Link Repo</h2>
                 <button class="close-btn" onclick="closeModal('sharedLinksModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div class="shared-links-toolbar">
-                    <input type="text" id="sharedLinksSearch" placeholder="Search community links..." oninput="renderSharedLinks()">
+                    <input type="text" id="sharedLinksSearch" placeholder="Search shared links..." oninput="renderSharedLinks()">
                     <select id="sharedLinksSort" onchange="renderSharedLinks()">
                         <option value="top">Top</option>
                         <option value="new">New</option>
@@ -1978,12 +1992,12 @@
                     <li class="link-manager-item" style="display:flex;align-items:center;">
                         ${iconDisplay}
                         <div class="link-manager-info" style="flex:1;min-width:0;">
-                            <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Community) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
+                            <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Repo) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
                             <div class="link-manager-url" title="${link.url}">${link.url}</div>
                         </div>
                         <div class="link-manager-actions">
-                            ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Submit to Community">🌐</button>` : ''}
-                            ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">🗑️</button>` : ''}
+                            ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Share to Repo">📤</button>` : ''}
+                            ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">❌</button>` : ''}
                             <button class="icon-btn" onclick="resetLinkClicks(${link.id})" title="Reset clicks">🔄</button>
                         </div>
                     </li>
@@ -3018,7 +3032,7 @@
             }
 
             // Show loading
-            listEl.innerHTML = '<div class="shared-links-loading">Loading community links...</div>';
+            listEl.innerHTML = '<div class="shared-links-loading">Loading shared links...</div>';
             statusEl.textContent = '';
 
             try {
@@ -3042,7 +3056,7 @@
                     } catch (e) { /* fall through */ }
                 }
                 listEl.innerHTML = `<div class="shared-links-error">
-                    ${err.message.includes('rate limit') ? 'GitHub API rate limit reached. Try again in a few minutes.' : 'Could not load community links. Check your connection.'}
+                    ${err.message.includes('rate limit') ? 'GitHub API rate limit reached. Try again in a few minutes.' : 'Could not load shared links. Check your connection.'}
                 </div>`;
             }
         }
@@ -3143,7 +3157,7 @@
             }
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">No community links found</div>';
+                listEl.innerHTML = '<div class="empty-state">No shared links found</div>';
                 return;
             }
 
@@ -3170,6 +3184,8 @@
                 const upActive = userVote === '+1' ? 'background:#dcfce7;border-color:#86efac;font-weight:700;' : '';
                 const downActive = userVote === '-1' ? 'background:#fef2f2;border-color:#fca5a5;font-weight:700;' : '';
 
+                // <span>by ${escapeHtml(link.author)} · ${timeAgo}</span> //jptest remove author name
+
                 return `
                     <div class="shared-link-card">
                         <div class="shared-link-card-header">
@@ -3180,9 +3196,10 @@
                                 <button class="shared-link-vote-btn downvote" style="${downActive}" onclick="voteOnSharedLink(${link.issueNumber}, '-1', this)" title="Downvote">👎 ${link.downvotes}</button>
                             </div>
                         </div>
+                        ${link.url ? `<div class="shared-link-desc">${escapeHtml(link.url)}</div>` : ''}
                         ${link.description ? `<div class="shared-link-desc">${escapeHtml(link.description)}</div>` : ''}
                         <div class="shared-link-meta">
-                            <span>by ${escapeHtml(link.author)} · ${timeAgo}</span>
+                            <span>${timeAgo}</span>
                             <button class="shared-link-add-btn ${alreadyAdded ? 'added' : ''}"
                                 onclick="${alreadyAdded ? '' : `addSharedLink(${link.issueNumber})`}"
                                 ${alreadyAdded ? 'disabled' : ''}>
@@ -3385,7 +3402,7 @@
                     const statusEl = document.getElementById('sharedLinksSubmitStatus');
                     if (statusEl) {
                         statusEl.style.color = '#10b981';
-                        statusEl.textContent = `"${name}" submitted to community!`;
+                        statusEl.textContent = `"${name}" shared!`;
                         setTimeout(() => { statusEl.textContent = ''; }, 3000);
                     }
                 } else {
@@ -3587,10 +3604,10 @@
             let html = '';
             html += `<div class="tile-context-menu-item" onclick="resetLinkClicks(${linkId}); closeTileContextMenu();">🔄 Reset clicks</div>`;
             if (link.isCustom) {
-                html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">🗑️ Remove link</div>`;
+                html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">❌ Delete</div>`;
             }
             if (canSubmitToCommunity(link)) {
-                html += `<div class="tile-context-menu-item" onclick="submitLinkToCommunity(${linkId}); closeTileContextMenu();">🌐 Submit to Community</div>`;
+                html += `<div class="tile-context-menu-item" onclick="submitLinkToCommunity(${linkId}); closeTileContextMenu();">📤 Share to Repo</div>`;
             }
             itemsEl.innerHTML = html;
 
