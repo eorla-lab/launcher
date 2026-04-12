@@ -6,11 +6,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#69c9d0">
-    <meta name="apple-mobile-web-app-title" content="Histo Launcher">
+    <meta name="apple-mobile-web-app-title" content="Surg Path Launcher">
     <link rel="manifest" href="./site.webmanifest">
     <link rel="icon" type="image/png" href="../favicon-96x96.png" sizes="96x96">
     <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-    <title>Install Launcher - Histology</title>
+    <title>Install Launcher - Surg Path</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -91,22 +91,22 @@
     <div class="card">
             <img src="../icons/eorla.jpeg" alt="EORLA" class="header-logo">
             <h1>Launcher</h1>
-        <p><span class="dept">Histology</span></p>
+        <p><span class="dept">Surg Path</span></p>
 
         <div id="installSection">
             <div class="steps">
                 <strong>To install:</strong><br>
                 1. Click "Install App" below (or use your browser's install option)<br>
                 2. The app will appear on your desktop/taskbar<br>
-                3. Your tiles will be pre-configured for Histology
+                3. Your tiles will be pre-configured for Surg Path
             </div>
             <button class="btn" id="installBtn" onclick="installPWA()">Install App</button>
-            <button class="btn-secondary" onclick="window.location.href='../?layout=000002N5Zk'">or open without installing →</button>
+            <button class="btn-secondary" onclick="window.location.href='../?layout=0009a6aFG0'">or open without installing →</button>
         </div>
 
         <div id="installedSection" class="hidden">
-            <p>The app is installed. You can close this window and open <strong>Launcher - Histology</strong> from your desktop or taskbar.</p>
-            <button class="btn" onclick="window.location.href='../?layout=000002N5Zk'">Open Launcher →</button>
+            <p>The app is installed. You can close this window and open <strong>Launcher - Surg Path</strong> from your desktop or taskbar.</p>
+            <button class="btn" onclick="window.location.href='../?layout=0009a6aFG0'">Open Launcher →</button>
         </div>
     </div>
 
@@ -141,7 +141,7 @@
 
         // If already running as PWA, redirect straight to the app
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            window.location.href = '../?layout=000002N5Zk';
+            window.location.href = '../?layout=0009a6aFG0';
         }
     </script>
 </body>

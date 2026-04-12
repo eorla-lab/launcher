@@ -1,0 +1,67 @@
+name: "Share a Link"
+description: "Submit a link to the community shared links repo"
+labels: ["shared-link"]
+body:
+  - type: input
+    id: link-name
+    attributes:
+      label: Name
+      description: "Display name for the link"
+      placeholder: "e.g., Epic Hyperspace"
+    validations:
+      required: true
+
+  - type: input
+    id: link-url
+    attributes:
+      label: URL
+      description: "Full URL of the link"
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: input
+    id: link-icon
+    attributes:
+      label: Icon
+      description: "An emoji or short text (1-3 characters) for the tile icon"
+      placeholder: "e.g., 🏥 or EP"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: link-color
+    attributes:
+      label: Color
+      description: "Tile background color"
+      options:
+        - blue
+        - green
+        - purple
+        - orange
+        - red
+        - indigo
+        - pink
+        - teal
+        - gray
+        - white
+    validations:
+      required: false
+
+  - type: input
+    id: link-aliases
+    attributes:
+      label: Search Aliases
+      description: "Comma-separated keywords to help others find this link"
+      placeholder: "e.g., hospital, patient, chart"
+    validations:
+      required: false
+
+  - type: textarea
+    id: link-description
+    attributes:
+      label: Description
+      description: "Brief description of what this link is for"
+      placeholder: "A useful tool for..."
+    validations:
+      required: false
