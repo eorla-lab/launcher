@@ -408,6 +408,20 @@
       ]
     },
     {
+      "id": 37,
+      "name": "PathAnnotate",
+      "url": "https://annotate.jjjp.ca/",
+      "icon": "./icons/pa.png",
+      "color": "#FFFFFF",
+      "aliases": [
+        "map",
+        "pa",
+        "path",
+        "mapping",
+        "annotate"
+      ]
+    },
+    {
       "id": 1774806056059,
       "name": "Tip Sheets <br>(Histo)",
       "url": "https://theottawahospital.sharepoint.com/:f:/r/sites/EORLAAPModernization/Shared%20Documents/Epic%20Beaker%20AP%20Information/Beaker%20AP%20Tip%20Sheets/Histology%20Tip%20Sheets%20PDF/PDF%20TOH%20Histology%20Specific%20TIP%20SHEETS",

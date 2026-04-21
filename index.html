@@ -2624,6 +2624,9 @@
         const LAYOUT_SLOTS = 8;
         const CODE_LENGTH = 10;
         const BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // Fixed ceiling — must never change once layout codes are in the wild.
+        // 10 base62 chars can encode permutations for up to 177 links.
+        const LAYOUT_N_MAX = 177;
 
         function toBase62(bigint, length) {
             const chars = [];
@@ -2648,7 +2651,7 @@
         // Encode: takes an array of data.json indices (positions in
         // defaultData.links) and produces a factoradic-packed base62 string.
         function encodeLayout(indices) {
-            const n = defaultData.links.length;
+            const n = LAYOUT_N_MAX;
             const slots = indices.slice(0, LAYOUT_SLOTS);
 
             // Build Lehmer code: for each pick, record its position
@@ -2679,8 +2682,8 @@
             const packed = fromBase62(code);
             if (packed < 0n) return [];
 
-            const n = defaultData.links.length;
-            if (n === 0) return [];
+            const n = LAYOUT_N_MAX;
+            if (defaultData.links.length === 0) return [];
 
             // Unpack Lehmer code using mixed-radix decomposition (reverse order)
             let remainder = packed;
