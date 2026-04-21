@@ -2,7 +2,7 @@
     "name": "Launcher - Surg Path",
     "short_name": "Surg Path",
     "description": "EORLA Launcher configured for Surg Path",
-    "start_url": "../?layout=0009a6aFG0",
+    "start_url": "../?layout=0000000002",
     "scope": "../",
     "display": "standalone",
     "background_color": "#12412f",

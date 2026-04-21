@@ -101,12 +101,12 @@
                 3. Your tiles will be pre-configured for Surg Path
             </div>
             <button class="btn" id="installBtn" onclick="installPWA()">Install App</button>
-            <button class="btn-secondary" onclick="window.location.href='../?layout=0009a6aFG0'">or open without installing →</button>
+            <button class="btn-secondary" onclick="window.location.href='../?layout=0000000002'">or open without installing →</button>
         </div>
 
         <div id="installedSection" class="hidden">
             <p>The app is installed. You can close this window and open <strong>Launcher - Surg Path</strong> from your desktop or taskbar.</p>
-            <button class="btn" onclick="window.location.href='../?layout=0009a6aFG0'">Open Launcher →</button>
+            <button class="btn" onclick="window.location.href='../?layout=0000000002'">Open Launcher →</button>
         </div>
     </div>
 
@@ -141,7 +141,7 @@
 
         // If already running as PWA, redirect straight to the app
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            window.location.href = '../?layout=0009a6aFG0';
+            window.location.href = '../?layout=0000000002';
         }
     </script>
 </body>
