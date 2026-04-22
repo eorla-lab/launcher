@@ -2675,6 +2675,14 @@
         // 10 base62 chars can encode permutations for up to 177 links.
         const LAYOUT_N_MAX = 177;
 
+        // Department layout aliases — short stable codes burned into PWA manifests.
+        // Update the value (right side) to change a department's default layout
+        // without reinstalling the app. Keys must not collide with real user codes.
+        const DEPARTMENT_LAYOUTS = {
+            'histo': '0002GbJkSo',  // Histology  ← update value to change histo default layout
+            'sp':    '3qrliCPMQ0',  // Surgical Pathology  ← update value to change sp default layout
+        };
+
         function toBase62(bigint, length) {
             const chars = [];
             const base = 62n;
@@ -2831,6 +2839,11 @@
         }
 
         code = code.trim();
+
+        // Resolve department alias before any other validation
+        if (DEPARTMENT_LAYOUTS[code]) {
+            code = DEPARTMENT_LAYOUTS[code];
+        }
 
         if (code.length !== CODE_LENGTH) {
             alert('Invalid layout code. Expected exactly ' + CODE_LENGTH + ' characters.');

@@ -101,12 +101,12 @@
                 3. Your tiles will be pre-configured for Histology
             </div>
             <button class="btn" id="installBtn" onclick="installPWA()">Install App</button>
-            <button class="btn-secondary" onclick="window.location.href='../?layout=000002N5Zk'">or open without installing →</button>
+            <button class="btn-secondary" onclick="window.location.href='../?layout=histo'">or open without installing →</button>
         </div>
 
         <div id="installedSection" class="hidden">
             <p>The app is installed. You can close this window and open <strong>Launcher - Histology</strong> from your desktop or taskbar.</p>
-            <button class="btn" onclick="window.location.href='../?layout=000002N5Zk'">Open Launcher →</button>
+            <button class="btn" onclick="window.location.href='../?layout=histo'">Open Launcher →</button>
         </div>
     </div>
 
@@ -141,7 +141,7 @@
 
         // If already running as PWA, redirect straight to the app
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            window.location.href = '../?layout=000002N5Zk';
+            window.location.href = '../?layout=histo';
         }
     </script>
 </body>
