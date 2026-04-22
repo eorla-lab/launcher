@@ -79,7 +79,13 @@
       "name": "CAP Protocols",
       "url": "https://www.cap.org/protocols-and-guidelines/cancer-reporting-tools/cancer-protocol-templates",
       "icon": "./icons/cap.png",
-      "color": "white"
+      "color": "white",
+      "children": [
+        { "name": "Breast DCIS",              "url": "https://documents.cap.org/protocols/Breast.DCIS_4.4.0.0.REL_CAPCP.pdf#page=8",                                                          "aliases": ["breast", "dcis", "cap"] },
+        { "name": "Breast Invasive Carcinoma", "url": "https://documents.cap.org/protocols/Breast.Invasive_4.10.0.0.REL.CAPCP.pdf#page=15",                                                    "aliases": ["breast", "invasive", "cap"] },
+        { "name": "Colorectal Carcinoma",      "url": "https://documents.cap.org/protocols/ColoRectal_4.4.0.1.REL_CAPCP.pdf#page=10",                                                          "aliases": ["colon", "colorectal", "rectal", "cap"] },
+        { "name": "Kidney/Renal Carcinoma",    "url": "https://documents.cap.org/documents/New-Cancer-Protocols-June-2025/Kidney_4.2.1.0.REL_CAPCP.pdf#page=8",                               "aliases": ["kidney", "renal", "cap"] }
+      ]
     },
     {
       "id": 12,

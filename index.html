@@ -1428,6 +1428,7 @@
     <script>
         let defaultData = { links: [], policies: [] };
         let links = [];
+        let sublinks = []; // flat list of children from all default links — searchable only, never on grid
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
         let docNumberClicks = {}; // Track policy clicks by Doc #
@@ -1599,6 +1600,21 @@
             try {
                 const response = await fetch('data.json');
                 defaultData = await response.json();
+
+                sublinks = [];
+                defaultData.links.forEach(parent => {
+                    (parent.children || []).forEach(child => {
+                        sublinks.push({
+                            name:        child.name,
+                            url:         child.url,
+                            aliases:     child.aliases || [],
+                            parentId:    parent.id,
+                            parentName:  parent.name,
+                            parentIcon:  parent.icon,
+                            parentColor: parent.color,
+                        });
+                    });
+                });
 
                 // Load policies from CSV
                 await loadPoliciesFromCSV();
@@ -2297,7 +2313,7 @@
             // Render search hints
             renderSearchHints('linkSearchHints', query);
 
-            // Filter and score links
+            // Filter and score links (including sublinks)
             let scoredLinks = [];
             if (hasQuery) {
                 for (const link of links) {
@@ -2306,7 +2322,12 @@
                         fields.push(...link.aliases);
                     }
                     const score = scoreItem(fields, query);
-                    if (score >= 0) scoredLinks.push({ item: link, score });
+                    if (score >= 0) scoredLinks.push({ item: link, score, isSublink: false });
+                }
+                for (const sub of sublinks) {
+                    const fields = [sub.name, ...sub.aliases];
+                    const score = scoreItem(fields, query);
+                    if (score >= 0) scoredLinks.push({ item: sub, score, isSublink: true });
                 }
             }
 
@@ -2319,14 +2340,19 @@
                 }
             }
 
-            // Sort links by score, then NEW status, then clicks
+            // Sort: score desc; regular links above sublinks at equal score; regular: NEW > clicks
             scoredLinks.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                const aIsNew = a.item.isNew && a.item.clicks === 0;
-                const bIsNew = b.item.isNew && b.item.clicks === 0;
-                if (aIsNew && !bIsNew) return -1;
-                if (!aIsNew && bIsNew) return 1;
-                return b.item.clicks - a.item.clicks;
+                if (!a.isSublink && b.isSublink) return -1;
+                if (a.isSublink && !b.isSublink) return 1;
+                if (!a.isSublink) {
+                    const aIsNew = a.item.isNew && a.item.clicks === 0;
+                    const bIsNew = b.item.isNew && b.item.clicks === 0;
+                    if (aIsNew && !bIsNew) return -1;
+                    if (!aIsNew && bIsNew) return 1;
+                    return b.item.clicks - a.item.clicks;
+                }
+                return 0;
             });
 
             // Sort policies by score, then existing policySort
@@ -2335,7 +2361,7 @@
                 return policySort(a.item, b.item);
             });
 
-            const sortedLinks = scoredLinks.map(s => s.item);
+            const sortedLinks = scoredLinks; // [{item, score, isSublink}]
             const sortedPolicies = scoredPolicies.map(s => s.item);
 
             // Show/hide sections based on results
@@ -2351,7 +2377,28 @@
             // Render links section
             if (sortedLinks.length > 0) {
                 linksSection.style.display = 'block';
-                searchResults.innerHTML = sortedLinks.map(link => {
+                searchResults.innerHTML = sortedLinks.map(({ item: link, isSublink }) => {
+                    if (isSublink) {
+                        const isImgIconS = link.parentIcon && (link.parentIcon.startsWith('http') || link.parentIcon.startsWith('/') || link.parentIcon.startsWith('.') || link.parentIcon.startsWith('data:image'));
+                        const isHexColorS = link.parentColor && link.parentColor.startsWith('#');
+                        const presetColorsS = { blue: '#3b82f6', green: '#10b981', purple: '#8b5cf6', orange: '#f59e0b', red: '#ef4444', indigo: '#6366f1', pink: '#ec4899', teal: '#14b8a6', gray: '#9ca3af' };
+                        const bgColorS = isHexColorS ? link.parentColor : (presetColorsS[link.parentColor] || '#e5e7eb');
+                        const textColorS = getContrastColor(link.parentColor || 'gray');
+                        const iconDisplayS = isImgIconS
+                            ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;border-radius:6px;background:${bgColorS};margin-right:10px;"><img src="${link.parentIcon}" style="width:20px;height:20px;object-fit:contain;" onerror="this.parentNode.style.display='none';"></span>`
+                            : `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;border-radius:6px;background:${bgColorS};color:${textColorS};font-size:14px;margin-right:10px;">${link.parentIcon || ''}</span>`;
+                        return `
+            <li class="policy-item search-result-item" onclick="window.open('${link.url}', '_blank')">
+                <div class="policy-info" style="display:flex;align-items:center;">
+                    ${iconDisplayS}
+                    <div style="min-width:0;">
+                        <div style="font-size:0.75rem;color:#9ca3af;">${highlightText(link.parentName, hlTerms)}</div>
+                        <div class="policy-title">${highlightText(link.name, hlTerms)}</div>
+                    </div>
+                </div>
+                <span class="external-icon">↗</span>
+            </li>`;
+                    }
                     const isNew = link.isNew && link.clicks === 0;
 
                     const isImageIcon = link.icon && (
