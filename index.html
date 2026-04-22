@@ -2632,8 +2632,8 @@
         // Update the value (right side) to change a department's default layout
         // without reinstalling the app. Keys must not collide with real user codes.
         const DEPARTMENT_LAYOUTS = {
-            '0000000001': '0002GbJkSo',  // Histology
-            '0000000002': '3qrliCPMQ0',  // Surgical Pathology
+            'histo': '0002GbJkSo',  // Histology  ← update value to change histo default layout
+            'sp':    '3qrliCPMQ0',  // Surgical Pathology  ← update value to change sp default layout
         };
 
         function toBase62(bigint, length) {
