@@ -8,15 +8,6 @@
  *    background ("stale-while-revalidate"). When data.json actually changes
  *    we tell the open page so it can update / notify the user.
  *
- * Scope: this worker only ever controls its own origin (e.g.
- * launcher.jjjp.ca). A PWA on a different sub-domain (annotate.jjjp.ca) has
- * its own separate worker and cache — they cannot see or touch each other.
- *
- * Updating: bump CACHE_VERSION below and deploy. Browsers re-download this
- * file on (roughly) every launch, byte-compare it, and if it changed they
- * install the new worker in the background; the activate step deletes the
- * old cache. See the "kill switch" note at the bottom if a deploy ever goes
- * wrong.
  */
 
 const CACHE_VERSION = 'v1';
@@ -144,7 +135,7 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
-/* ── Kill switch ───────────────────────────────────────────────────────────
+/* ── Note ───────────────────────────────────────────────────────────
  * If a future deploy of this worker ever misbehaves, replace the whole file
  * with the following and deploy. Every client will drop its cache, unregister
  * the worker, and reload clean:
