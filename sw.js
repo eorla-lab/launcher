@@ -94,16 +94,27 @@ self.addEventListener('fetch', (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(req, { ignoreSearch: true });
+    // Clone now, before `cached` is handed to respondWith() and its body is
+    // consumed — otherwise the comparison clone below would throw.
+    const cachedForCompare = cached ? cached.clone() : null;
 
-    const fromNetwork = fetch(req).then((res) => {
+    const fromNetwork = fetch(req).then(async (res) => {
       if (res && res.ok) {
-        cache.put(req, res.clone());
         if (isMainData) {
-          event.waitUntil(recordDataSync(cache));
-          if (cached) {
-            // We had an older copy and just got a newer one — let the page know.
-            event.waitUntil(broadcastDataUpdated());
+          // Only notify the page if data.json's contents actually changed —
+          // otherwise it would claim "updated data" on every single launch.
+          let changed = true;
+          if (cachedForCompare) {
+            try {
+              const [oldText, newText] = await Promise.all([cachedForCompare.text(), res.clone().text()]);
+              changed = oldText !== newText;
+            } catch (e) { changed = true; }
           }
+          await cache.put(req, res.clone());
+          event.waitUntil(recordDataSync(cache));
+          if (cached && changed) event.waitUntil(broadcastDataUpdated());
+        } else {
+          await cache.put(req, res.clone());
         }
       }
       return res;
