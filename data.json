@@ -247,10 +247,8 @@
         "myapps",
         "my",
         "apps",
-        "elm",
         "iexpense",
         "oracle",
-        "hris",
         "epic"
       ]
     },
@@ -325,7 +323,7 @@
     {
       "id": 30,
       "name": "HRIS",
-      "url": "https://ohhcmweb01.civic1.ottawahospital.on.ca:1443/HRPRD/signon.html",
+      "url": "https://myhris.ottawahospital.on.ca/",
       "icon": "./icons/TOH_HRIS.jpeg",
       "color": "#FFFFFF",
       "aliases": [
@@ -391,7 +389,7 @@
     {
       "id": 35,
       "name": "ELM",
-      "url": "https://myelm.ottawahospital.on.ca:1443/psp/ELMPRD/?cmd=login&languageCd=ENG&",
+      "url": "https://myelm.ottawahospital.on.ca/",
       "icon": "./icons/TOH_ELM.png",
       "color": "white",
       "aliases": [
