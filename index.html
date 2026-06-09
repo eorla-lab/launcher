@@ -1458,6 +1458,7 @@
     <script>
         let defaultData = { links: [], policies: [] };
         let links = [];
+        let tileOrder = []; // manual tile arrangement (link ids) — only used when logged in
         let sublinks = []; // flat list of children from all default links — searchable only, never on grid
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
@@ -1624,6 +1625,7 @@
                 renderDashboard();
                 renderPolicies();
                 checkLayoutParam(); // Check for ?layout= URL parameter
+                resumeBadgeSession(); // restore a logged-in badge session, if any
             } finally {
                 hideAppSplash();
             }
@@ -1849,6 +1851,7 @@
             if (savedData) {
                 const parsed = JSON.parse(savedData);
                 links = parsed.links || [];
+                tileOrder = Array.isArray(parsed.tileOrder) ? parsed.tileOrder : [];
 
                 // Smart merge: Add any NEW links from data.json that user doesn't have
                 const userLinkIds = links.map(l => l.id);
@@ -1882,9 +1885,13 @@
             console.log('Total policies loaded:', policies.length);
         }
 
-        // Save user data to localStorage
+        // Save user data to localStorage (and, when logged in, to the cloud profile)
         function saveUserData() {
-            localStorage.setItem('workspaceData', JSON.stringify({ links }));
+            try {
+                localStorage.setItem('workspaceData', JSON.stringify({ links, tileOrder }));
+            } catch (e) { /* storage blocked on locked-down machines — ignore */ }
+            // Mirror to the per-badge cloud profile so the layout follows the user.
+            if (window.launcherAuth && launcherAuth.isAuthed()) launcherAuth.pushProfileDebounced();
         }
 
         // Load policy clicks from localStorage
@@ -1959,21 +1966,35 @@
         }
 
         // Render dashboard with all tiles sorted by new status first, then clicks
-        function renderDashboard() {
-            const dashboard = document.getElementById('dashboard');
-
-            // Sort links: new links first, then by clicks
-            const sortedLinks = [...links].sort((a, b) => {
+        // Decide tile order. When logged in with a saved manual arrangement,
+        // honour it (like a phone home screen); otherwise auto-sort new-first
+        // then by click count.
+        function orderedLinks() {
+            const authed = window.launcherAuth && launcherAuth.isAuthed();
+            if (authed && tileOrder.length) {
+                const byId = new Map(links.map(l => [l.id, l]));
+                const ordered = [];
+                tileOrder.forEach(id => {
+                    if (byId.has(id)) { ordered.push(byId.get(id)); byId.delete(id); }
+                });
+                // Links not yet placed (e.g. newly added) trail, click-sorted.
+                const rest = [...byId.values()].sort((a, b) => b.clicks - a.clicks);
+                return [...ordered, ...rest];
+            }
+            return [...links].sort((a, b) => {
                 const aIsNew = a.isNew && a.clicks === 0;
                 const bIsNew = b.isNew && b.clicks === 0;
-
-                // New links go first
                 if (aIsNew && !bIsNew) return -1;
                 if (!aIsNew && bIsNew) return 1;
-
-                // Then sort by clicks
                 return b.clicks - a.clicks;
             });
+        }
+
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            const reorderable = window.launcherAuth && launcherAuth.isAuthed();
+
+            const sortedLinks = orderedLinks();
 
             let html = '';
 
@@ -1992,7 +2013,7 @@
                 }
 
                 html += `
-                    <button class="tile" draggable="true" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
+                    <button class="tile${reorderable ? ' reorderable' : ''}" draggable="true" data-id="${link.id}" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -2010,8 +2031,10 @@
 
             dashboard.innerHTML = html;
 
-            // Set up drag-out handlers on the new tiles
-            setupTileDragOut();
+            // When logged in, tiles reorder like a phone home screen.
+            // Otherwise they drag OUT (to share the link to the desktop).
+            if (reorderable) setupTileReorder();
+            else setupTileDragOut();
         }
 
         // Render link manager
@@ -3039,465 +3062,155 @@
         }
 
         // ==================== Shared Links (Community Repo) ====================
+        // Backend: https://jjjp.ca/launcher  (launcher/api.php on the NAS).
+        // Public read — anyone sees the list. Posting/removing requires a badge login.
 
-        const SHARED_LINKS_REPO = 'jessepelley/launcher';
-        const SHARED_LINKS_LABEL = 'shared-link';
         const SHARED_LINKS_CACHE_KEY = 'sharedLinksCache';
         const SHARED_LINKS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
         let sharedLinksData = [];
-
-        // GitHub PAT for authenticated API calls (fine-grained, scoped to this repo, issues only)
-        // This value is injected at deploy time by GitHub Actions from the SHARED_LINKS_PAT secret.
-        // Do NOT paste a real token here — it will be revoked by GitHub's secret scanner.
-        // See: Settings → Secrets → Actions → SHARED_LINKS_PAT
-        const GITHUB_PAT = '';
-
-        function ghHeaders() {
-            const h = { 'Accept': 'application/vnd.github+json' };
-            if (GITHUB_PAT) h['Authorization'] = `Bearer ${GITHUB_PAT}`;
-            return h;
-        }
-
-        // --- Anonymous user fingerprint ---
-        function getAnonymousId() {
-            let id = localStorage.getItem('sharedLinksAnonId');
-            if (!id) {
-                id = 'anon-' + crypto.randomUUID();
-                localStorage.setItem('sharedLinksAnonId', id);
-            }
-            return id;
-        }
-
-        function getUserFingerprint() {
-            return {
-                anonId: getAnonymousId(),
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                screen: `${screen.width}x${screen.height}`,
-                timestamp: new Date().toISOString()
-            };
-        }
-
-        // --- Rate limiting ---
-        const VOTE_COOLDOWN = 0; // votes are one-per-issue, no time cooldown needed
-        const SUBMIT_COOLDOWN = 60 * 1000; // 1 minute between submissions
-        const MAX_SUBMISSIONS_PER_DAY = 10;
-
-        function getVoteLog() {
-            try { return JSON.parse(localStorage.getItem('sharedLinksVotes') || '{}'); }
-            catch { return {}; }
-        }
-
-        function saveVoteLog(log) {
-            localStorage.setItem('sharedLinksVotes', JSON.stringify(log));
-        }
-
-        function hasVoted(issueNumber) {
-            const log = getVoteLog();
-            return log[issueNumber] || null; // returns '+1' or '-1' or null
-        }
-
-        function canSubmit() {
-            const log = JSON.parse(localStorage.getItem('sharedLinksSubmitLog') || '[]');
-            const now = Date.now();
-            // Clean old entries (older than 24h)
-            const recent = log.filter(t => now - t < 24 * 60 * 60 * 1000);
-            if (recent.length >= MAX_SUBMISSIONS_PER_DAY) return { ok: false, reason: 'Daily submission limit reached (10/day). Try again tomorrow.' };
-            if (recent.length > 0 && now - recent[recent.length - 1] < SUBMIT_COOLDOWN) return { ok: false, reason: 'Please wait a moment before submitting again.' };
-            return { ok: true };
-        }
-
-        function recordSubmission() {
-            const log = JSON.parse(localStorage.getItem('sharedLinksSubmitLog') || '[]');
-            log.push(Date.now());
-            localStorage.setItem('sharedLinksSubmitLog', JSON.stringify(log));
-        }
-
-        // --- Core functions ---
 
         function openSharedLinks() {
             document.getElementById('sharedLinksModal').classList.add('active');
             loadSharedLinks();
         }
 
-        async function loadSharedLinks() {
-            const listEl = document.getElementById('sharedLinksList');
+        async function fetchSharedLinks() {
+            const res = await launcherAuth.api('shared_list');
+            return Array.isArray(res.links) ? res.links : [];
+        }
+
+        async function loadSharedLinks(force) {
+            const listEl   = document.getElementById('sharedLinksList');
             const statusEl = document.getElementById('sharedLinksStatus');
 
-            // Check cache first
-            const cached = localStorage.getItem(SHARED_LINKS_CACHE_KEY);
+            const cached = !force && localStorage.getItem(SHARED_LINKS_CACHE_KEY);
             if (cached) {
                 try {
                     const { data, timestamp } = JSON.parse(cached);
                     if (Date.now() - timestamp < SHARED_LINKS_CACHE_TTL) {
                         sharedLinksData = data;
                         renderSharedLinks();
-                        const minsAgo = Math.round((Date.now() - timestamp) / 60000);
-                        statusEl.textContent = minsAgo < 1 ? 'Just updated' : `Updated ${minsAgo}m ago`;
+                        const mins = Math.round((Date.now() - timestamp) / 60000);
+                        statusEl.textContent = mins < 1 ? 'Just updated' : `Updated ${mins}m ago`;
                         return;
                     }
-                } catch (e) { /* cache corrupt, refetch */ }
+                } catch (e) { /* cache corrupt — refetch */ }
             }
 
-            // Show loading
-            listEl.innerHTML = '<div class="shared-links-loading">Loading shared links...</div>';
+            listEl.innerHTML = '<div class="shared-links-loading">Loading shared links…</div>';
             statusEl.textContent = '';
-
             try {
                 sharedLinksData = await fetchSharedLinks();
-                localStorage.setItem(SHARED_LINKS_CACHE_KEY, JSON.stringify({
-                    data: sharedLinksData,
-                    timestamp: Date.now()
-                }));
+                try { localStorage.setItem(SHARED_LINKS_CACHE_KEY, JSON.stringify({ data: sharedLinksData, timestamp: Date.now() })); } catch (e) {}
                 renderSharedLinks();
                 statusEl.textContent = 'Just updated';
             } catch (err) {
-                if (cached) {
-                    try {
-                        const { data, timestamp } = JSON.parse(cached);
-                        sharedLinksData = data;
-                        renderSharedLinks();
-                        listEl.insertAdjacentHTML('afterbegin',
-                            '<div class="shared-links-error">Could not refresh. Showing cached data.</div>');
-                        statusEl.textContent = `Cached from ${new Date(timestamp).toLocaleTimeString()}`;
-                        return;
-                    } catch (e) { /* fall through */ }
-                }
-                listEl.innerHTML = `<div class="shared-links-error">
-                    ${err.message.includes('rate limit') ? 'GitHub API rate limit reached. Try again in a few minutes.' : 'Could not load shared links. Check your connection.'}
-                </div>`;
+                listEl.innerHTML = '<div class="shared-links-error">Could not load shared links. Check your connection.</div>';
             }
-        }
-
-        async function fetchSharedLinks() {
-            const issuesUrl = `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues?labels=${SHARED_LINKS_LABEL}&state=open&per_page=100`;
-            const resp = await fetch(issuesUrl, { headers: ghHeaders() });
-            if (!resp.ok) {
-                if (resp.status === 403) throw new Error('rate limit');
-                throw new Error(`GitHub API error: ${resp.status}`);
-            }
-            const issues = await resp.json();
-
-            // Fetch comments (votes) for all issues in parallel
-            const withVotes = await Promise.all(issues.map(async (issue) => {
-                try {
-                    const comments = await fetchAllComments(issue.number);
-                    return parseSharedLinkIssue(issue, comments);
-                } catch {
-                    return parseSharedLinkIssue(issue, []);
-                }
-            }));
-
-            return withVotes.filter(link => link !== null);
-        }
-
-        async function fetchAllComments(issueNumber) {
-            // Fetch all comment pages (100 per page)
-            let allComments = [];
-            let page = 1;
-            while (true) {
-                const resp = await fetch(
-                    `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issueNumber}/comments?per_page=100&page=${page}`,
-                    { headers: ghHeaders() }
-                );
-                if (!resp.ok) break;
-                const comments = await resp.json();
-                if (comments.length === 0) break;
-                allComments = allComments.concat(comments);
-                if (comments.length < 100) break;
-                page++;
-            }
-            return allComments;
-        }
-
-        const VOTE_COMMENT_PREFIX = '<!-- VOTE:';
-        const VOTE_COMMENT_SUFFIX = ' -->';
-
-        function parseVoteComment(commentBody) {
-            if (!commentBody || !commentBody.startsWith(VOTE_COMMENT_PREFIX)) return null;
-            try {
-                const jsonStr = commentBody.slice(VOTE_COMMENT_PREFIX.length, commentBody.indexOf(VOTE_COMMENT_SUFFIX));
-                return JSON.parse(jsonStr);
-            } catch { return null; }
-        }
-
-        function countVotes(comments) {
-            // Parse vote comments and deduplicate by anonId (last vote wins)
-            const votesByUser = {};
-            for (const c of comments) {
-                const vote = parseVoteComment(c.body);
-                if (!vote || !vote.anonId || !vote.vote) continue;
-                votesByUser[vote.anonId] = vote.vote;
-            }
-
-            let upvotes = 0, downvotes = 0;
-            for (const v of Object.values(votesByUser)) {
-                if (v === '+1') upvotes++;
-                else if (v === '-1') downvotes++;
-            }
-            return { upvotes, downvotes, votesByUser };
-        }
-
-        function parseSharedLinkIssue(issue, comments) {
-            const body = issue.body || '';
-
-            const getField = (label) => {
-                const formMatch = body.match(new RegExp(`### ${label}\\s*\\n+([^\\n#]+)`, 'i'));
-                if (formMatch) {
-                    const val = formMatch[1].trim();
-                    return val === '_No response_' ? '' : val;
-                }
-                const mdMatch = body.match(new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+)`, 'i'));
-                return mdMatch ? mdMatch[1].trim() : '';
-            };
-
-            const name = getField('Name') || issue.title;
-            const url = getField('URL');
-            if (!url) return null;
-
-            const icon = getField('Icon') || '🔗';
-            const color = getField('Color') || 'white';
-            const aliasesRaw = getField('Search Aliases') || getField('Aliases');
-            const description = getField('Description');
-
-            const { upvotes, downvotes, votesByUser } = countVotes(comments);
-            const totalVotes = upvotes + downvotes;
-            const score = upvotes - downvotes;
-            const ratio = totalVotes > 0 ? upvotes / totalVotes : 1;
-
-            return {
-                issueNumber: issue.number,
-                issueUrl: issue.html_url,
-                name,
-                url,
-                icon,
-                color: color.toLowerCase(),
-                aliases: aliasesRaw ? aliasesRaw.split(',').map(a => a.trim()).filter(Boolean) : [],
-                description,
-                author: issue.user ? issue.user.login : 'unknown',
-                upvotes,
-                downvotes,
-                score,
-                ratio,
-                votesByUser,
-                createdAt: issue.created_at
-            };
         }
 
         function renderSharedLinks() {
-            const listEl = document.getElementById('sharedLinksList');
+            const listEl    = document.getElementById('sharedLinksList');
             const searchVal = (document.getElementById('sharedLinksSearch').value || '').toLowerCase().trim();
-            const sortMode = document.getElementById('sharedLinksSort').value;
+            const me        = launcherAuth.getUser();
 
             let filtered = sharedLinksData.filter(link => {
-                if (link.score < 0 || (link.ratio < 0.5 && (link.upvotes + link.downvotes) >= 3)) return false;
-                if (searchVal) {
-                    const haystack = [link.name, link.description, link.url, ...link.aliases].join(' ').toLowerCase();
-                    return haystack.includes(searchVal);
-                }
-                return true;
+                if (!searchVal) return true;
+                return [link.name, link.url].join(' ').toLowerCase().includes(searchVal);
             });
-
-            if (sortMode === 'top') {
-                filtered.sort((a, b) => b.score - a.score || new Date(b.createdAt) - new Date(a.createdAt));
-            } else {
-                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            }
+            // This backend has no votes — both sort modes order by most recent.
+            filtered.sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">No shared links found</div>';
+                listEl.innerHTML = '<div class="empty-state">No shared links yet</div>';
                 return;
             }
 
             const presetColors = { blue:'#3b82f6', green:'#10b981', purple:'#8b5cf6', orange:'#f59e0b', red:'#ef4444', indigo:'#6366f1', pink:'#ec4899', teal:'#14b8a6', gray:'#9ca3af', white:'#f9fafb' };
             const addedUrls = new Set(links.map(l => l.url));
-            const anonId = getAnonymousId();
 
             listEl.innerHTML = filtered.map(link => {
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
-                const isHexColor = link.color && link.color.startsWith('#');
-                const bgColor = isHexColor ? link.color : (presetColors[link.color] || '#e5e7eb');
-                const textColor = getContrastColor(link.color || 'gray');
+                const isHexColor  = link.color && link.color.startsWith('#');
+                const bgColor     = isHexColor ? link.color : (presetColors[link.color] || '#e5e7eb');
+                const textColor   = getContrastColor(link.color || 'gray');
                 const alreadyAdded = addedUrls.has(link.url);
-                // Check user's vote from server data (votesByUser) with local fallback
-                const serverVote = link.votesByUser ? link.votesByUser[anonId] : null;
-                const userVote = serverVote || getVoteLog()[link.issueNumber] || null;
+                const canDelete   = me && (link.by === me || me === 'jpelley');
+                const safeId      = encodeURIComponent(link.id);
 
-                let iconHtml;
-                if (isImageIcon) {
-                    iconHtml = `<span class="shared-link-icon" style="background:${bgColor};"><img src="${link.icon}" onerror="this.style.display='none';this.parentElement.textContent='🔗';"></span>`;
-                } else {
-                    iconHtml = `<span class="shared-link-icon" style="background:${bgColor};color:${textColor};">${link.icon}</span>`;
-                }
-
-                const timeAgo = getTimeAgo(link.createdAt);
-                const upActive = userVote === '+1' ? 'background:#dcfce7;border-color:#86efac;font-weight:700;' : '';
-                const downActive = userVote === '-1' ? 'background:#fef2f2;border-color:#fca5a5;font-weight:700;' : '';
-
-                // <span>by ${escapeHtml(link.author)} · ${timeAgo}</span> //jptest remove author name
+                const iconHtml = isImageIcon
+                    ? `<span class="shared-link-icon" style="background:${bgColor};"><img src="${escapeHtml(link.icon)}" onerror="this.style.display='none';this.parentElement.textContent='🔗';"></span>`
+                    : `<span class="shared-link-icon" style="background:${bgColor};color:${textColor};">${escapeHtml(link.icon || '🔗')}</span>`;
 
                 return `
                     <div class="shared-link-card">
                         <div class="shared-link-card-header">
                             ${iconHtml}
                             <div class="shared-link-title">${escapeHtml(link.name)}</div>
-                            <div class="shared-link-votes">
-                                <button class="shared-link-vote-btn upvote" style="${upActive}" onclick="voteOnSharedLink(${link.issueNumber}, '+1', this)" title="Upvote">👍 ${link.upvotes}</button>
-                                <button class="shared-link-vote-btn downvote" style="${downActive}" onclick="voteOnSharedLink(${link.issueNumber}, '-1', this)" title="Downvote">👎 ${link.downvotes}</button>
-                            </div>
+                            ${canDelete ? `<button class="shared-link-vote-btn" onclick="deleteSharedLink('${safeId}')" title="Remove">🗑</button>` : ''}
                         </div>
                         ${link.url ? `<div class="shared-link-desc">${escapeHtml(link.url)}</div>` : ''}
-                        ${link.description ? `<div class="shared-link-desc">${escapeHtml(link.description)}</div>` : ''}
                         <div class="shared-link-meta">
-                            <span>${timeAgo}</span>
+                            <span>${link.by ? 'by ' + escapeHtml(link.by) + ' · ' : ''}${getTimeAgo(link.ts)}</span>
                             <button class="shared-link-add-btn ${alreadyAdded ? 'added' : ''}"
-                                onclick="${alreadyAdded ? '' : `addSharedLink(${link.issueNumber})`}"
+                                onclick="${alreadyAdded ? '' : `addSharedLink('${safeId}')`}"
                                 ${alreadyAdded ? 'disabled' : ''}>
                                 ${alreadyAdded ? '✓ Added' : '+ Add'}
                             </button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
-        async function voteOnSharedLink(issueNumber, vote, btnEl) {
-            if (!GITHUB_PAT) {
-                const link = sharedLinksData.find(l => l.issueNumber === issueNumber);
-                if (link) window.open(link.issueUrl, '_blank');
-                return;
-            }
-
-            const anonId = getAnonymousId();
-            const link = sharedLinksData.find(l => l.issueNumber === issueNumber);
-            const existingVote = link && link.votesByUser ? link.votesByUser[anonId] : null;
-
-            // Already voted the same way — do nothing
-            if (existingVote === vote) return;
-
-            // Disable button while working
-            btnEl.disabled = true;
-            btnEl.style.opacity = '0.5';
-
-            try {
-                // Post a hidden comment as the vote
-                const voteData = {
-                    anonId,
-                    vote,
-                    ua: navigator.userAgent,
-                    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    ts: new Date().toISOString()
-                };
-                const commentBody = `${VOTE_COMMENT_PREFIX}${JSON.stringify(voteData)}${VOTE_COMMENT_SUFFIX}`;
-
-                const resp = await fetch(
-                    `https://api.github.com/repos/${SHARED_LINKS_REPO}/issues/${issueNumber}/comments`,
-                    {
-                        method: 'POST',
-                        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ body: commentBody })
-                    }
-                );
-
-                if (resp.ok || resp.status === 201) {
-                    // Record vote locally for immediate feedback
-                    const voteLog = getVoteLog();
-                    voteLog[issueNumber] = vote;
-                    saveVoteLog(voteLog);
-
-                    // Update local data optimistically
-                    if (link) {
-                        if (!link.votesByUser) link.votesByUser = {};
-                        // Undo previous vote if changing
-                        if (existingVote === '+1') link.upvotes = Math.max(0, link.upvotes - 1);
-                        if (existingVote === '-1') link.downvotes = Math.max(0, link.downvotes - 1);
-                        // Apply new vote
-                        if (vote === '+1') link.upvotes++;
-                        if (vote === '-1') link.downvotes++;
-                        link.votesByUser[anonId] = vote;
-                        link.score = link.upvotes - link.downvotes;
-                        const total = link.upvotes + link.downvotes;
-                        link.ratio = total > 0 ? link.upvotes / total : 1;
-                    }
-
-                    localStorage.removeItem(SHARED_LINKS_CACHE_KEY);
-                    renderSharedLinks();
-                } else {
-                    const err = await resp.json().catch(() => ({}));
-                    console.warn('Vote failed:', resp.status, err);
-                }
-            } catch (err) {
-                console.warn('Vote error:', err);
-            } finally {
-                btnEl.disabled = false;
-                btnEl.style.opacity = '';
-            }
-        }
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        function getTimeAgo(dateStr) {
-            const diff = Date.now() - new Date(dateStr).getTime();
-            const mins = Math.floor(diff / 60000);
-            if (mins < 60) return `${mins}m ago`;
-            const hours = Math.floor(mins / 60);
-            if (hours < 24) return `${hours}h ago`;
-            const days = Math.floor(hours / 24);
-            if (days < 30) return `${days}d ago`;
-            const months = Math.floor(days / 30);
-            return `${months}mo ago`;
-        }
-
-        function addSharedLink(issueNumber) {
-            const shared = sharedLinksData.find(l => l.issueNumber === issueNumber);
+        function addSharedLink(idEnc) {
+            const id = decodeURIComponent(idEnc);
+            const shared = sharedLinksData.find(l => String(l.id) === String(id));
             if (!shared) return;
+            if (links.some(l => l.url === shared.url)) { renderSharedLinks(); return; }
 
-            if (links.some(l => l.url === shared.url)) {
-                renderSharedLinks();
-                return;
-            }
-
-            const newLink = {
+            links.push({
                 id: Date.now(),
                 name: shared.name,
                 url: shared.url,
-                icon: shared.icon,
-                color: shared.color,
+                icon: shared.icon || '🔗',
+                color: shared.color || 'white',
                 clicks: 0,
                 isCustom: true,
                 isNew: true,
-                fromShared: true
-            };
-
-            if (shared.aliases && shared.aliases.length > 0) {
-                newLink.aliases = shared.aliases;
-            }
-
-            links.push(newLink);
+                fromShared: true,
+            });
             saveUserData();
             renderDashboard();
             renderLinkManager();
             renderSharedLinks();
         }
 
-        // --- Submit existing link to community ---
+        async function deleteSharedLink(idEnc) {
+            const id = decodeURIComponent(idEnc);
+            if (!launcherAuth.isAuthed()) { showAppToast('Scan your badge to manage shared links.'); return; }
+            if (!confirm('Remove this shared link for everyone?')) return;
+            try {
+                await launcherAuth.api('shared_delete', { method: 'POST', body: JSON.stringify({ id }) });
+                sharedLinksData = sharedLinksData.filter(l => String(l.id) !== String(id));
+                localStorage.removeItem(SHARED_LINKS_CACHE_KEY);
+                renderSharedLinks();
+            } catch (e) { showAppToast('Could not remove (only the author or owner can).'); }
+        }
 
+        // --- Share one of your own links to the community repo ---
         function getSubmittedUrls() {
             try { return JSON.parse(localStorage.getItem('sharedLinksSubmitted') || '[]'); }
             catch { return []; }
         }
+        function markAsSubmitted(url) {
+            const s = getSubmittedUrls();
+            if (!s.includes(url)) { s.push(url); try { localStorage.setItem('sharedLinksSubmitted', JSON.stringify(s)); } catch (e) {} }
+        }
 
         function canSubmitToCommunity(link) {
-            // Not eligible: links from the community repo, or already submitted, or default (non-custom) links
             if (link.fromShared) return false;
             if (!link.isCustom) return false;
             if (getSubmittedUrls().includes(link.url)) return false;
-            // Also check if this URL already exists in the shared links cache
             if (sharedLinksData.some(s => s.url === link.url)) return false;
             return true;
         }
@@ -3505,84 +3218,48 @@
         async function submitLinkToCommunity(linkId) {
             const link = links.find(l => l.id === linkId);
             if (!link) return;
-
-            // Rate limiting
-            const check = canSubmit();
-            if (!check.ok) {
-                alert(check.reason);
+            if (!launcherAuth.isAuthed()) {
+                showAppToast('Scan your badge to share a link to the repo.');
                 return;
             }
-
-            const name = link.name;
-            const url = link.url;
-            const icon = link.icon || '🔗';
-            const color = link.color || 'white';
-            const aliases = (link.aliases || []).join(', ');
-            const desc = link.description || '';
-
-            // Build issue body
-            let body = `### Name\n\n${name}\n\n### URL\n\n${url}\n\n### Icon\n\n${icon}\n\n### Color\n\n${color}`;
-            body += `\n\n### Search Aliases\n\n${aliases || '_No response_'}`;
-            body += `\n\n### Description\n\n${desc || '_No response_'}`;
-
-            // Append anonymous fingerprint
-            const fp = getUserFingerprint();
-            body += `\n\n---\n<details><summary>Submission metadata</summary>\n\n`;
-            body += `- **Anonymous ID:** \`${fp.anonId}\`\n`;
-            body += `- **User-Agent:** \`${fp.userAgent}\`\n`;
-            body += `- **Language:** ${fp.language}\n`;
-            body += `- **Timezone:** ${fp.timezone}\n`;
-            body += `- **Screen:** ${fp.screen}\n`;
-            body += `- **Submitted:** ${fp.timestamp}\n`;
-            body += `\n</details>`;
-
-            if (!GITHUB_PAT) {
-                // Fallback: open pre-filled GitHub Issue URL
-                const issueUrl = `https://github.com/${SHARED_LINKS_REPO}/issues/new?labels=${SHARED_LINKS_LABEL}&title=${encodeURIComponent(name)}&body=${encodeURIComponent(body)}`;
-                window.open(issueUrl, '_blank');
-                markAsSubmitted(url);
-                renderLinkManager();
-                return;
-            }
-
             try {
-                const resp = await fetch(`https://api.github.com/repos/${SHARED_LINKS_REPO}/issues`, {
+                const res = await launcherAuth.api('shared_add', {
                     method: 'POST',
-                    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: name,
-                        body: body,
-                        labels: [SHARED_LINKS_LABEL]
-                    })
+                    body: JSON.stringify({ name: link.name, url: link.url, icon: link.icon || '🔗', color: link.color || 'white' }),
                 });
-
-                if (resp.ok || resp.status === 201) {
-                    markAsSubmitted(url);
+                if (res && res.ok) {
+                    markAsSubmitted(link.url);
                     localStorage.removeItem(SHARED_LINKS_CACHE_KEY);
                     renderLinkManager();
-                    // Show brief confirmation
                     const statusEl = document.getElementById('sharedLinksSubmitStatus');
                     if (statusEl) {
                         statusEl.style.color = '#10b981';
-                        statusEl.textContent = `"${name}" shared!`;
+                        statusEl.textContent = res.duplicate ? `"${link.name}" was already shared.` : `"${link.name}" shared!`;
                         setTimeout(() => { statusEl.textContent = ''; }, 3000);
                     }
-                } else {
-                    const err = await resp.json().catch(() => ({}));
-                    alert(`Submission failed: ${err.message || resp.status}`);
+                    showAppToast(res.duplicate ? 'Already in the repo' : 'Shared to the repo');
                 }
-            } catch (err) {
-                alert('Network error. Please try again.');
+            } catch (e) {
+                showAppToast('Could not share — try again.');
             }
         }
 
-        function markAsSubmitted(url) {
-            const submitted = getSubmittedUrls();
-            if (!submitted.includes(url)) {
-                submitted.push(url);
-                localStorage.setItem('sharedLinksSubmitted', JSON.stringify(submitted));
-            }
-            recordSubmission();
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = (str == null ? '' : String(str));
+            return div.innerHTML;
+        }
+
+        function getTimeAgo(ts) {
+            if (!ts) return '';
+            const mins = Math.floor((Date.now() - Number(ts)) / 60000);
+            if (mins < 1)  return 'just now';
+            if (mins < 60) return `${mins}m ago`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 30) return `${days}d ago`;
+            return `${Math.floor(days / 30)}mo ago`;
         }
 
         // ==================== End Shared Links ====================
@@ -3971,6 +3648,234 @@
 
             window.addEventListener('load', () => setTimeout(checkDataFreshness, 2000));
         })();
+
+        /* ════════════════════════════════════════════════════════════════════
+           BADGE LOGIN + PER-USER CLOUD PROFILE  (hidden feature)
+           Nothing about this is visible until a badge is scanned. A wedge
+           scanner types the badge payload very fast, delimited by backslashes
+           (e.g.  \jpelley\ ). On a valid scan we offer "Log in as <name>",
+           then pull/save that user's workspace from https://jjjp.ca/launcher.
+           Mirrors the time.jjjp.ca identity model (X-API-Key = username).
+           ════════════════════════════════════════════════════════════════════ */
+        const launcherAuth = (function () {
+            const API      = 'https://jjjp.ca/launcher/api.php';
+            const USER_KEY = 'jjjp_launcher_username';
+            let pushTimer  = null;
+
+            function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+            const a = {
+                API,
+                clean(name) { return (name || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 32); },
+                getUser()   { return safeGet(USER_KEY) || ''; },
+                isAuthed()  { return !!this.getUser(); },
+                setUser(name) {
+                    const u = this.clean(name);
+                    if (!u) return '';
+                    try { localStorage.setItem(USER_KEY, u); } catch (e) {}
+                    return u;
+                },
+                logout() { try { localStorage.removeItem(USER_KEY); } catch (e) {} },
+
+                async api(action, opts = {}) {
+                    const u = this.getUser();
+                    const q = new URLSearchParams({ action, ...(opts.query || {}) });
+                    const headers = {};
+                    if (u)         headers['X-API-Key']   = u;
+                    if (opts.body) headers['Content-Type'] = 'application/json';
+                    const res = await fetch(API + '?' + q.toString(), {
+                        method: opts.method || 'GET', headers, body: opts.body,
+                    });
+                    if (!res.ok) throw new Error(action + ' failed: ' + res.status);
+                    return res.json();
+                },
+
+                async pullProfile() {
+                    const { profile } = await this.api('profile');
+                    if (profile && Array.isArray(profile.links) && profile.links.length) {
+                        links     = profile.links;
+                        tileOrder = Array.isArray(profile.tileOrder) ? profile.tileOrder : [];
+                        mergeMissingDefaults();          // pick up any new data.json links
+                        try { localStorage.setItem('workspaceData', JSON.stringify({ links, tileOrder })); } catch (e) {}
+                    } else {
+                        // First login for this badge — seed the cloud from what's here now.
+                        this.pushProfile();
+                    }
+                    renderDashboard();
+                },
+
+                async pushProfile() {
+                    try { await this.api('profile', { method: 'POST', body: JSON.stringify({ links, tileOrder }) }); }
+                    catch (e) { /* offline / server down — local copy still saved */ }
+                },
+                pushProfileDebounced() {
+                    clearTimeout(pushTimer);
+                    pushTimer = setTimeout(() => this.pushProfile(), 800);
+                },
+            };
+            return a;
+        })();
+        window.launcherAuth = launcherAuth;
+
+        // Add any default links the cloud profile predates, so the grid never
+        // silently loses newly-published tiles. (Same intent as loadUserData's merge.)
+        function mergeMissingDefaults() {
+            const have = new Set(links.map(l => l.id));
+            defaultData.links.forEach(d => {
+                if (!have.has(d.id)) links.push({ ...d, clicks: 0, isCustom: false });
+            });
+        }
+
+        // ── Login / logout UX ────────────────────────────────────────────────
+        async function badgeLogin(name) {
+            const u = launcherAuth.setUser(name);
+            if (!u) { showAppToast('Invalid badge'); return; }
+            showAppToast('Logged in as ' + u);
+            renderUserChip();
+            try { await launcherAuth.pullProfile(); }
+            catch (e) { showAppToast('Logged in, but couldn’t reach your profile.'); }
+            renderDashboard();
+        }
+
+        function badgeLogout() {
+            launcherAuth.logout();
+            renderUserChip();
+            renderDashboard();   // back to click-sorted, reorder disabled
+            showAppToast('Logged out');
+        }
+
+        // A scan was detected — confirm before switching identity.
+        function offerBadgeLogin(name) {
+            const clean = launcherAuth.clean(name);
+            if (!clean) return;
+            if (launcherAuth.getUser() === clean) { showAppToast('Already logged in as ' + clean); return; }
+            showAppToast('Log in as ' + clean + '?', 'Log in', () => badgeLogin(clean));
+        }
+
+        // Floating identity chip (only exists in the DOM while logged in).
+        function renderUserChip() {
+            let chip = document.getElementById('launcherUserChip');
+            const u = launcherAuth.getUser();
+            if (!u) { if (chip) chip.remove(); return; }
+            if (!chip) { chip = document.createElement('div'); chip.id = 'launcherUserChip'; document.body.appendChild(chip); }
+            chip.innerHTML = '';
+            const span = document.createElement('span'); span.textContent = '👤 ' + u;
+            const out  = document.createElement('button'); out.textContent = 'Log out'; out.onclick = badgeLogout;
+            chip.appendChild(span); chip.appendChild(out);
+        }
+
+        // ── Wedge / badge scanner ────────────────────────────────────────────
+        // The badge emits  \username\  — backslashes delimit the payload. We run
+        // in the capture phase and stopPropagation() so scan keystrokes never
+        // reach the global "type-to-search" handler or any focused input.
+        function wireBadgeScanner() {
+            let scanning = false, buf = '', startT = 0, lastT = 0;
+            const MAX_GAP = 500, MAX_TOTAL = 3000, MAX_LEN = 32;
+            const reset = () => { scanning = false; buf = ''; };
+
+            document.addEventListener('keydown', e => {
+                if (e.repeat) return;
+                const now = performance.now();
+
+                if (e.key === '\\') {
+                    e.preventDefault(); e.stopPropagation();
+                    if (!scanning) { scanning = true; buf = ''; startT = now; lastT = now; return; }
+                    const name = buf; reset();
+                    if (name && /^[A-Za-z0-9_-]{1,32}$/.test(name) && now - startT < MAX_TOTAL) {
+                        offerBadgeLogin(name);
+                    }
+                    return;
+                }
+
+                if (!scanning) return;
+
+                if (now - lastT > MAX_GAP || now - startT > MAX_TOTAL) { reset(); return; }
+                lastT = now;
+
+                if (e.key.length === 1) {
+                    e.preventDefault(); e.stopPropagation();
+                    buf += e.key;
+                    if (buf.length > MAX_LEN) reset();
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault(); e.stopPropagation();
+                }
+            }, true);
+        }
+
+        // ── Tile reorder (logged-in only) — phone-home-screen drag ───────────
+        function setupTileReorder() {
+            const dashboard = document.getElementById('dashboard');
+            const tiles = dashboard.querySelectorAll('.tile.reorderable');
+            let draggedId = null;
+            tiles.forEach(tile => {
+                tile.addEventListener('dragstart', e => {
+                    draggedId = tile.dataset.id;
+                    e.stopPropagation();
+                    e.dataTransfer.effectAllowed = 'move';
+                    // Mark as an internal drag so the "drop to create a link"
+                    // overlay ignores it (same flag setupTileDragOut uses).
+                    try { e.dataTransfer.setData('application/x-launcher-tile', 'reorder'); } catch (_) {}
+                    tile.classList.add('dragging');
+                });
+                tile.addEventListener('dragend', () => {
+                    tile.classList.remove('dragging');
+                    dashboard.querySelectorAll('.drag-over').forEach(t => t.classList.remove('drag-over'));
+                });
+                tile.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move'; });
+                tile.addEventListener('dragenter', e => { e.preventDefault(); e.stopPropagation(); if (tile.dataset.id !== draggedId) tile.classList.add('drag-over'); });
+                tile.addEventListener('dragleave', () => tile.classList.remove('drag-over'));
+                tile.addEventListener('drop', e => {
+                    e.preventDefault(); e.stopPropagation();
+                    tile.classList.remove('drag-over');
+                    const targetId = tile.dataset.id;
+                    if (draggedId == null || targetId === draggedId) return;
+                    reorderTiles(Number(draggedId), Number(targetId));
+                });
+            });
+        }
+
+        // Move one visible tile in front of another and persist the arrangement.
+        function reorderTiles(fromId, toId) {
+            const visible = orderedLinks().slice(0, 8).map(l => l.id);
+            const fromIdx = visible.indexOf(fromId);
+            const toIdx   = visible.indexOf(toId);
+            if (fromIdx === -1 || toIdx === -1) return;
+            visible.splice(toIdx, 0, visible.splice(fromIdx, 1)[0]);
+            const prior   = tileOrder.length ? tileOrder : links.map(l => l.id);
+            const rest    = prior.filter(id => !visible.includes(id));
+            const placed  = new Set([...visible, ...rest]);
+            const newbies = links.map(l => l.id).filter(id => !placed.has(id));
+            tileOrder = [...visible, ...rest, ...newbies];
+            saveUserData();      // writes local + debounced cloud push
+            renderDashboard();
+        }
+
+        // Styles for elements that only appear when logged in (keeps the app
+        // visually unchanged for anonymous users).
+        (function injectAuthStyles() {
+            const css = `
+                .tile.reorderable { cursor: grab; }
+                .tile.reorderable:active { cursor: grabbing; }
+                .tile.dragging { opacity: .4; }
+                .tile.drag-over { outline: 2px dashed #69c9d0; outline-offset: -3px; }
+                #launcherUserChip { position: fixed; top: 10px; right: 10px; z-index: 99999;
+                    display: flex; align-items: center; gap: 8px; background: #222; color: #fff;
+                    padding: 6px 12px; border-radius: 999px; font-size: 12px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+                #launcherUserChip button { background: none; border: none; color: #69c9d0;
+                    cursor: pointer; font-size: 12px; font-weight: 600; padding: 0; }`;
+            const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
+        })();
+
+        wireBadgeScanner();   // attach immediately — independent of DOM-ready
+
+        // Restore a logged-in session (e.g. personal device) after init renders.
+        async function resumeBadgeSession() {
+            if (!launcherAuth.isAuthed()) return;
+            renderUserChip();
+            try { await launcherAuth.pullProfile(); } catch (e) { /* offline — keep local */ }
+        }
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', init);
