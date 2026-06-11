@@ -335,21 +335,6 @@
       ]
     },
     {
-      "id": 31,
-      "name": "HRIS (external)",
-      "url": "https://myhris.ottawahospital.on.ca/",
-      "icon": "./icons/TOH_HRIS.jpeg",
-      "color": "#FFFFFF",
-      "aliases": [
-        "paystub",
-        "HR",
-        "oracle",
-        "pay",
-        "peoplesoft",
-        "external"
-      ]
-    },
-    {
       "id": 32,
       "name": "SLS",
       "url": "https://rl6c.rlsolutions.com/TheOttawaHospital_Prod",
@@ -414,7 +399,7 @@
     {
       "id": 37,
       "name": "PathAnnotate",
-      "url": "https://annotate.jjjp.ca/",
+      "url": "https://pathannotate.app/",
       "icon": "./icons/pa.png",
       "color": "#FFFFFF",
       "aliases": [

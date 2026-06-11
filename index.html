@@ -782,10 +782,10 @@
         }
 
         /* Active "pinned to layout" state for the settings-list pin button. */
-        /* .icon-btn.pinned {
+        .icon-btn.pinned {
             background: #dbeafe;
             box-shadow: inset 0 0 0 1.5px #60a5fa;
-        } */
+        }
 
         /* Clickable name/icon area of a settings link row (opens the link). */
         .link-manager-open {
@@ -1045,16 +1045,11 @@
             }
 
             .shared-link-card {
-                padding: 12px;
+                padding: 8px 10px;
             }
 
-            .shared-link-card-header {
-                gap: 8px;
-            }
-
-            .shared-link-votes {
-                gap: 6px;
-                font-size: 0.8rem;
+            .shared-link-actions {
+                gap: 4px;
             }
 
             .shared-link-vote-btn {
@@ -1062,74 +1057,86 @@
                 font-size: 0.75rem;
             }
 
-            .shared-link-desc {
-                font-size: 0.8rem;
-            }
-
-            .shared-link-meta {
-                font-size: 0.7rem;
+            .shared-link-url {
+                font-size: 0.75rem;
             }
         }
 
         /* Shared Links Modal */
         .shared-link-card {
             background: #f9fafb;
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            transition: background 0.2s;
-        }
-
-        .shared-link-card:hover {
-            background: #f3f4f6;
-        }
-
-        .shared-link-card-header {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        /* Clickable name/icon/url area of a repo row — opens the link, mirrors
+           the "Your Links" settings list (.link-manager-open). */
+        .shared-link-open {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+            padding: 4px;
+            margin: -4px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+        .shared-link-open:hover {
+            background: #f3f4f6;
         }
 
         .shared-link-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
-            border-radius: 8px;
-            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .shared-link-icon img {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             object-fit: contain;
+        }
+
+        .shared-link-info {
+            flex: 1;
+            min-width: 0;
         }
 
         .shared-link-title {
             font-weight: 600;
             color: #1f2937;
-            flex: 1;
         }
 
-        /* When the title is a real link (http/https), keep it looking like the
-           text but hint clickability on hover. */
-        a.shared-link-title {
-            text-decoration: none;
-            cursor: pointer;
+        .shared-link-byline {
+            font-weight: 400;
+            color: #9ca3af;
+            font-size: 0.75rem;
         }
 
-        a.shared-link-title:hover {
-            text-decoration: underline;
+        .shared-link-url {
+            font-size: 0.8rem;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .shared-link-votes {
+        .shared-link-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
+            gap: 6px;
         }
 
         .shared-link-vote-btn {
@@ -1177,21 +1184,6 @@
             font-weight: 700;
             font-size: 0.85rem;
             color: #374151;
-        }
-
-        .shared-link-desc {
-            color: #6b7280;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .shared-link-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: #9ca3af;
         }
 
         .shared-link-add-btn {
@@ -3636,33 +3628,35 @@
                     : `<span class="shared-link-icon" style="background:${bgColor};color:${textColor};">${escapeHtml(link.icon || '🔗')}</span>`;
 
                 // Let people open a repo link to preview it before adding (like
-                // browsing in Manage Links). Only http(s) becomes a real link — a
-                // hostile repo entry can't smuggle in a javascript: URL.
+                // browsing in Manage Links). Clicking the row's icon/name/url area
+                // opens it — same affordance as the "Your Links" settings list.
+                // Only http(s) becomes a real link — a hostile repo entry can't
+                // smuggle in a javascript: URL.
                 const safeHref = (link.url && /^https?:\/\//i.test(link.url)) ? escapeHtml(link.url) : '';
-                const titleHtml = safeHref
-                    ? `<a class="shared-link-title" href="${safeHref}" target="_blank" rel="noopener noreferrer" title="Open in a new tab">${escapeHtml(link.name)}</a>`
-                    : `<div class="shared-link-title">${escapeHtml(link.name)}</div>`;
+                const byline   = `${link.by ? ' · by ' + escapeHtml(link.by) : ''} · ${escapeHtml(getTimeAgo(link.ts))}`;
+                const openInner = `
+                    ${iconHtml}
+                    <div class="shared-link-info">
+                        <div class="shared-link-title">${escapeHtml(link.name)}<span class="shared-link-byline">${byline}</span></div>
+                        ${link.url ? `<div class="shared-link-url">${escapeHtml(link.url)}</div>` : ''}
+                    </div>`;
+                const openHtml = safeHref
+                    ? `<a class="shared-link-open" href="${safeHref}" target="_blank" rel="noopener noreferrer" title="Open in a new tab">${openInner}</a>`
+                    : `<div class="shared-link-open">${openInner}</div>`;
 
                 return `
                     <div class="shared-link-card">
-                        <div class="shared-link-card-header">
-                            ${iconHtml}
-                            ${titleHtml}
-                            <div class="shared-link-votes">
-                                <button class="shared-link-vote-btn upvote${myVote === 1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', 1)" title="Upvote">▲</button>
-                                <span class="shared-link-score" title="Net votes">${score}</span>
-                                <button class="shared-link-vote-btn downvote${myVote === -1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', -1)" title="Downvote">▼</button>
-                            </div>
-                            ${canDelete ? `<button class="shared-link-vote-btn" onclick="deleteSharedLink('${safeId}')" title="Remove">🗑</button>` : ''}
-                        </div>
-                        ${link.url ? `<div class="shared-link-desc">${escapeHtml(link.url)}</div>` : ''}
-                        <div class="shared-link-meta">
-                            <span>${link.by ? 'by ' + escapeHtml(link.by) + ' · ' : ''}${getTimeAgo(link.ts)}</span>
+                        ${openHtml}
+                        <div class="shared-link-actions">
+                            <button class="shared-link-vote-btn upvote${myVote === 1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', 1)" title="Upvote">▲</button>
+                            <span class="shared-link-score" title="Net votes">${score}</span>
+                            <button class="shared-link-vote-btn downvote${myVote === -1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', -1)" title="Downvote">▼</button>
                             <button class="shared-link-add-btn ${alreadyAdded ? 'added' : ''}"
                                 onclick="${alreadyAdded ? '' : `addSharedLink('${safeId}')`}"
                                 ${alreadyAdded ? 'disabled' : ''}>
                                 ${alreadyAdded ? '✓ Added' : '+ Add'}
                             </button>
+                            ${canDelete ? `<button class="shared-link-vote-btn" onclick="deleteSharedLink('${safeId}')" title="Remove">🗑</button>` : ''}
                         </div>
                     </div>`;
             }).join('');
@@ -3983,8 +3977,10 @@
 
             let html = '';
             const authed = window.launcherAuth && launcherAuth.isAuthed();
-            if (authed && pinnedIds.includes(linkId)) {
-                html += `<div class="tile-context-menu-item" onclick="unpinTile(${linkId}); closeTileContextMenu();">📌 Unpin</div>`;
+            if (authed) {
+                html += pinnedIds.includes(linkId)
+                    ? `<div class="tile-context-menu-item" onclick="unpinTile(${linkId}); closeTileContextMenu();">📌 Unpin</div>`
+                    : `<div class="tile-context-menu-item" onclick="pinTile(${linkId}); closeTileContextMenu();">📌 Pin</div>`;
             }
             if (link.isCustom) {
                 html += `<div class="tile-context-menu-item" onclick="closeTileContextMenu(); openSettings(); editLink(${linkId});">✏️ Edit</div>`;
@@ -4519,6 +4515,14 @@
             renderDashboard();
         }
 
+        // Pin a tile to the main layout from the context menu (logged-in only).
+        function pinTile(linkId) {
+            if (!(window.launcherAuth && launcherAuth.isAuthed())) return;
+            if (!pinnedIds.includes(linkId)) pinnedIds.push(linkId);
+            saveUserData();
+            renderDashboard();
+        }
+
         // Styles for elements that only appear when logged in (keeps the app
         // visually unchanged for anonymous users).
         (function injectAuthStyles() {
@@ -4527,7 +4531,6 @@
                 .tile.reorderable:active { cursor: grabbing; }
                 .tile.dragging { opacity: .4; }
                 .tile.drag-over { outline: 2px dashed #69c9d0; outline-offset: -3px; }
-                .tile.pinned { outline: 1.5px solid rgba(105,201,208,.55); outline-offset: -3px; }
                 .pin-badge { position: absolute; top: 4px; left: 6px; font-size: 12px;
                     line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
                 #launcherUserChip { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
