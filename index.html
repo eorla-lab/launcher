@@ -176,6 +176,12 @@
             cursor: not-allowed;
         }
 
+        /* Keyboard-selected tile (arrow-key navigation): same lift as hover. */
+        .tile.tile-kbd-active {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
         .tile-icon {
             width: 50px;
             height: 50px;
@@ -336,6 +342,17 @@
             flex: 1;
         }
 
+        /* Policies modal: anchor the top instead of vertically centering, so the
+           frame doesn't slide up/down as the result count changes while typing.
+           The 5vh top equals the centred position of the 90vh-tall open state, so
+           it still opens looking centred, then shrinks to fit without moving. */
+        #policiesModal.modal.active {
+            align-items: flex-start;
+        }
+        #policiesModal {
+            padding-top: 5vh;
+        }
+
         /* Search Box */
         .search-box {
             margin-bottom: 20px;
@@ -432,6 +449,7 @@
         }
 
         .policy-item {
+            position: relative;
             background: #f9fafb;
             padding: 16px;
             border-radius: 8px;
@@ -447,6 +465,82 @@
             background: #f3f4f6;
         }
 
+        /* Off-site policies (a site the user has toggled off): still reachable,
+           but visually de-emphasised and ranked below their own sites' docs. */
+        .policy-item.off-site {
+            opacity: 0.5;
+        }
+        .policy-item.off-site:hover {
+            opacity: 0.85;
+        }
+
+        /* "My sites" toggle chips above the policy filters. */
+        .site-chips {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end; /* right-aligned, no label */
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .site-chip {
+            padding: 3px 9px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        /* OFF: muted grey. ON: soft per-site tint supplied by the psb-* class. */
+        .site-chip:not(.on) {
+            background: #f1f3f5;
+            color: #adb5bd;
+        }
+        .site-chip:not(.on):hover {
+            background: #e9ecef;
+            color: #6b7280;
+        }
+        .site-chip.on:hover {
+            filter: brightness(0.96);
+        }
+
+        /* Per-policy site badge (e.g. TOH / CHEO), floated to the box's upper-right
+           corner. Muted Bootstrap-"subtle" tints: soft bg + darker same-hue text,
+           still distinguishable per site without shouting. */
+        .policy-site-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 1;
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            padding: 2px 7px;
+            border-radius: 6px;
+            line-height: 1.4;
+            background: #e9ecef;
+            color: #495057;
+        }
+        .psb-TOH   { background: #e7eefb; color: #1e3a8a; }
+        .psb-CHEO  { background: #efe9fb; color: #5b21b6; }
+        .psb-QCH   { background: #e4f1ec; color: #065f46; }
+        .psb-RMRL  { background: #e1eff3; color: #155e75; }
+        .psb-EORLA { background: #f7eede; color: #92400e; }
+
+        /* Keyboard-selected result (arrow-key navigation) in either search list. */
+        .policy-item.kbd-active,
+        .search-result-item.kbd-active {
+            background: #eff6ff;
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+        }
+        .policy-item.off-site.kbd-active {
+            opacity: 1; /* keep a selected off-site row fully legible */
+        }
+
         .policy-info {
             flex: 1;
         }
@@ -455,6 +549,7 @@
             font-weight: 600;
             color: #1f2937;
             margin-bottom: 4px;
+            padding-right: 44px; /* clear the corner site badge */
         }
 
         .policy-category {
@@ -496,11 +591,18 @@
         }
 
         .search-hint .hint-tag {
-            padding: 1px 7px;
-            border-radius: 3px;
+            padding: 2px 8px;
+            border-radius: 6px; /* match the result site badges */
             font-size: 0.72rem;
             line-height: 1.4;
             white-space: nowrap;
+            cursor: pointer;
+            transition: filter 0.15s, box-shadow 0.15s;
+        }
+
+        .search-hint .hint-tag:hover {
+            filter: brightness(0.96);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) inset;
         }
 
         .search-hint .required-tag {
@@ -604,11 +706,12 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: #9ca3af;
-            font-size: 0.85rem;
-            padding: 2px 5px;
+            color: #6b7280;
+            font-size: 1.35rem; /* same plain arrow, just bigger than before */
+            padding: 2px 6px;
             border-radius: 4px;
             line-height: 1;
+            transition: background 0.2s, color 0.2s;
         }
 
         .policy-expand-btn:hover {
@@ -665,6 +768,21 @@
 
         .icon-btn:hover {
             background: #e5e7eb;
+        }
+
+        /* Active "pinned to layout" state for the settings-list pin button. */
+        .icon-btn.pinned {
+            background: #dbeafe;
+            box-shadow: inset 0 0 0 1.5px #60a5fa;
+        }
+
+        /* Clickable name/icon area of a settings link row (opens the link). */
+        .link-manager-open {
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .link-manager-open:hover {
+            background: #f3f4f6;
         }
 
         .empty-state {
@@ -1011,10 +1129,32 @@
 
         .shared-link-vote-btn.upvote {
             color: #16a34a;
+            padding: 4px 7px;
         }
 
         .shared-link-vote-btn.downvote {
             color: #dc2626;
+            padding: 4px 7px;
+        }
+
+        .shared-link-vote-btn.upvote.active {
+            background: #16a34a;
+            border-color: #16a34a;
+            color: #fff;
+        }
+
+        .shared-link-vote-btn.downvote.active {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #fff;
+        }
+
+        .shared-link-score {
+            min-width: 18px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #374151;
         }
 
         .shared-link-desc {
@@ -1187,7 +1327,7 @@
 
                 <div class="search-box">
                     <div style="position: relative;">
-                        <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="filterPolicies()"
+                        <input type="text" id="policySearch" placeholder="Search policies..." onkeyup="onSearchKeyup(event, filterPolicies)"
                             oninput="toggleClearButton('policySearch', 'policySearchClear')">
                         <button id="policySearchClear" onclick="clearSearch('policySearch')"
                             style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
@@ -1198,6 +1338,8 @@
                         <span class="search-syntax-help">?<span class="syntax-tooltip"><code>word</code> optional match (OR)<br><code>"word"</code> required match (AND)<br><code>-word</code> exclude matches</span></span>
                     </div>
                 </div>
+
+                <div id="policySiteChips" class="site-chips"></div>
 
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; min-width: 0;">
                     <select id="folderFilter" onchange="filterPolicies(); toggleFilterClearButtons();"
@@ -1238,7 +1380,7 @@
                 <div class="search-box">
                     <div style="position: relative;">
                         <input type="text" id="linkSearch" placeholder="Search links and policies..."
-                            onkeyup="filterLinksAndPolicies()"
+                            onkeyup="onSearchKeyup(event, filterLinksAndPolicies)"
                             oninput="toggleClearButton('linkSearch', 'linkSearchClear')" autofocus>
                         <button id="linkSearchClear" onclick="clearSearch('linkSearch')"
                             style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
@@ -1458,7 +1600,7 @@
     <script>
         let defaultData = { links: [], policies: [] };
         let links = [];
-        let tileOrder = []; // manual tile arrangement (link ids) — only used when logged in
+        let pinnedIds = []; // ids of tiles the user has pinned (drag to pin) — only used when logged in
         let sublinks = []; // flat list of children from all default links — searchable only, never on grid
         let policies = [];
         let policyClicks = {}; // Track policy clicks by GUID
@@ -1468,6 +1610,105 @@
         const POLICY_PAGE_SIZE = 50;
         let currentFilteredPolicies = []; // cached sorted/filtered list
         let policiesRenderedCount = 0; // how many are currently in the DOM
+
+        // ── Policy "site" filter (My sites) ──────────────────────────────────
+        // The CSV Folder column prefix reliably identifies the owning hospital /
+        // service for every row. We derive a coarse `site` so a user can keep
+        // results focused on the site(s) they actually work at. Sites turned OFF
+        // aren't hidden — they're dimmed and ranked below, so cross-site docs are
+        // still reachable but a TOH-only user isn't clicking into CHEO dead ends.
+        const POLICY_SITES = ['TOH', 'CHEO', 'QCH', 'RMRL', 'EORLA'];
+        const SITE_NAMES = {
+            TOH:   'The Ottawa Hospital',
+            CHEO:  "Children's Hospital of Eastern Ontario",
+            QCH:   'Queensway Carleton Hospital',
+            RMRL:  'Regional Microbiology Reference Laboratory',
+            EORLA: 'EORLA (corporate / shared)',
+        };
+        const SITE_COLORS = {
+            TOH:   '#2563eb', // blue
+            CHEO:  '#7c3aed', // purple
+            QCH:   '#059669', // green
+            RMRL:  '#0891b2', // cyan
+            EORLA: '#d97706', // amber
+        };
+        const SITE_FILTER_KEY = 'policySiteFilter';
+        let enabledSites = null; // Set<string>, lazily loaded
+
+        // Map a Folder string to one of POLICY_SITES (or 'OTHER' — none today).
+        function siteOf(folder) {
+            const f = (folder || '').toUpperCase();
+            if (f.startsWith('CHEO')) return 'CHEO';
+            if (f.startsWith('TOH')) return 'TOH';
+            if (f.startsWith('QUEENSWAY') || f.startsWith('QCH')) return 'QCH';
+            if (f.startsWith('RMRL')) return 'RMRL';
+            if (f.startsWith('EORLA')) return 'EORLA';
+            return 'OTHER';
+        }
+
+        function getEnabledSites() {
+            if (!enabledSites) {
+                try {
+                    const raw = JSON.parse(localStorage.getItem(SITE_FILTER_KEY));
+                    if (Array.isArray(raw)) enabledSites = new Set(raw.filter(s => POLICY_SITES.includes(s)));
+                } catch (e) { /* corrupt / blocked — fall through to default */ }
+                if (!enabledSites) enabledSites = new Set(POLICY_SITES); // default: all on
+            }
+            return enabledSites;
+        }
+
+        // A policy is "active" if its site is enabled (unknown 'OTHER' always shows).
+        function siteIsActive(policy, enabled = getEnabledSites()) {
+            return !POLICY_SITES.includes(policy.site) || enabled.has(policy.site);
+        }
+
+        function setEnabledSites(arr) {
+            enabledSites = new Set((arr || []).filter(s => POLICY_SITES.includes(s)));
+            try { localStorage.setItem(SITE_FILTER_KEY, JSON.stringify([...enabledSites])); } catch (e) {}
+        }
+
+        function saveSiteFilter() {
+            try { localStorage.setItem(SITE_FILTER_KEY, JSON.stringify([...getEnabledSites()])); } catch (e) {}
+            // Follow the badge across machines when logged in.
+            if (window.launcherAuth && launcherAuth.isAuthed()) launcherAuth.pushProfileDebounced();
+        }
+
+        function toggleSite(site) {
+            const s = getEnabledSites();
+            if (s.has(site)) s.delete(site); else s.add(site);
+            saveSiteFilter();
+            renderSiteChips();
+            renderPolicies();
+        }
+
+        // Stable partition: active-site policies first, off-site below (order kept).
+        function rankBySite(list) {
+            const enabled = getEnabledSites();
+            if (enabled.size === POLICY_SITES.length) return list; // all on — no reorder
+            const active = [], off = [];
+            for (const p of list) (siteIsActive(p, enabled) ? active : off).push(p);
+            return active.concat(off);
+        }
+
+        // Small coloured pill marking a policy's owning site (so users can see
+        // where a doc lives before clicking into a possible no-access page).
+        function siteBadgeHTML(policy) {
+            const s = policy.site;
+            if (!POLICY_SITES.includes(s)) return '';
+            return `<span class="policy-site-badge psb-${s}" title="${SITE_NAMES[s]}">${s}</span>`;
+        }
+
+        function renderSiteChips() {
+            const el = document.getElementById('policySiteChips');
+            if (!el) return;
+            const enabled = getEnabledSites();
+            // ON chips wear the same soft per-site tint as the result badges
+            // (via the psb-* classes); OFF chips fall back to a muted grey.
+            el.innerHTML = POLICY_SITES.map(s => {
+                const on = enabled.has(s);
+                return `<button class="site-chip${on ? ' on psb-' + s : ''}" onclick="toggleSite('${s}')" title="${SITE_NAMES[s]} — click to ${on ? 'hide' : 'show'}">${s}</button>`;
+            }).join('');
+        }
 
         // Highlight search term occurrences in text (returns HTML string)
         // Accepts a single string or an array of terms
@@ -1512,6 +1753,25 @@
             return { required, excluded, optional };
         }
 
+        // Same classification as parseSearchQuery, but returns the terms in the
+        // order they were typed (so the hint badges don't reshuffle on toggle).
+        function parseSearchQueryOrdered(input) {
+            const terms = [];
+            if (!input || !input.trim()) return terms;
+            const re = /"([^"]+)"|(\S+)/g; // a quoted phrase, or a bare token
+            let m;
+            while ((m = re.exec(input)) !== null) {
+                if (m[1] !== undefined) {
+                    terms.push({ term: m[1].toLowerCase(), type: 'required' });
+                } else {
+                    const tok = m[2];
+                    if (tok.startsWith('-') && tok.length > 1) terms.push({ term: tok.slice(1).toLowerCase(), type: 'excluded' });
+                    else if (tok !== '-') terms.push({ term: tok.toLowerCase(), type: 'optional' });
+                }
+            }
+            return terms;
+        }
+
         // Score an item's text fields against a parsed query
         // Returns -1 if excluded or missing required terms (filter out)
         // Returns 0+ for matches (higher = more terms matched)
@@ -1549,36 +1809,175 @@
             return query.required.concat(query.optional);
         }
 
-        // Render search hint tags showing how the query is being parsed
+        // Render search hint tags, in the order the terms were typed.
         function renderSearchHints(containerId, query) {
             const container = document.getElementById(containerId);
             if (!container) return;
 
-            const hasTerms = query.required.length > 0 || query.optional.length > 0 || query.excluded.length > 0;
-            if (!hasTerms) {
+            // Which input feeds this hint row, so a click can edit the query text.
+            const inputId = containerId === 'policySearchHints' ? 'policySearch' : 'linkSearch';
+            const input = document.getElementById(inputId);
+            const ordered = parseSearchQueryOrdered(input ? input.value : '');
+            if (!ordered.length) {
                 container.innerHTML = '';
                 return;
             }
 
-            let html = '';
-            for (const term of query.required) {
-                html += `<span class="hint-tag required-tag" title="Required: results must contain this">&quot;${term}&quot;</span>`;
-            }
-            for (const term of query.optional) {
-                html += `<span class="hint-tag optional-tag" title="Include any match">${term}</span>`;
-            }
-            for (const term of query.excluded) {
-                html += `<span class="hint-tag excluded-tag" title="Excluded: results with this are hidden">${term}</span>`;
-            }
+            const attr = term => escapeHtml(term).replace(/"/g, '&quot;'); // safe inside ="..."
+            // Left-click cycles optional → required → excluded; right-click removes.
+            const title = 'Click to cycle optional / required / exclude · right-click to remove';
+            const CLS = { required: 'required-tag', optional: 'optional-tag', excluded: 'excluded-tag' };
 
-            container.innerHTML = html;
+            container.innerHTML = ordered.map(({ term, type }) => {
+                const label = type === 'required' ? `&quot;${escapeHtml(term)}&quot;` : escapeHtml(term);
+                return `<span class="hint-tag ${CLS[type]}" data-type="${type}" data-input="${inputId}" data-term="${attr(term)}" title="${title}" onclick="onHintTagClick(this)" oncontextmenu="onHintTagRemove(event, this)">${label}</span>`;
+            }).join('');
+        }
+
+        function escapeRegex(s) {
+            return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Write a new query string into a search box and re-run its filter, as if
+        // the user had typed it (keeps the clear button + results in sync).
+        function setSearchQuery(inputId, newVal) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.value = newVal;
+            if (inputId === 'policySearch') {
+                filterPolicies();
+                toggleClearButton('policySearch', 'policySearchClear');
+            } else {
+                filterLinksAndPolicies();
+                toggleClearButton('linkSearch', 'linkSearchClear');
+            }
+            input.focus();
+        }
+
+        // Left-click a parsed-query tag to cycle it through the three modes by
+        // rewriting the raw query text in place:
+        //   optional (grey)  →  required (blue)   :  term  →  "term"
+        //   required (blue)  →  excluded (red)    :  "term" →  -term
+        //   excluded (red)   →  optional (grey)   :  -term  →  term
+        function onHintTagClick(el) {
+            const type = el.dataset.type;
+            const inputId = el.dataset.input;
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const t = escapeRegex(el.dataset.term);
+            let val = input.value;
+
+            if (type === 'optional') {
+                val = val.replace(new RegExp('(^|\\s)(' + t + ')(?=\\s|$)', 'i'),
+                    (m, pre, word) => pre + '"' + word + '"');
+            } else if (type === 'required') {
+                val = val.replace(new RegExp('"(' + t + ')"', 'i'), '-$1');
+            } else if (type === 'excluded') {
+                val = val.replace(new RegExp('(^|\\s)-(' + t + ')(?=\\s|$)', 'i'), '$1$2');
+            }
+            setSearchQuery(inputId, val);
+        }
+
+        // Right-click a tag (any colour) to drop that term from the query.
+        function onHintTagRemove(e, el) {
+            e.preventDefault();
+            const type = el.dataset.type;
+            const inputId = el.dataset.input;
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const t = escapeRegex(el.dataset.term);
+            let val = input.value;
+
+            if (type === 'optional') {
+                val = val.replace(new RegExp('(^|\\s)' + t + '(?=\\s|$)', 'i'), ' ');
+            } else if (type === 'required') {
+                val = val.replace(new RegExp('"' + t + '"', 'i'), ' ');
+            } else if (type === 'excluded') {
+                val = val.replace(new RegExp('(^|\\s)-' + t + '(?=\\s|$)', 'i'), ' ');
+            }
+            setSearchQuery(inputId, val.replace(/\s{2,}/g, ' ').trim());
         }
 
         // Toggle policy details section open/closed
         function togglePolicyDetails(btn) {
             const details = btn.closest('.policy-item').querySelector('.policy-details');
             const expanded = details.classList.toggle('policy-details--open');
-            btn.textContent = expanded ? '▴' : '▾';
+            btn.textContent = expanded ? '▾' : '▸'; // down = open, right = collapsed
+        }
+
+        // Re-filter on keyup, but ignore the navigation keys — otherwise every
+        // arrow/enter keyup would rebuild the result list and wipe the keyboard
+        // highlight that keydown just set (the "glitchy flash" bug).
+        const NAV_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
+        function onSearchKeyup(e, filterFn) {
+            if (e && NAV_KEYS.includes(e.key)) return;
+            filterFn();
+        }
+
+        // ── Keyboard navigation for search result lists ──────────────────────
+        // Shared by the Policies modal and the universal (links+policies) search.
+        // `getItems()` returns the ordered, currently-rendered result elements.
+        // Arrow Up/Down move a `.kbd-active` highlight; Enter opens the active one
+        // (or the top result if none is highlighted yet, preserving old behaviour).
+        function moveResultSelection(getItems, dir, loadMore) {
+            let items = getItems();
+            if (!items.length) return;
+            let idx = items.findIndex(el => el.classList.contains('kbd-active'));
+            if (idx === -1) {
+                if (dir < 0) return;  // Up from the search box: stay; don't jump to the end.
+                idx = 0;
+            } else {
+                // Up past the first result releases the selection back to the
+                // search box (highlight cleared; focus already lives in the input).
+                if (dir < 0 && idx === 0) {
+                    items.forEach(el => el.classList.remove('kbd-active'));
+                    return;
+                }
+                let next = idx + dir;
+                // At the end and more to load? Pull the next batch, then continue.
+                if (next >= items.length && loadMore && loadMore()) items = getItems();
+                idx = Math.max(0, Math.min(next, items.length - 1));
+            }
+            items.forEach(el => el.classList.remove('kbd-active'));
+            items[idx].classList.add('kbd-active');
+            items[idx].scrollIntoView({ block: 'nearest' });
+        }
+
+        function openResultSelection(getItems) {
+            const items = getItems();
+            if (!items.length) return false;
+            const el = items.find(x => x.classList.contains('kbd-active')) || items[0];
+            el.click();
+            return true;
+        }
+
+        function activePolicyItem() {
+            return document.querySelector('#policiesList .policy-item.kbd-active');
+        }
+
+        // Left/Right arrows collapse/expand the keyboard-selected policy box.
+        // `open === true` expands, `false` collapses. No-op if nothing selected.
+        function setSelectedPolicyDetails(open) {
+            const el = activePolicyItem();
+            if (!el) return false;
+            const details = el.querySelector('.policy-details');
+            const btn = el.querySelector('.policy-expand-btn');
+            if (!details) return true; // selected, but nothing to expand — still consume the key
+            const isOpen = details.classList.contains('policy-details--open');
+            if (open !== isOpen) {
+                details.classList.toggle('policy-details--open', open);
+                if (btn) btn.textContent = open ? '▾' : '▸';
+            }
+            return true;
+        }
+
+        // Flip the selected policy box open/closed (Right-arrow acts as a toggle).
+        function toggleSelectedPolicyDetails() {
+            const el = activePolicyItem();
+            if (!el) return false;
+            const details = el.querySelector('.policy-details');
+            const isOpen = details && details.classList.contains('policy-details--open');
+            return setSelectedPolicyDetails(!isOpen);
         }
 
         // Calculate if background color is light or dark
@@ -1773,6 +2172,7 @@
                             id: i,
                             title: description,
                             category: folder,
+                            site: siteOf(folder),
                             subfolder: subfolder,
                             owner: owner,
                             lastRevision: lastRevision,
@@ -1851,7 +2251,7 @@
             if (savedData) {
                 const parsed = JSON.parse(savedData);
                 links = parsed.links || [];
-                tileOrder = Array.isArray(parsed.tileOrder) ? parsed.tileOrder : [];
+                pinnedIds = Array.isArray(parsed.pinnedIds) ? parsed.pinnedIds : [];
 
                 // Smart merge: Add any NEW links from data.json that user doesn't have
                 const userLinkIds = links.map(l => l.id);
@@ -1888,7 +2288,7 @@
         // Save user data to localStorage (and, when logged in, to the cloud profile)
         function saveUserData() {
             try {
-                localStorage.setItem('workspaceData', JSON.stringify({ links, tileOrder }));
+                localStorage.setItem('workspaceData', JSON.stringify({ links, pinnedIds }));
             } catch (e) { /* storage blocked on locked-down machines — ignore */ }
             // Mirror to the per-badge cloud profile so the layout follows the user.
             if (window.launcherAuth && launcherAuth.isAuthed()) launcherAuth.pushProfileDebounced();
@@ -1969,25 +2369,30 @@
         // Decide tile order. When logged in with a saved manual arrangement,
         // honour it (like a phone home screen); otherwise auto-sort new-first
         // then by click count.
-        function orderedLinks() {
-            const authed = window.launcherAuth && launcherAuth.isAuthed();
-            if (authed && tileOrder.length) {
-                const byId = new Map(links.map(l => [l.id, l]));
-                const ordered = [];
-                tileOrder.forEach(id => {
-                    if (byId.has(id)) { ordered.push(byId.get(id)); byId.delete(id); }
-                });
-                // Links not yet placed (e.g. newly added) trail, click-sorted.
-                const rest = [...byId.values()].sort((a, b) => b.clicks - a.clicks);
-                return [...ordered, ...rest];
-            }
-            return [...links].sort((a, b) => {
+        // Auto-sort: NEW (unclicked) tiles first, then by descending click count.
+        function autoSortLinks(arr) {
+            return [...arr].sort((a, b) => {
                 const aIsNew = a.isNew && a.clicks === 0;
                 const bIsNew = b.isNew && b.clicks === 0;
                 if (aIsNew && !bIsNew) return -1;
                 if (!aIsNew && bIsNew) return 1;
                 return b.clicks - a.clicks;
             });
+        }
+
+        function orderedLinks() {
+            const authed = window.launcherAuth && launcherAuth.isAuthed();
+            if (authed && pinnedIds.length) {
+                // Pinned tiles hold their slots (in pin order); everything else —
+                // including freshly-added NEW links — auto-sorts in right behind them.
+                const byId = new Map(links.map(l => [l.id, l]));
+                const pinned = [];
+                pinnedIds.forEach(id => {
+                    if (byId.has(id)) { pinned.push(byId.get(id)); byId.delete(id); }
+                });
+                return [...pinned, ...autoSortLinks([...byId.values()])];
+            }
+            return autoSortLinks(links);
         }
 
         function renderDashboard() {
@@ -2001,6 +2406,7 @@
             // Fill 8 link tile slots
             sortedLinks.slice(0, 8).forEach(link => {
                 const isNew = link.isNew && link.clicks === 0;
+                const isPinned = reorderable && pinnedIds.includes(link.id);
                 const isImageIcon = link.icon && (link.icon.startsWith('http') || link.icon.startsWith('/') || link.icon.startsWith('.'));
                 const isHexColor = link.color && link.color.startsWith('#');
 
@@ -2013,7 +2419,8 @@
                 }
 
                 html += `
-                    <button class="tile${reorderable ? ' reorderable' : ''}" draggable="true" data-id="${link.id}" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
+                    <button class="tile${reorderable ? ' reorderable' : ''}${isPinned ? ' pinned' : ''}" draggable="true" data-id="${link.id}" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
+                        ${isPinned ? `<span class="pin-badge" title="Pinned">📌</span>` : ''}
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -2030,6 +2437,7 @@
             `;
 
             dashboard.innerHTML = html;
+            dashSel = -1; // re-render invalidates any keyboard selection
 
             // When logged in, tiles reorder like a phone home screen.
             // Otherwise they drag OUT (to share the link to the desktop).
@@ -2037,9 +2445,49 @@
             else setupTileDragOut();
         }
 
+        // ── Dashboard tile keyboard navigation ───────────────────────────────
+        // Arrow keys move a selection ring around the 3-wide tile grid; Enter
+        // activates the selected tile (same as clicking it).
+        const DASH_COLS = 3;
+        let dashSel = -1;
+        function dashboardTiles() { return Array.from(document.querySelectorAll('#dashboard .tile')); }
+
+        function setDashSel(idx) {
+            const tiles = dashboardTiles();
+            tiles.forEach(t => t.classList.remove('tile-kbd-active'));
+            if (idx < 0 || idx >= tiles.length) { dashSel = -1; return; }
+            dashSel = idx;
+            tiles[idx].classList.add('tile-kbd-active');
+            tiles[idx].scrollIntoView({ block: 'nearest' });
+        }
+
+        // dCol/dRow are -1/0/+1. Movement clamps to the grid (no wrap, no row jump).
+        function moveDashSel(dCol, dRow) {
+            const tiles = dashboardTiles();
+            if (!tiles.length) return;
+            if (dashSel === -1) { setDashSel(0); return; }
+            let idx = dashSel;
+            if (dRow !== 0) {
+                const ni = idx + dRow * DASH_COLS;
+                if (ni >= 0 && ni < tiles.length) idx = ni;
+            }
+            if (dCol !== 0) {
+                const ni = idx + dCol;
+                if (ni >= 0 && ni < tiles.length && Math.floor(ni / DASH_COLS) === Math.floor(idx / DASH_COLS)) idx = ni;
+            }
+            setDashSel(idx);
+        }
+
+        function activateDashSel() {
+            const tiles = dashboardTiles();
+            if (dashSel >= 0 && dashSel < tiles.length) { tiles[dashSel].click(); return true; }
+            return false;
+        }
+
         // Render link manager
         function renderLinkManager() {
             const linkManager = document.getElementById('linkManager');
+            const authed = window.launcherAuth && launcherAuth.isAuthed();
 
             if (links.length === 0) {
                 linkManager.innerHTML = '<div class="empty-state">No links yet</div>';
@@ -2070,15 +2518,20 @@
                 }
 
                 const clickWord = link.clicks === 1 ? 'click' : 'clicks';
+                const safeUrl = (link.url || '').replace(/'/g, "\\'");
+                const pinned = pinnedIds.includes(link.id);
 
                 return `
                     <li class="link-manager-item" style="display:flex;align-items:center;">
-                        ${iconDisplay}
-                        <div class="link-manager-info" style="flex:1;min-width:0;">
-                            <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Repo) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
-                            <div class="link-manager-url" title="${link.url}">${link.url}</div>
+                        <div class="link-manager-open" onclick="handleLinkClick(${link.id}, '${safeUrl}'); renderLinkManager();" title="Open ${link.name}" style="display:flex;align-items:center;flex:1;min-width:0;cursor:pointer;">
+                            ${iconDisplay}
+                            <div class="link-manager-info" style="flex:1;min-width:0;">
+                                <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Repo) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
+                                <div class="link-manager-url" title="${link.url}">${link.url}</div>
+                            </div>
                         </div>
                         <div class="link-manager-actions">
+                            ${authed ? `<button class="icon-btn${pinned ? ' pinned' : ''}" onclick="togglePinFromManager(${link.id})" title="${pinned ? 'Pinned to layout — click to unpin' : 'Pin to main layout'}">📌</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="editLink(${link.id})" title="Edit">✏️</button>` : ''}
                             ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Share to Repo">📤</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">❌</button>` : ''}
@@ -2103,21 +2556,22 @@
         }
 
         // Build HTML for a single policy item
-        function buildPolicyItemHTML(policy, searchTerm = '') {
+        function buildPolicyItemHTML(policy, searchTerm = '', offSite = false) {
             const isNew = policy.isNew && policy.clicks === 0;
             const safeGuid = policy.guid.replace(/'/g, "\\'");
             const safeDocNum = policy.docNum.replace(/'/g, "\\'");
             const safeUrl = policy.url.replace(/'/g, "\\'");
             const titleHtml = highlightText(policy.title, searchTerm);
+            const siteBadge = siteBadgeHTML(policy);
             const categoryHtml = policy.category ? highlightText(policy.category, searchTerm) : '';
             const hasDetails = policy.docNum || policy.version || policy.docType ||
                                policy.lastRevision || policy.revisedBy || policy.modificationType ||
                                policy.writtenBy || policy.owner || policy.clicks;
             return `
-                <li class="policy-item" onclick="handlePolicyClick('${safeGuid}', '${safeDocNum}', '${safeUrl}')">
+                <li class="policy-item${offSite ? ' off-site' : ''}" onclick="handlePolicyClick('${safeGuid}', '${safeDocNum}', '${safeUrl}')">
                     <div class="policy-info">
                         <div class="policy-title">
-                            ${titleHtml}
+                            ${siteBadge}${titleHtml}
                             ${isNew ? '<span style="display: inline-block; vertical-align: middle; background: #ef4444; color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 8px; margin-bottom: 4px; line-height: 1;">NEW</span>' : ''}
                         </div>
                         ${categoryHtml ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${categoryHtml}</div>` : ''}
@@ -2146,7 +2600,7 @@
                         </div>` : ''}
                     </div>
                     <div class="policy-actions">
-                        ${hasDetails ? `<button class="policy-expand-btn" onclick="event.stopPropagation(); togglePolicyDetails(this)" title="Show details">▾</button>` : ''}
+                        ${hasDetails ? `<button class="policy-expand-btn" onclick="event.stopPropagation(); togglePolicyDetails(this)" title="Show details">▸</button>` : ''}
                         <span class="external-icon"></span>
                     </div>
                 </li>
@@ -2166,9 +2620,10 @@
             const rawSearch = (document.getElementById('policySearch')?.value || '');
             const query = parseSearchQuery(rawSearch);
             const hlTerms = getHighlightTerms(query);
+            const enabled = getEnabledSites();
             const fragment = document.createDocumentFragment();
             const temp = document.createElement('div');
-            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, hlTerms)).join('');
+            temp.innerHTML = nextBatch.map(p => buildPolicyItemHTML(p, hlTerms, !siteIsActive(p, enabled))).join('');
             while (temp.firstChild) fragment.appendChild(temp.firstChild);
 
             policiesRenderedCount += nextBatch.length;
@@ -2203,6 +2658,7 @@
 
             // Populate filter dropdowns
             populateFilters();
+            renderSiteChips();
 
             // Get current filter values
             const rawSearch = document.getElementById('policySearch').value;
@@ -2243,6 +2699,9 @@
             if (!hasQuery) {
             filtered.sort(policySort);
             }
+
+            // Push policies from sites the user has turned off below the rest.
+            filtered = rankBySite(filtered);
 
             // Cache for pagination
             currentFilteredPolicies = filtered;
@@ -2355,6 +2814,20 @@
             window.open(url, '_blank');
         }
 
+        // Pin / unpin a link to the main layout straight from the settings list.
+        // Logged-in only (pins live on the per-badge profile, like the dashboard).
+        function togglePinFromManager(linkId) {
+            if (!(window.launcherAuth && launcherAuth.isAuthed())) return;
+            if (pinnedIds.includes(linkId)) {
+                pinnedIds = pinnedIds.filter(id => id !== linkId);
+            } else {
+                pinnedIds.push(linkId);
+            }
+            saveUserData();      // local + debounced cloud push
+            renderDashboard();
+            renderLinkManager();
+        }
+
         // Open search
         function openSearch() {
             filterLinksAndPolicies(); // Use combined search
@@ -2429,7 +2902,7 @@
             });
 
             const sortedLinks = scoredLinks; // [{item, score, isSublink}]
-            const sortedPolicies = scoredPolicies.map(s => s.item);
+            const sortedPolicies = rankBySite(scoredPolicies.map(s => s.item));
 
             // Show/hide sections based on results
             if (sortedLinks.length === 0 && sortedPolicies.length === 0) {
@@ -2560,9 +3033,9 @@
             if (sortedPolicies.length > 0) {
                 policiesSection.style.display = 'block';
                 policySearchResults.innerHTML = sortedPolicies.slice(0, 20).map(policy => `
-                    <li class="policy-item search-result-item" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
+                    <li class="policy-item search-result-item${siteIsActive(policy) ? '' : ' off-site'}" onclick="handlePolicyClick('${policy.guid}', '${policy.docNum}', '${policy.url}')">
                         <div class="policy-info">
-                            <div class="policy-title">${highlightText(policy.title, hlTerms)}</div>
+                            <div class="policy-title">${siteBadgeHTML(policy)}${highlightText(policy.title, hlTerms)}</div>
                             ${policy.category ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 2px;">${highlightText(policy.category, hlTerms)}</div>` : ''}
                             ${policy.subfolder ? `<span class="policy-category">${highlightText(policy.subfolder, hlTerms)}</span>` : ''}
                         </div>
@@ -3118,8 +3591,13 @@
                 if (!searchVal) return true;
                 return [link.name, link.url].join(' ').toLowerCase().includes(searchVal);
             });
-            // This backend has no votes — both sort modes order by most recent.
-            filtered.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+            const sortVal = (document.getElementById('sharedLinksSort').value) || 'top';
+            if (sortVal === 'new') {
+                filtered.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+            } else {
+                // Top: highest net score first, ties broken by most recent.
+                filtered.sort((a, b) => (sharedScore(b) - sharedScore(a)) || ((b.ts || 0) - (a.ts || 0)));
+            }
 
             if (filtered.length === 0) {
                 listEl.innerHTML = '<div class="empty-state">No shared links yet</div>';
@@ -3137,6 +3615,8 @@
                 const alreadyAdded = addedUrls.has(link.url);
                 const canDelete   = me && (link.by === me || me === 'jpelley');
                 const safeId      = encodeURIComponent(link.id);
+                const score       = sharedScore(link);
+                const myVote      = me && link.votes ? (Number(link.votes[me]) || 0) : 0;
 
                 const iconHtml = isImageIcon
                     ? `<span class="shared-link-icon" style="background:${bgColor};"><img src="${escapeHtml(link.icon)}" onerror="this.style.display='none';this.parentElement.textContent='🔗';"></span>`
@@ -3147,6 +3627,11 @@
                         <div class="shared-link-card-header">
                             ${iconHtml}
                             <div class="shared-link-title">${escapeHtml(link.name)}</div>
+                            <div class="shared-link-votes">
+                                <button class="shared-link-vote-btn upvote${myVote === 1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', 1)" title="Upvote">▲</button>
+                                <span class="shared-link-score" title="Net votes">${score}</span>
+                                <button class="shared-link-vote-btn downvote${myVote === -1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', -1)" title="Downvote">▼</button>
+                            </div>
                             ${canDelete ? `<button class="shared-link-vote-btn" onclick="deleteSharedLink('${safeId}')" title="Remove">🗑</button>` : ''}
                         </div>
                         ${link.url ? `<div class="shared-link-desc">${escapeHtml(link.url)}</div>` : ''}
@@ -3160,6 +3645,39 @@
                         </div>
                     </div>`;
             }).join('');
+        }
+
+        // Net score for a shared link from its public votes{ user: ±1 } map.
+        function sharedScore(link) {
+            if (!link || !link.votes || typeof link.votes !== 'object') return 0;
+            return Object.values(link.votes).reduce((sum, v) => sum + (Number(v) || 0), 0);
+        }
+
+        // Cast / clear an up- or down-vote. Optimistic: update locally, then POST.
+        // Tapping your current vote again clears it. Votes are public.
+        async function voteSharedLink(idEnc, dir) {
+            const id = decodeURIComponent(idEnc);
+            if (!launcherAuth.isAuthed()) { showAppToast('Scan your badge to vote.'); return; }
+            const me   = launcherAuth.getUser();
+            const link = sharedLinksData.find(l => String(l.id) === String(id));
+            if (!link) return;
+
+            if (!link.votes || typeof link.votes !== 'object') link.votes = {};
+            const current = Number(link.votes[me]) || 0;
+            const next    = current === dir ? 0 : dir;   // re-tapping clears
+
+            if (next === 0) delete link.votes[me]; else link.votes[me] = next;
+            localStorage.removeItem(SHARED_LINKS_CACHE_KEY); // score changed — drop stale cache
+            renderSharedLinks();
+
+            try {
+                await launcherAuth.api('shared_vote', { method: 'POST', body: JSON.stringify({ id, dir: next }) });
+            } catch (e) {
+                // Roll back the optimistic change on failure.
+                if (current === 0) delete link.votes[me]; else link.votes[me] = current;
+                renderSharedLinks();
+                showAppToast('Could not record your vote — try again.');
+            }
         }
 
         function addSharedLink(idEnc) {
@@ -3280,6 +3798,8 @@
                 renderPolicies();
                 toggleFilterClearButtons();
                 document.getElementById('policiesModal').classList.add('active');
+                // Open "ready to type" — focus the search box once the modal is up.
+                setTimeout(() => { const s = document.getElementById('policySearch'); if (s) s.focus(); }, 100);
 
                 // Set up IntersectionObserver to auto-load more policies on scroll
                 if (policyObserver) policyObserver.disconnect();
@@ -3441,6 +3961,10 @@
             if (!link) return;
 
             let html = '';
+            const authed = window.launcherAuth && launcherAuth.isAuthed();
+            if (authed && pinnedIds.includes(linkId)) {
+                html += `<div class="tile-context-menu-item" onclick="unpinTile(${linkId}); closeTileContextMenu();">📌 Unpin</div>`;
+            }
             if (link.isCustom) {
                 html += `<div class="tile-context-menu-item" onclick="closeTileContextMenu(); openSettings(); editLink(${linkId});">✏️ Edit</div>`;
             }
@@ -3553,9 +4077,21 @@
             });
             modal.addEventListener('click', function(e) {
                 if (e.target === this && mousedownOnBackdrop) {
-                    this.classList.remove('active');
+                    closeModal(this.id); // route through closeModal so searches clear
                 }
             });
+        });
+
+        // Escape dismisses whatever is open: the top-most active modal (routed
+        // through closeModal so its search inputs/filters reset), or a tile menu.
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            const open = document.querySelectorAll('.modal.active');
+            if (open.length) {
+                closeModal(open[open.length - 1].id);
+            } else {
+                closeTileContextMenu();
+            }
         });
 
         // ── Service worker: offline support + instant load ───────────────────
@@ -3694,9 +4230,10 @@
                     const { profile } = await this.api('profile');
                     if (profile && Array.isArray(profile.links) && profile.links.length) {
                         links     = profile.links;
-                        tileOrder = Array.isArray(profile.tileOrder) ? profile.tileOrder : [];
+                        pinnedIds = Array.isArray(profile.pinnedIds) ? profile.pinnedIds : [];
+                        if (Array.isArray(profile.policySites)) setEnabledSites(profile.policySites);
                         mergeMissingDefaults();          // pick up any new data.json links
-                        try { localStorage.setItem('workspaceData', JSON.stringify({ links, tileOrder })); } catch (e) {}
+                        try { localStorage.setItem('workspaceData', JSON.stringify({ links, pinnedIds })); } catch (e) {}
                     } else {
                         // First login for this badge — seed the cloud from what's here now.
                         this.pushProfile();
@@ -3705,7 +4242,7 @@
                 },
 
                 async pushProfile() {
-                    try { await this.api('profile', { method: 'POST', body: JSON.stringify({ links, tileOrder }) }); }
+                    try { await this.api('profile', { method: 'POST', body: JSON.stringify({ links, pinnedIds, policySites: [...getEnabledSites()] }) }); }
                     catch (e) { /* offline / server down — local copy still saved */ }
                 },
                 pushProfileDebounced() {
@@ -3802,6 +4339,110 @@
             }, true);
         }
 
+        // ── Camera badge scanner (mobile) — ZXing, lazy-loaded ───────────────
+        // Phones have no wedge scanner, so the same hidden login is reached by
+        // LONG-PRESSING the header logo (see wireLogoLongPress), which opens this
+        // camera overlay. ZXing (~330 KB) is fetched only the first time the
+        // camera is opened, so it never touches the normal/critical load path.
+        // A decoded barcode flows into the very same offerBadgeLogin() confirm.
+        let _camReader = null;
+
+        function loadZxing() {
+            if (window._zxingPromise) return window._zxingPromise;
+            window._zxingPromise = new Promise((resolve, reject) => {
+                if (typeof ZXing !== 'undefined') return resolve();
+                const s = document.createElement('script');
+                s.src = 'zxing.min.js';
+                s.onload  = () => resolve();
+                s.onerror = () => reject(new Error('Could not load the scanner library'));
+                document.head.appendChild(s);
+            });
+            return window._zxingPromise;
+        }
+
+        function ensureCameraOverlay() {
+            let ov = document.getElementById('badgeCamOverlay');
+            if (ov) return ov;
+            ov = document.createElement('div');
+            ov.id = 'badgeCamOverlay';
+            ov.innerHTML =
+                '<div class="bc-box">' +
+                  '<div class="bc-head"><span>Scan your badge</span>' +
+                    '<button type="button" class="bc-close" aria-label="Close">✕</button></div>' +
+                  '<div class="bc-stage"><video id="badgeCamVideo" playsinline muted></video>' +
+                    '<div class="bc-reticle"></div></div>' +
+                  '<p id="badgeCamStatus">Starting camera…</p>' +
+                '</div>';
+            document.body.appendChild(ov);
+            ov.querySelector('.bc-close').addEventListener('click', closeCamera);
+            ov.addEventListener('click', e => { if (e.target === ov) closeCamera(); });
+            return ov;
+        }
+
+        // Opens the overlay and starts decoding. getUserMedia (inside
+        // decodeFromConstraints) is what triggers the browser's camera-permission
+        // prompt — it only fires here, on this deliberate gesture, never on load.
+        async function openCamera() {
+            const ov     = ensureCameraOverlay();
+            const video  = ov.querySelector('#badgeCamVideo');
+            const status = ov.querySelector('#badgeCamStatus');
+            ov.classList.add('open');
+            status.textContent = 'Starting camera…';
+
+            try { await loadZxing(); }
+            catch (e) { status.textContent = e.message; return; }
+
+            try {
+                _camReader = new ZXing.BrowserMultiFormatReader();
+                // Prefer the rear camera on phones; falls back to any camera.
+                _camReader.decodeFromConstraints(
+                    { video: { facingMode: { ideal: 'environment' } } },
+                    video,
+                    (result) => {
+                        if (!result) return;                 // null between frames
+                        const name = launcherAuth.clean(result.getText());
+                        if (name) { closeCamera(); offerBadgeLogin(name); }
+                    }
+                ).catch(e => { status.textContent = 'Cannot access the camera: ' + (e.message || e.name); });
+                status.textContent = 'Point the camera at your badge barcode…';
+            } catch (e) {
+                status.textContent = 'Cannot access the camera: ' + (e.message || e.name);
+            }
+        }
+
+        function closeCamera() {
+            if (_camReader) { try { _camReader.reset(); } catch (e) {} _camReader = null; }
+            const ov = document.getElementById('badgeCamOverlay');
+            if (ov) ov.classList.remove('open');
+        }
+
+        // Long-press the logo (~650 ms, no real movement) opens the scanner.
+        // Invisible to everyone else; uses pointer events so one path covers
+        // touch + mouse. A >12 px drag cancels it, so desktop drag-to-share still
+        // works; contextmenu is suppressed so iOS doesn't pop a "Save Image" sheet.
+        function wireLogoLongPress() {
+            const logo = document.getElementById('headerLogo');
+            if (!logo || logo._lpBound) return;
+            logo._lpBound = true;
+            let timer = null, sx = 0, sy = 0;
+            const HOLD = 650, MOVE_TOL = 12;
+            const cancel = () => { clearTimeout(timer); timer = null; };
+            logo.addEventListener('pointerdown', e => {
+                sx = e.clientX; sy = e.clientY;
+                clearTimeout(timer);
+                timer = setTimeout(openCamera, HOLD);
+            });
+            logo.addEventListener('pointermove', e => {
+                if (timer && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) cancel();
+            });
+            // A native drag (drag-to-share) suppresses pointermove, so the move
+            // check above can't see it — dragstart is the definitive signal that
+            // the user is dragging, not holding, so cancel the camera timer here.
+            logo.addEventListener('dragstart', cancel);
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => logo.addEventListener(ev, cancel));
+            logo.addEventListener('contextmenu', e => e.preventDefault());
+        }
+
         // ── Tile reorder (logged-in only) — phone-home-screen drag ───────────
         function setupTileReorder() {
             const dashboard = document.getElementById('dashboard');
@@ -3834,19 +4475,26 @@
             });
         }
 
-        // Move one visible tile in front of another and persist the arrangement.
+        // Dragging a tile PINS it (and only it), dropping it at the target's slot.
+        // Unpinned tiles keep auto-sorting behind the pinned block, so a freshly
+        // added link can still surface as NEW without being trapped in place.
         function reorderTiles(fromId, toId) {
-            const visible = orderedLinks().slice(0, 8).map(l => l.id);
-            const fromIdx = visible.indexOf(fromId);
-            const toIdx   = visible.indexOf(toId);
-            if (fromIdx === -1 || toIdx === -1) return;
-            visible.splice(toIdx, 0, visible.splice(fromIdx, 1)[0]);
-            const prior   = tileOrder.length ? tileOrder : links.map(l => l.id);
-            const rest    = prior.filter(id => !visible.includes(id));
-            const placed  = new Set([...visible, ...rest]);
-            const newbies = links.map(l => l.id).filter(id => !placed.has(id));
-            tileOrder = [...visible, ...rest, ...newbies];
+            pinnedIds = pinnedIds.filter(id => id !== fromId);
+            const toIdx = pinnedIds.indexOf(toId);
+            if (toIdx === -1) {
+                // Dropped onto an unpinned tile — pin it at the end of the pinned block.
+                pinnedIds.push(fromId);
+            } else {
+                pinnedIds.splice(toIdx, 0, fromId);
+            }
             saveUserData();      // writes local + debounced cloud push
+            renderDashboard();
+        }
+
+        // Remove a tile from the pinned set (context-menu "Unpin").
+        function unpinTile(linkId) {
+            pinnedIds = pinnedIds.filter(id => id !== linkId);
+            saveUserData();
             renderDashboard();
         }
 
@@ -3858,17 +4506,40 @@
                 .tile.reorderable:active { cursor: grabbing; }
                 .tile.dragging { opacity: .4; }
                 .tile.drag-over { outline: 2px dashed #69c9d0; outline-offset: -3px; }
-                #launcherUserChip { position: fixed; top: 10px; right: 10px; z-index: 99999;
-                    display: flex; align-items: center; gap: 8px; background: #222; color: #fff;
-                    padding: 6px 12px; border-radius: 999px; font-size: 12px;
+                .tile.pinned { outline: 1.5px solid rgba(105,201,208,.55); outline-offset: -3px; }
+                .pin-badge { position: absolute; top: 4px; left: 6px; font-size: 12px;
+                    line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+                #launcherUserChip { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+                    z-index: 99999; display: flex; align-items: center; gap: 8px; background: #222; color: #fff;
+                    padding: 6px 14px; border-radius: 999px; font-size: 12px;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                     box-shadow: 0 2px 10px rgba(0,0,0,.25); }
                 #launcherUserChip button { background: none; border: none; color: #69c9d0;
-                    cursor: pointer; font-size: 12px; font-weight: 600; padding: 0; }`;
+                    cursor: pointer; font-size: 12px; font-weight: 600; padding: 0; }
+                .header-logo { -webkit-touch-callout: none; }
+                #badgeCamOverlay { position: fixed; inset: 0; z-index: 100000; display: none;
+                    align-items: center; justify-content: center; padding: 16px;
+                    background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+                #badgeCamOverlay.open { display: flex; }
+                #badgeCamOverlay .bc-box { width: 100%; max-width: 420px; overflow: hidden;
+                    background: #161616; color: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5);
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+                #badgeCamOverlay .bc-head { display: flex; align-items: center; justify-content: space-between;
+                    padding: 12px 16px; font-size: 15px; font-weight: 600; }
+                #badgeCamOverlay .bc-close { background: none; border: none; color: #aaa; font-size: 18px;
+                    cursor: pointer; line-height: 1; padding: 4px; }
+                #badgeCamOverlay .bc-stage { position: relative; background: #000; aspect-ratio: 4 / 3; }
+                #badgeCamOverlay video { width: 100%; height: 100%; object-fit: cover; display: block; }
+                #badgeCamOverlay .bc-reticle { position: absolute; inset: 18% 12%; pointer-events: none;
+                    border: 2px solid rgba(105,201,208,.9); border-radius: 12px; }
+                #badgeCamStatus { margin: 0; padding: 12px 16px 16px; font-size: 13px; color: #bbb; text-align: center; }`;
             const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
         })();
 
         wireBadgeScanner();   // attach immediately — independent of DOM-ready
+        // Logo long-press = mobile entry point to the same hidden login. Logo
+        // exists in the static HTML, so binding now is safe (no DOM-ready wait).
+        wireLogoLongPress();
 
         // Restore a logged-in session (e.g. personal device) after init renders.
         async function resumeBadgeSession() {
@@ -3892,6 +4563,15 @@
                 return;
             }
 
+            // Arrow keys move the tile selection; Enter activates the selected tile.
+            switch (e.key) {
+                case 'ArrowRight': e.preventDefault(); moveDashSel(1, 0);  return;
+                case 'ArrowLeft':  e.preventDefault(); moveDashSel(-1, 0); return;
+                case 'ArrowDown':  e.preventDefault(); moveDashSel(0, 1);  return;
+                case 'ArrowUp':    e.preventDefault(); moveDashSel(0, -1); return;
+                case 'Enter':      if (dashSel >= 0) { e.preventDefault(); activateDashSel(); } return;
+            }
+
             // Check if it's a printable character (letters, numbers, space, etc.)
             if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 openSearch();
@@ -3908,47 +4588,52 @@
 
         // Handle Enter key in search to open first result
         document.addEventListener('DOMContentLoaded', function () {
+            // Universal search: arrow keys walk the combined links→policies list
+            // (both rendered with .search-result-item, in DOM order), Enter opens
+            // the highlighted result (top result if none highlighted yet).
             const linkSearchInput = document.getElementById('linkSearch');
             if (linkSearchInput) {
+                const getUniversalItems = () =>
+                    Array.from(document.querySelectorAll('#searchModal .search-result-item'));
                 linkSearchInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'ArrowDown') {
                         e.preventDefault();
-
-                        // Check if links section is visible and has results
-                        const linksSection = document.getElementById('linksSection');
-                        const policiesSection = document.getElementById('policiesSection');
-
-                        if (linksSection.style.display !== 'none') {
-                            const firstLinkResult = document.querySelector('#searchResults .search-result-item');
-                            if (firstLinkResult) {
-                                firstLinkResult.click();
-                                return;
-                            }
-                        }
-
-                        // If no links, try policies
-                        if (policiesSection.style.display !== 'none') {
-                            const firstPolicyResult = document.querySelector('#policySearchResults .search-result-item');
-                            if (firstPolicyResult) {
-                                firstPolicyResult.click();
-                            }
-                        }
+                        moveResultSelection(getUniversalItems, 1);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        moveResultSelection(getUniversalItems, -1);
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        openResultSelection(getUniversalItems);
                     }
                 });
             }
 
-            // Handle Enter key for policies search
+            // Policies search: up/down navigate (loading more at the end), Enter
+            // opens the selection, and left/right collapse/expand the selected box.
+            // Left/right only hijack the caret when a row is actually selected.
             const policySearchInput = document.getElementById('policySearch');
             if (policySearchInput) {
+                const getPolicyItems = () =>
+                    Array.from(document.querySelectorAll('#policiesList .policy-item'));
+                const loadMorePolicies = () => {
+                    if (document.getElementById('policyLoadMore')) { renderPolicyBatch(); return true; }
+                    return false;
+                };
                 policySearchInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'ArrowDown') {
                         e.preventDefault();
-
-                        // Get the first visible result
-                        const firstResult = document.querySelector('#policiesList .policy-item');
-                        if (firstResult) {
-                            firstResult.click();
-                        }
+                        moveResultSelection(getPolicyItems, 1, loadMorePolicies);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        moveResultSelection(getPolicyItems, -1);
+                    } else if (e.key === 'ArrowRight') {
+                        if (activePolicyItem()) { e.preventDefault(); toggleSelectedPolicyDetails(); }
+                    } else if (e.key === 'ArrowLeft') {
+                        if (activePolicyItem()) { e.preventDefault(); setSelectedPolicyDetails(false); }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        openResultSelection(getPolicyItems);
                     }
                 });
             }
