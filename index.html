@@ -171,6 +171,17 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* The tile itself is the click / drag / context-menu target. Children are
+           purely visual: Safari otherwise makes the inner <img> its own drag
+           source and selection target, so grabbing the icon dragged the image
+           (not the tile) and right-clicking it missed the tile context menu. */
+        .tile * {
+            pointer-events: none;
+            -webkit-user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         .tile.disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -771,10 +782,10 @@
         }
 
         /* Active "pinned to layout" state for the settings-list pin button. */
-        .icon-btn.pinned {
+        /* .icon-btn.pinned {
             background: #dbeafe;
             box-shadow: inset 0 0 0 1.5px #60a5fa;
-        }
+        } */
 
         /* Clickable name/icon area of a settings link row (opens the link). */
         .link-manager-open {
@@ -1101,6 +1112,17 @@
             font-weight: 600;
             color: #1f2937;
             flex: 1;
+        }
+
+        /* When the title is a real link (http/https), keep it looking like the
+           text but hint clickability on hover. */
+        a.shared-link-title {
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a.shared-link-title:hover {
+            text-decoration: underline;
         }
 
         .shared-link-votes {
@@ -1442,15 +1464,9 @@
                     <div id="addLinkForm"
                         style="display: none; background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                         <h3 style="margin-bottom: 12px;">Add New Link</h3>
-                        <div class="form-group" style="display: flex; gap: 12px; align-items: flex-end;">
-                            <div style="flex: 1; display: flex; flex-direction: column;">
-                                <label>Name</label>
-                                <input type="text" id="newLinkName" placeholder="e.g., Schedule">
-                            </div>
-                            <div style="flex: 1; display: flex; flex-direction: column;">
-                                <label>Description</label>
-                                <input type="text" id="newLinkDescription" placeholder="optional, for Shared Link Repo">
-                            </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="newLinkName" placeholder="e.g., Schedule">
                         </div>
                         <div class="form-group">
                             <label>URL</label>
@@ -2420,7 +2436,7 @@
 
                 html += `
                     <button class="tile${reorderable ? ' reorderable' : ''}${isPinned ? ' pinned' : ''}" draggable="true" data-id="${link.id}" data-url="${link.url}" data-name="${link.name}" onclick="handleLinkClick(${link.id}, '${link.url}')" oncontextmenu="showTileContextMenu(event, ${link.id})">
-                        ${isPinned ? `<span class="pin-badge" title="Pinned">📌</span>` : ''}
+                        ${isPinned ? `<span class="pin-badge" title="Pinned"></span>` : ''}
                         ${isNew ? `<span class="new-badge">NEW</span>` : ''}
                         ${iconHtml}
                         <div class="tile-name">${link.name}</div>
@@ -3027,6 +3043,7 @@
                 }).join('');
             } else {
                 linksSection.style.display = 'none';
+                searchResults.innerHTML = '';   // drop stale rows so keyboard nav can't land on hidden items
             }
 
             // Render policies section
@@ -3048,6 +3065,7 @@
                 }
             } else {
                 policiesSection.style.display = 'none';
+                policySearchResults.innerHTML = '';   // same: no stale rows behind a hidden section
             }
         }
 
@@ -3094,7 +3112,6 @@
         function hideAddLinkForm() {
             document.getElementById('addLinkForm').style.display = 'none';
             document.getElementById('newLinkName').value = '';
-            document.getElementById('newLinkDescription').value = '';
             document.getElementById('newLinkUrl').value = '';
             document.getElementById('newLinkIcon').value = '';
             document.getElementById('newLinkAliases').value = '';
@@ -3108,7 +3125,6 @@
 
         function addCustomLink() {
             const name = document.getElementById('newLinkName').value.trim();
-            const description = document.getElementById('newLinkDescription').value.trim();
             const url = document.getElementById('newLinkUrl').value.trim();
             const icon = document.getElementById('newLinkIcon').value.trim() || '🔗';
             const color = document.getElementById('newLinkColor').value;
@@ -3130,7 +3146,6 @@
                     link.icon = icon;
                     link.color = color;
                     link.aliases = aliases.length > 0 ? aliases : undefined;
-                    link.description = description || undefined;
                 }
             } else {
                 // Create new link
@@ -3145,7 +3160,6 @@
                     isNew: true
                 };
                 if (aliases.length > 0) newLink.aliases = aliases;
-                if (description) newLink.description = description;
                 links.push(newLink);
             }
 
@@ -3163,7 +3177,6 @@
 
             // Populate the form with existing values
             document.getElementById('newLinkName').value = link.name || '';
-            document.getElementById('newLinkDescription').value = link.description || '';
             document.getElementById('newLinkUrl').value = link.url || '';
             document.getElementById('newLinkIcon').value = (link.icon && !link.icon.startsWith('http') && !link.icon.startsWith('/') && !link.icon.startsWith('.')) ? link.icon : '';
             document.getElementById('newLinkColor').value = link.color || 'blue';
@@ -3622,11 +3635,19 @@
                     ? `<span class="shared-link-icon" style="background:${bgColor};"><img src="${escapeHtml(link.icon)}" onerror="this.style.display='none';this.parentElement.textContent='🔗';"></span>`
                     : `<span class="shared-link-icon" style="background:${bgColor};color:${textColor};">${escapeHtml(link.icon || '🔗')}</span>`;
 
+                // Let people open a repo link to preview it before adding (like
+                // browsing in Manage Links). Only http(s) becomes a real link — a
+                // hostile repo entry can't smuggle in a javascript: URL.
+                const safeHref = (link.url && /^https?:\/\//i.test(link.url)) ? escapeHtml(link.url) : '';
+                const titleHtml = safeHref
+                    ? `<a class="shared-link-title" href="${safeHref}" target="_blank" rel="noopener noreferrer" title="Open in a new tab">${escapeHtml(link.name)}</a>`
+                    : `<div class="shared-link-title">${escapeHtml(link.name)}</div>`;
+
                 return `
                     <div class="shared-link-card">
                         <div class="shared-link-card-header">
                             ${iconHtml}
-                            <div class="shared-link-title">${escapeHtml(link.name)}</div>
+                            ${titleHtml}
                             <div class="shared-link-votes">
                                 <button class="shared-link-vote-btn upvote${myVote === 1 ? ' active' : ''}" onclick="voteSharedLink('${safeId}', 1)" title="Upvote">▲</button>
                                 <span class="shared-link-score" title="Net votes">${score}</span>
@@ -4296,7 +4317,7 @@
             if (!u) { if (chip) chip.remove(); return; }
             if (!chip) { chip = document.createElement('div'); chip.id = 'launcherUserChip'; document.body.appendChild(chip); }
             chip.innerHTML = '';
-            const span = document.createElement('span'); span.textContent = '👤 ' + u;
+            const span = document.createElement('span'); span.textContent = u;
             const out  = document.createElement('button'); out.textContent = 'Log out'; out.onclick = badgeLogout;
             chip.appendChild(span); chip.appendChild(out);
         }
@@ -4593,8 +4614,12 @@
             // the highlighted result (top result if none highlighted yet).
             const linkSearchInput = document.getElementById('linkSearch');
             if (linkSearchInput) {
+                // Only visible rows: a hidden section (display:none) leaves its
+                // <li>s in the DOM, and navigating onto those is the "press down
+                // twice" bug. offsetParent === null when an ancestor is hidden.
                 const getUniversalItems = () =>
-                    Array.from(document.querySelectorAll('#searchModal .search-result-item'));
+                    Array.from(document.querySelectorAll('#searchModal .search-result-item'))
+                         .filter(el => el.offsetParent !== null);
                 linkSearchInput.addEventListener('keydown', function (e) {
                     if (e.key === 'ArrowDown') {
                         e.preventDefault();
