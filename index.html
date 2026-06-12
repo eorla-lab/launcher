@@ -2407,7 +2407,9 @@
             const dashboard = document.getElementById('dashboard');
             const reorderable = window.launcherAuth && launcherAuth.isAuthed();
 
-            const sortedLinks = orderedLinks();
+            // Hidden links (e.g. reserved data.json slots) keep their array
+            // position for layout-code stability but never render as tiles.
+            const sortedLinks = orderedLinks().filter(l => !l.hidden);
 
             let html = '';
 
@@ -2502,8 +2504,9 @@
                 return;
             }
 
-            // Sort by NEW first, then clicks descending (consistent with dashboard)
-            const sortedLinks = [...links].sort((a, b) => {
+            // Sort by NEW first, then clicks descending (consistent with dashboard).
+            // Hidden (reserved-slot) links are omitted from the manage list too.
+            const sortedLinks = links.filter(l => !l.hidden).sort((a, b) => {
                 const aIsNew = a.isNew && a.clicks === 0;
                 const bIsNew = b.isNew && b.clicks === 0;
                 if (aIsNew && !bIsNew) return -1;
@@ -2865,6 +2868,7 @@
             let scoredLinks = [];
             if (hasQuery) {
                 for (const link of links) {
+                    if (link.hidden) continue;   // reserved slots aren't searchable
                     const fields = [link.name, link.url];
                 if (link.aliases && Array.isArray(link.aliases)) {
                         fields.push(...link.aliases);
@@ -3320,8 +3324,9 @@
 
         function generateLayoutCode() {
             // Get default (non-custom) links sorted by current ranking
+            // (hidden reserved slots are never encoded into a shared layout)
             const defaultLinks = links
-                .filter(l => !l.isCustom)
+                .filter(l => !l.isCustom && !l.hidden)
                 .sort((a, b) => {
                     const aIsNew = a.isNew && a.clicks === 0;
                     const bIsNew = b.isNew && b.clicks === 0;
@@ -4492,17 +4497,31 @@
             });
         }
 
-        // Dragging a tile PINS it (and only it), dropping it at the target's slot.
-        // Unpinned tiles keep auto-sorting behind the pinned block, so a freshly
-        // added link can still surface as NEW without being trapped in place.
+        // Dragging a tile PINS it and drops it at the target's slot. Unpinned tiles
+        // keep auto-sorting behind the pinned block, so a freshly added link can
+        // still surface as NEW without being trapped in place.
         function reorderTiles(fromId, toId) {
             pinnedIds = pinnedIds.filter(id => id !== fromId);
             const toIdx = pinnedIds.indexOf(toId);
-            if (toIdx === -1) {
-                // Dropped onto an unpinned tile — pin it at the end of the pinned block.
-                pinnedIds.push(fromId);
-            } else {
+            if (toIdx !== -1) {
+                // Dropped onto a pinned tile — take that slot within the pinned block.
                 pinnedIds.splice(toIdx, 0, fromId);
+            } else {
+                // Dropped onto an unpinned tile (e.g. near the end). Lock the dragged
+                // tile to that exact visual slot by pinning everything currently above
+                // it — so it stays where it was dropped instead of snapping to the
+                // bottom of the pinned block. Tiles below the drop keep auto-sorting.
+                const visual = orderedLinks()
+                    .filter(l => !l.hidden)
+                    .map(l => l.id)
+                    .filter(id => id !== fromId);
+                const dropIdx = visual.indexOf(toId);
+                if (dropIdx === -1) {
+                    pinnedIds.push(fromId);            // fallback: shouldn't happen
+                } else {
+                    visual.splice(dropIdx, 0, fromId); // dragged tile takes target's slot
+                    pinnedIds = visual.slice(0, dropIdx + 1);
+                }
             }
             saveUserData();      // writes local + debounced cloud push
             renderDashboard();

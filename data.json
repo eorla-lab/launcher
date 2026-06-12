@@ -335,6 +335,15 @@
       ]
     },
     {
+      "id": 31,
+      "name": "Reserved",
+      "url": "#",
+      "icon": "➕",
+      "color": "gray",
+      "hidden": true,
+      "aliases": []
+    },
+    {
       "id": 32,
       "name": "SLS",
       "url": "https://rl6c.rlsolutions.com/TheOttawaHospital_Prod",
