@@ -1530,8 +1530,11 @@
                     <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
 
                     <h3 style="margin-bottom: 12px;">Reset</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px;">Reset to default links and clear all click data.</p>
+                    <p style="color: #6b7280; margin-bottom: 16px;">Reset to default links and clear all click data, then reload.</p>
                     <button class="btn btn-danger" onclick="resetToDefaults()" style="width: 100%;">🔄 Reset to Defaults</button>
+
+                    <p style="color: #6b7280; margin: 20px 0 16px;">App looks broken, blank, or out of date? Clear the cached app files and reload a fresh copy. Your tiles and clicks are kept.</p>
+                    <button class="btn btn-secondary" onclick="clearAppCacheAndReload()" style="width: 100%;">🧹 Clear app cache &amp; reload</button>
                     </div>
                 </div>
 
@@ -3524,24 +3527,45 @@
             reader.readAsText(file);
         }
 
-        // Reset to defaults
-        function resetToDefaults() {
-            if (!confirm('This will delete all your customizations and click data. Are you sure?')) return;
+        // Reset to defaults — wipes the user's links/clicks (not the cached app
+        // shell) and reloads so it feels like a clean start.
+        async function resetToDefaults() {
+            if (!confirm('This will delete all your customizations and click data, then reload. Are you sure?')) return;
 
             localStorage.removeItem('workspaceData');
-            localStorage.removeItem('policyClicks'); // Also reset policy clicks
-            localStorage.removeItem('docNumberClicks'); // Also reset doc number clicks
-            policyClicks = {}; // Clear in-memory policy clicks
-            docNumberClicks = {}; // Clear in-memory doc number clicks
-            loadUserData();
-            loadPolicyClicks(); // Reload (will be empty)
-            // Reload policies to update click counts and NEW badges
-            loadPoliciesFromCSV().then(() => {
-                renderDashboard();
-                renderLinkManager();
-                renderPolicies();
-                alert('Reset complete!');
-            });
+            localStorage.removeItem('policyClicks');
+            localStorage.removeItem('docNumberClicks');
+
+            // Signed-in badges keep a cloud copy — overwrite it with defaults now,
+            // otherwise the reload would just pull the old layout straight back.
+            if (window.launcherAuth && launcherAuth.isAuthed()) {
+                links = defaultData.links.map(l => ({ ...l, clicks: 0, isCustom: false }));
+                pinnedIds = [];
+                try { await launcherAuth.pushProfile(); } catch (e) { /* offline — local clear still applies */ }
+            }
+
+            location.reload();
+        }
+
+        // Closest thing to a reinstall without OS-level uninstall: drop every
+        // Cache Storage entry and unregister the service worker, then reload so the
+        // shell is fetched and re-precached fresh. User data (clicks, custom links,
+        // login) in localStorage is intentionally left untouched.
+        async function clearAppCacheAndReload() {
+            if (!confirm('Clear the app’s cached files and reload a fresh copy?\n\nYour tiles and clicks are kept. Use this if the app looks broken, blank, or out of date.')) return;
+            try {
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+            } catch (e) { /* cache API blocked/unavailable — reload anyway */ }
+            try {
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map(r => r.unregister()));
+                }
+            } catch (e) { /* SW API blocked/unavailable — reload anyway */ }
+            location.reload();
         }
 
         // ==================== Shared Links (Community Repo) ====================
