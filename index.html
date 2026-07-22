@@ -1449,8 +1449,8 @@
                     <div id="manageTabContent" style="height: 620px;">
 
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <button class="btn btn-primary" onclick="showAddLinkForm()" style="flex: 1;">Add Custom Link</button>
-                        <button class="btn btn-secondary" onclick="openSharedLinks()" style="flex: 1;">Shared Link Repo</button>
+                        <button class="btn btn-primary" onclick="showAddLinkForm()" style="flex: 1;">Add Link</button>
+                        <button class="btn btn-secondary" onclick="openSharedLinks()" style="flex: 1;">Shared Links</button>
                     </div>
 
                     <div id="addLinkForm"
@@ -1542,16 +1542,19 @@
                 <div id="changelogTab" class="tab-content">
                     <div id="changelogContent" style="height: 620px;">
                         <div style="margin-bottom: 24px;">
+                            <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.3</h3>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">July 2026</p>
+                            <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
+                                <li>Scan badge, pin and re-arrange tiles, share links</li>
+                            </ul>
+                        </div>
+                        <div style="margin-bottom: 24px;">
                             <h3 style="color: #1f2937; margin-bottom: 8px;">Version 1.2</h3>
                             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">April 2026</p>
                             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-                                <li>Shared Link Repo: browse and add links shared by others</li>
+                                <li>Shared Links: browse and add links shared by others</li>
                                 <li>
-                                    Improved search:
-                                    <ul style="margin-top:4px; padding-left: 20px; list-style-type: disc;">
-                                        <li>Prefix a word with - to exclude results containing that word</li>
-                                        <li>Use quotation marks to require an exact phrase match</li>
-                                    </ul>
+                                    Improved policy search
                                 </li>
                             </ul>
                         </div>
@@ -1588,7 +1591,7 @@
     <div id="sharedLinksModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Shared Link Repo</h2>
+                <h2>Shared Links</h2>
                 <button class="close-btn" onclick="closeModal('sharedLinksModal')">✕</button>
             </div>
             <div class="modal-body">
@@ -1663,7 +1666,8 @@
                     const raw = JSON.parse(localStorage.getItem(SITE_FILTER_KEY));
                     if (Array.isArray(raw)) enabledSites = new Set(raw.filter(s => POLICY_SITES.includes(s)));
                 } catch (e) { /* corrupt / blocked — fall through to default */ }
-                if (!enabledSites) enabledSites = new Set(POLICY_SITES); // default: all on
+                //if (!enabledSites) enabledSites = new Set(POLICY_SITES); // default: all on
+                if (!enabledSites) enabledSites = new Set(['TOH', 'EORLA']); // default: TOH and EORLA 
             }
             return enabledSites;
         }
@@ -2540,14 +2544,14 @@
                         <div class="link-manager-open" onclick="handleLinkClick(${link.id}, '${safeUrl}'); renderLinkManager();" title="Open ${link.name}" style="display:flex;align-items:center;flex:1;min-width:0;cursor:pointer;">
                             ${iconDisplay}
                             <div class="link-manager-info" style="flex:1;min-width:0;">
-                                <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Repo) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
+                                <div class="link-manager-name">${link.name} ${link.fromShared ? '<span style="color: #10b981; font-size: 0.8rem;">(Shared Links) </span>' : link.isCustom ? '<span style="color: #3b82f6; font-size: 0.8rem;">(Custom) </span>' : ''}<span class="link-manager-url">${link.clicks} ${clickWord}</span></div>
                                 <div class="link-manager-url" title="${link.url}">${link.url}</div>
                             </div>
                         </div>
                         <div class="link-manager-actions">
                             ${authed ? `<button class="icon-btn${pinned ? ' pinned' : ''}" onclick="togglePinFromManager(${link.id})" title="${pinned ? 'Pinned to layout — click to unpin' : 'Pin to main layout'}">📌</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="editLink(${link.id})" title="Edit">✏️</button>` : ''}
-                            ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Share to Repo">📤</button>` : ''}
+                            ${canSubmitToCommunity(link) ? `<button class="icon-btn" onclick="submitLinkToCommunity(${link.id})" title="Add to Shared links">📤</button>` : ''}
                             ${link.isCustom ? `<button class="icon-btn" onclick="deleteLink(${link.id})" title="Delete">❌</button>` : ''}
                             <button class="icon-btn" onclick="resetLinkClicks(${link.id})" title="Reset clicks">🔄</button>
                         </div>
@@ -3781,7 +3785,7 @@
             const link = links.find(l => l.id === linkId);
             if (!link) return;
             if (!launcherAuth.isAuthed()) {
-                showAppToast('Scan your badge to share a link to the repo.');
+                showAppToast('Scan your badge to share a link.');
                 return;
             }
             try {
@@ -3799,7 +3803,7 @@
                         statusEl.textContent = res.duplicate ? `"${link.name}" was already shared.` : `"${link.name}" shared!`;
                         setTimeout(() => { statusEl.textContent = ''; }, 3000);
                     }
-                    showAppToast(res.duplicate ? 'Already in the repo' : 'Shared to the repo');
+                    showAppToast(res.duplicate ? 'Already in Shared Links' : 'Added to Shared Links');
                 }
             } catch (e) {
                 showAppToast('Could not share — try again.');
@@ -4019,7 +4023,7 @@
                 html += `<div class="tile-context-menu-item danger" onclick="deleteLink(${linkId}); closeTileContextMenu();">❌ Delete</div>`;
             }
             if (canSubmitToCommunity(link)) {
-                html += `<div class="tile-context-menu-item" onclick="submitLinkToCommunity(${linkId}); closeTileContextMenu();">📤 Share to Repo</div>`;
+                html += `<div class="tile-context-menu-item" onclick="submitLinkToCommunity(${linkId}); closeTileContextMenu();">📤 Add to Shared Links</div>`;
             }
             itemsEl.innerHTML = html;
 

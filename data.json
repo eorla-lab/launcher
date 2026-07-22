@@ -420,6 +420,18 @@
       ]
     },
     {
+      "id": 38,
+      "name": "Vocantas",
+      "url": "https://toh-staff.vocantasonline.com",
+      "icon": "./icons/vocantas.png",
+      "color": "#FFFFFF",
+      "aliases": [
+        "shift",
+        "fill",
+        "asf"
+      ]
+    },
+    {
       "id": 1774806056059,
       "name": "Tip Sheets <br>(Histo)",
       "url": "https://theottawahospital.sharepoint.com/:f:/r/sites/EORLAAPModernization/Shared%20Documents/Epic%20Beaker%20AP%20Information/Beaker%20AP%20Tip%20Sheets/Histology%20Tip%20Sheets%20PDF/PDF%20TOH%20Histology%20Specific%20TIP%20SHEETS",
