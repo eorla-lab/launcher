@@ -7,13 +7,11 @@ A customizable web app launcher for quick access to internal tools, policies, an
 ## Features
 
 - 🎯 **Smart Sorting** - Links auto-sort based on your click frequency
-- 🆕 **NEW Badge** - Highlights unclicked links so nothing gets missed
 - 🔍 **Search** - Quickly find any link even when the grid is full
-- ⚙️ **Customizable** - Users can add personal links stored in localStorage
-- 📄 **Policy Directory** - Searchable database of company policies
-- 💾 **Import/Export** - Share configurations via JSON
+- ⚙️ **Customizable** - Users can add personal links 
+- 📄 **Policy Directory** - Searchable policy database
+- 💾 **Import/Export** - Export configurations via JSON files
 - 📱 **PWA Ready** - Install as a web app on desktop or mobile
-- 🎨 **Flexible Icons** - Supports emojis, image URLs, and custom colors
 
 ## Demo
 
@@ -113,26 +111,12 @@ The badge disappears after the first click.
 - Safari
 - Mobile browsers
 
-## Privacy
-
-- All user data stored in **localStorage** (browser-only)
-- No tracking or analytics
-- No server-side storage
-- No cookies
-
 ## Contributing
 
 Contributions welcome! Please:
 1. Fork the repo
 2. Create a feature branch
 3. Submit a pull request
-
-### Ideas for Contributions
-- Additional icon packs
-- Dark mode
-- Different grid sizes (2x2, 4x4)
-- Analytics dashboard
-- Multi-language support
 
 ## Changelog
 
@@ -145,9 +129,8 @@ MIT License - feel free to use and modify for your organization.
 ## Support
 
 - Open an issue for bugs or feature requests
-- Submit your exported JSON if you want to contribute links
 - Star ⭐ the repo if you find it useful!
 
 ## Credits
 
-Created for workplace productivity. Contributions welcome from the community.
+Created for workplace productivity. Contributions welcome.
