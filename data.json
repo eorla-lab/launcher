@@ -534,6 +534,95 @@
       ]
     },
     {
+      "id": 39,
+      "name": "Biochem Huddles",
+      "url": "https://theottawahospital.sharepoint.com/sites/Biochemistry/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FBiochemistry%2FShared%20Documents%2FHuddles",
+      "icon": "BC",
+      "color": "blue",
+      "aliases": [
+        "biochem",
+        "chem",
+        "huddle",
+        "biochem huddle",
+        "huddles",
+        "minutes"
+      ]
+    },
+    {
+      "id": 40,
+      "name": "Misc Maintenance",
+      "url": "https://theottawahospital.sharepoint.com/sites/Biochemistry/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FBiochemistry%2FShared%20Documents%2FMiscellaneous%20Maintenance%20Sheets",
+      "icon": "📋",
+      "color": "blue",
+      "aliases": [
+        "Miscellaneous",
+        "biochem",
+        "blood gas",
+        "ABL",
+        "nbil",
+        "osmo",
+        "ph",
+        "novus"
+      ]
+    },
+    {
+      "id": 41,
+      "name": "Reagent Lot Validation",
+      "url": "https://theottawahospital.sharepoint.com/sites/ReagentLotvalidation-BiochemistryTOH/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FReagentLotvalidation%2DBiochemistryTOH%2FShared%20Documents%2FGeneral",
+      "icon": "✅",
+      "color": "white",
+      "aliases": [
+        "lot to lot",
+        "validation",
+        "blood gas",
+        "ABL",
+        "roche",
+        "cobas",
+        "triage",
+        "drugs"
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Biochemistry Portal",
+      "url": "https://theottawahospital.sharepoint.com/sites/Biochemistry/Shared%20Documents/Forms/AllItems.aspx?viewid=5a16c1a4%2D5ce7%2D4dd3%2D9dad%2D1bb15de43f99",
+      "icon": "BC",
+      "color": "blue",
+      "aliases": [
+        "biochem",
+        "chem",
+        "portal"
+      ]
+    },
+    {
+      "id": 43,
+      "name": "Roche Maintenance",
+      "url": "https://theottawahospital.sharepoint.com/sites/Biochemistry/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FBiochemistry%2FShared%20Documents%2FRoche%20Maintenance%20Sheets",
+      "icon": "🧰",
+      "color": "gray",
+      "aliases": [
+        "Miscellaneous",
+        "biochem",
+        "roche",
+        "cobas"
+      ]
+    },
+    {
+      "id": 44,
+      "name": "Education",
+      "url": "https://theottawahospital.sharepoint.com/sites/Biochemistry/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FBiochemistry%2FShared%20Documents%2FHuddles%2FEducation",
+      "icon": "BC",
+      "color": "blue",
+      "aliases": [
+        "biochem",
+        "education",
+        "infinity",
+        "masking",
+        "analytical goals",
+        "urinalysis"
+      ]
+    },
+    {
       "id": 1774806056059,
       "name": "Tip Sheets <br>(Histo)",
       "url": "https://theottawahospital.sharepoint.com/:f:/r/sites/EORLAAPModernization/Shared%20Documents/Epic%20Beaker%20AP%20Information/Beaker%20AP%20Tip%20Sheets/Histology%20Tip%20Sheets%20PDF/PDF%20TOH%20Histology%20Specific%20TIP%20SHEETS",
