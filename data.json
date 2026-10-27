@@ -541,6 +541,7 @@
       "color": "blue",
       "aliases": [
         "biochem",
+        "BC",
         "chem",
         "huddle",
         "biochem huddle",
@@ -556,6 +557,7 @@
       "color": "blue",
       "aliases": [
         "Miscellaneous",
+        "BC",
         "biochem",
         "blood gas",
         "ABL",
@@ -573,6 +575,7 @@
       "color": "white",
       "aliases": [
         "lot to lot",
+        "BC",
         "validation",
         "blood gas",
         "ABL",
@@ -590,6 +593,7 @@
       "color": "blue",
       "aliases": [
         "biochem",
+        "BC",
         "chem",
         "portal"
       ]
@@ -602,6 +606,7 @@
       "color": "gray",
       "aliases": [
         "Miscellaneous",
+        "BC",
         "biochem",
         "roche",
         "cobas"
@@ -615,6 +620,7 @@
       "color": "blue",
       "aliases": [
         "biochem",
+        "BC",
         "education",
         "infinity",
         "masking",
